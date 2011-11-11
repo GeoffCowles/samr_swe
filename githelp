@@ -1,0 +1,18 @@
+- create local branch
+git clone git@github.com:GeoffCowles/samr_swe.git
+
+- add some files
+git add .
+
+- commit some files (to local respository)
+git commit -a
+
+- check on where you are vs. master
+git status
+git ls-files
+
+- merge local repository with master
+git push origin master 
+
+- git update to be at same level as master
+git pull??
