@@ -70,6 +70,8 @@ swe {
 }
 
 Main {
+   dim = 2
+   base_name = "swe"
 // log file parameters 
    log_file_name    = "conrun.log"
    log_all_nodes    = TRUE
@@ -120,7 +122,7 @@ StandardTagAndInitialize{
    tagging_method = "GRADIENT_DETECTOR"
 }
 
-GriddingAlgorithm{
+PatchHierarchy{    
    max_levels = 1         // Maximum number of levels in hierarchy.
 
    ratio_to_coarser {      // vector ratio to next coarser level
@@ -144,7 +146,9 @@ GriddingAlgorithm{
       level_1 = 4,  4 
       // all finer levels will use same values as level_1...
    }
+}
 
+GriddingAlgorithm{
    efficiency_tolerance    = 0.50e0   // min % of tag cells in new patch level
    combine_efficiency      = 0.75e0   // chop box if sum of volumes of smaller
                                       // boxes < efficiency * vol of large box
