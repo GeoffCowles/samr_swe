@@ -52,24 +52,26 @@ module cntrl
   integer, parameter :: heniche = 19
   integer, parameter :: step = 20
   integer, parameter :: supercrit = 21
+  integer, parameter :: roelvink = 22
 
   !floodying/drying
-  real(dp) :: mindepth = 1e-3 
+  real(dp) :: mindepth 
   logical  :: conserve_volume = .false.
   logical  :: wetdry   = .true.
 
   !other
   
   !friction / roughness
-  real(dp) :: C_manning = 0.002_dp !manning coefficient for conrun
+  real(dp) :: C_manning !manning coefficient, set in input
+!  real(dp) :: C_manning = 0.002_dp !manning coefficient for conrun
 !  real(dp) :: C_manning = .018_dp  !manning for threehump
 !  real(dp) :: C_manning = .03_dp   !manning for heniche
 !  real(dp) :: C_manning =   0.00_dp   !manning for exact Riemann
   real(dp) :: friction_depth = 1e9 !only apply friction at depth less than friction_depth - currently unused
 
   !flux parameters
-  integer :: flux_order = 2    !=1 first order, =2, second order
-  integer :: transverse_prop = 2 !=0 no transverse flux prop, = 1 transv prop, no correction, =2 transv prop with correction
+  integer :: flux_order     !=1 first order, =2, second order
+  integer :: transverse_prop  !=0 no transverse flux prop, = 1 transv prop, no correction, =2 transv prop with correction
   integer, dimension(3) :: mthlim = (/1,1,1/) !=0, no lim, =1 minmod, =2 superbee, = 3 van leer, = 4 monotonized centered, =5 beam-warming
 
   

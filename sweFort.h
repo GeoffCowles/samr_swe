@@ -88,5 +88,7 @@ extern "C" {
      const double*,
      int* , int* );
 
-   void c2f_(const int& , const int& , const int&, const int& , const int&);
+   void c2f_(const int& , const int& , const int&, const int& , const int&,
+       const int&, const double&, const double&, const int&, const int&);
+
 }

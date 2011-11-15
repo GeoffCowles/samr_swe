@@ -402,7 +402,7 @@ subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,scal)
       end do 
     end do
 
-   !---------------------------------------------------------------------
+  !---------------------------------------------------------------------
   case(heniche) !heniche non-constant slope test, see Brufau etal, IJNMF v39
   !---------------------------------------------------------------------
 
@@ -444,6 +444,27 @@ subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,scal)
       endif
     end do 
   end do
+
+  !---------------------------------------------------------------------
+  case(roelvink) !inlet roelvink test (Coastal Engineering 53, 2006)
+  !---------------------------------------------------------------------
+   do i=i1,i2
+      do j=j1,j2
+         xc = xlo(1)+dx(1)*dble(i-i1)+dx(1)/2
+         h(i,j) = 2.
+!          if(xc < 5. )then 
+!           write(*,*)'depth is 3'
+!           h(i,j) = 3.
+!          else
+!           write(*,*)'depth is 2'
+!           h(i,j) = 2.
+!         endif
+        vh(i,j,1) = zero
+        vh(i,j,2) = zero
+      end do
+    end do
+
+
  
   end select
 

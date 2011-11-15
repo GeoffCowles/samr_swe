@@ -45,8 +45,6 @@ subroutine friction(dx,dt,i1,i2,j1,j2,h,vh,b)
   !local
   integer  :: i,j
   real(dp) :: depth,CD,coef,hvmag,alpha  
-  real(dp) :: dtol = 1e-30 
-
   if(C_manning == zero)return   !no friction
   
   coef = gravity*C_manning*C_manning
@@ -54,7 +52,7 @@ subroutine friction(dx,dt,i1,i2,j1,j2,h,vh,b)
 	do j=j1,j2
 	  depth = h(i,j)
 	  if(depth <= friction_depth)then
-		if(depth < dtol)then
+		if(depth < mindepth)then
 		  vh(i,j,1) = zero
 		  vh(i,j,2) = zero
 		else	 
@@ -115,7 +113,6 @@ subroutine linfriction(dx,dt,i1,i2,j1,j2,h,vh,b)
  
   !local
   integer  :: i,j
-  real(dp) :: dtol = 1e-30 
   real(dp) :: depth,alpha
 
   !if(C_manning == zero)return   !no friction
@@ -123,7 +120,7 @@ subroutine linfriction(dx,dt,i1,i2,j1,j2,h,vh,b)
   do i=i1,i2
 	do j=j1,j2
 	  depth = h(i,j)
-	  if(depth < dtol)then  !depth threshold
+	  if(depth < mindepth)then  !depth threshold
 		vh(i,j,1) = zero
 		vh(i,j,2) = zero
 	  else	 

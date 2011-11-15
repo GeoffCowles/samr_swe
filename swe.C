@@ -103,6 +103,7 @@ using namespace std;
 #define HENICHE         (19)
 #define STEP            (20)
 #define SUPERCRIT       (21)
+#define ROELVINK        (22)
 
 // defines for cell tagging routines
 #define RICHARDSON_NEWLY_TAGGED (-10)
@@ -295,6 +296,8 @@ swe::swe(
 	  d_data_problem_int = STEP;
    } else if (d_data_problem == "SUPERCRIT") {
 	  d_data_problem_int = SUPERCRIT;
+	} else if (d_data_problem == "ROELVINK") {
+	  d_data_problem_int = ROELVINK;
    } else {
       TBOX_ERROR(d_object_name << ": "
          << "Unknown d_data_problem string = "
@@ -332,7 +335,8 @@ swe::swe(
 	} // end setting BC for 2D case
 
    //bind the control parameters between C++ and fortran 
-   c2f_(d_dim.getValue(),NSTATE,NSCAL,CELLG,FLUXG);  //FORTRAN
+   c2f_(d_dim.getValue(),NSTATE,NSCAL,CELLG,FLUXG, //FORTRAN
+	d_data_problem_int,d_C_manning,d_mindepth,d_fluxorder,d_transverse); 
               
 }  // <=  end of swe constructor
 
@@ -673,6 +677,7 @@ double swe::computeStableDtOnPatch(
              veldepth->getPointer(),
              bathy->getPointer(),
              stabdt);
+   //cout << "time step" << stabdt; 
    //stop the timer
    t_compute_dt->stop();
    return stabdt;
@@ -835,14 +840,13 @@ void swe::conservativeDifferenceOnPatch(
 			veldepth->getPointer(),
 			bathy->getPointer());
 
-		// friction term 
-		if (d_data_problem == "SAMPSON") {
+		// friction term (d_frictype==0 => no friction)
+		if (d_frictype == 1) { //implicit Linear friction 
 			linfriction_(dx,dt,ifirst(0),ilast(0),ifirst(1),ilast(1), //FORTRAN
 				depth->getPointer(),
 				veldepth->getPointer(), 
 				bathy->getPointer());
-
-		} else { //regular friction 
+		} else if(d_frictype == 2) { //implicit Manning friction with coefficinet n=C_manning
 			friction_(dx,dt,ifirst(0),ilast(0),ifirst(1),ilast(1), //FORTRAN
 				depth->getPointer(),
 				veldepth->getPointer(), 
@@ -891,6 +895,8 @@ void swe::boundaryReset(
    const double* dx = patch_geom->getDx();
    const double* xpatchhi = patch_geom->getXUpper();
    const double* xdomainhi = d_grid_geometry->getXUpper();
+   const double* xpatchlo = patch_geom->getXLower();
+   const double* xdomainlo = d_grid_geometry->getXLower();
 
    pdat::CellIndex icell(ifirst);
    hier::BoxArray bdrybox(d_dim, 2 * d_dim.getValue());
@@ -935,6 +941,11 @@ void swe::boundaryReset(
       if ((d_data_problem == "STEP") && (bnode == 1) &&
           (tbox::MathUtilities<double>::Abs(xpatchhi[0] - xdomainhi[0]) < dx[0])) {
          bdry_case = FLOW_BC;
+      }
+// BEGIN SIMPLE-MINDED FIX FOR STEP PROBLEM
+      if ((d_data_problem == "ROELVINK") && (bnode == 1) &&
+          (tbox::MathUtilities<double>::Abs(xpatchlo[0] - xdomainlo[0]) < dx[0])) {
+         bdry_case = DIRICHLET_BC;
       }
 // END SIMPLE-MINDED FIX FOR STEP PROBLEM
       if (bdry_case == REFLECT_BC) {
@@ -1035,8 +1046,22 @@ void swe::setPhysicalBoundaryConditions(
 			//d_bdry_edge_veldepth[i*PDIM+0] = u*h;
 			}
 		}
-	
-	  	
+       } else if(d_data_problem == "ROELVINK"){
+                double H0_roel = 2.0;
+                double eta0_roel = 1.0;
+                double T_roel = 3600;
+                double h; //,u;
+                for (int i = 0; i < NUM_2D_EDGES; i++) {
+                        if(d_scalar_bdry_edge_conds[i] == DIRICHLET_BC){
+                        //equation 33, Brufau et al, IJNMF v39
+                                h = H0_roel + eta0_roel*cos(2*3.14159*fill_time/T_roel);
+                                cout << "setting h on edge " << h << i ;
+                        //equation  
+                        //u = eta0_hen*sqrt(9.81/H0_hen)*cos(2*3.14159*fill_time/T_hen);
+                                d_bdry_edge_depth[i] = h;
+                        //d_bdry_edge_veldepth[i*PDIM+0] = u*h;
+                        }
+                }
 	} //end if d_data_problem
 	
 	//special fix for step, set flow conditions only if it is truly the exit 
@@ -1054,6 +1079,23 @@ void swe::setPhysicalBoundaryConditions(
       }
 
    }
+
+        //special fix for step, set dirichlet conditions only if it is truly the open boundary
+        if (d_data_problem == "ROELVINK") {
+
+      const tbox::Pointer<geom::CartesianPatchGeometry > patch_geom =
+         patch.getPatchGeometry();
+      const double* dx = patch_geom->getDx();
+      const double* xpatchlow = patch_geom->getXLower();
+      const double* xdomainlow = d_grid_geometry->getXLower();
+//gwc
+      if (tbox::MathUtilities<double>::Abs(xpatchlow[0]-xdomainlow[0]) > dx[0]) {
+         tmp_edge_scalar_bcond[XLO] = DIRICHLET_BC;
+         tmp_edge_vector_bcond[XLO] = DIRICHLET_BC;
+      }
+   }
+
+
    
 
 
@@ -1760,6 +1802,13 @@ void swe::printClassData(ostream &os) const
    os << "Problem description and initial data..." << endl;
    os << "   d_data_problem = " << d_data_problem << endl;
    os << "   d_data_problem_int = " << d_data_problem_int << endl;
+   os << "   d_C_manning  =  " << d_C_manning << endl;
+   os << "   d_mindepth   =  " << d_mindepth  << endl;
+   os << "   d_frictype   =  " << d_frictype  << endl;
+   os << "   d_fluxorder  =  " << d_fluxorder << endl;
+   os << "   d_transverse =  " << d_transverse << endl;
+
+
 
    os << "   Boundary condition data " << endl;
    os << " Dirichlet BC is type " << DIRICHLET_BC << endl ;
@@ -2026,6 +2075,54 @@ void swe::getFromInput(
             << "`data_problem' value not found in input." << endl);
       }
 
+      // Read the Manning coefficient.  
+      if (db->keyExists("C_manning")) {
+         d_C_manning = db->getDouble("C_manning"); 
+      } else {
+         TBOX_ERROR(d_object_name << ": "
+            << "`C_manning' value not found in input." << endl);
+      }
+
+      // Read the minimum depth 
+      if (db->keyExists("mindepth")) {
+         d_mindepth = db->getDouble("mindepth");
+      } else {
+         TBOX_ERROR(d_object_name << ": "
+            << "`mindepth' value not found in input." << endl);
+      }
+
+      // Read the Friction Type 
+      if (db->keyExists("frictype")) {
+         d_frictype  = db->getInteger("frictype");
+      } else {
+         TBOX_ERROR(d_object_name << ": "
+            << "`frictype' value not found in input." << endl);
+      }
+
+      // Read the flux order    
+      if (db->keyExists("fluxorder")) {
+         d_fluxorder  = db->getInteger("fluxorder");
+      } else {
+         TBOX_ERROR(d_object_name << ": "
+            << "`fluxorder' value not found in input." << endl);
+      }
+
+      // Read the transverse correction control var
+      if (db->keyExists("transverse")) {
+         d_transverse = db->getInteger("transverse");
+      } else {
+         TBOX_ERROR(d_object_name << ": "
+            << "`transverse' value not found in input." << endl);
+      }
+
+
+
+
+
+
+
+
+
       //tbox::Pointer<tbox::Database> init_data_db;
       //if (db->keyExists("Initial_data")) {
       //   init_data_db = db->getDatabase("Initial_data");
@@ -2109,6 +2206,11 @@ void swe::putToDatabase(tbox::Pointer<tbox::Database> db)
    db->putIntegerArray("d_nghosts", &d_nghosts[0], PDIM);
    db->putIntegerArray("d_fluxghosts", &d_fluxghosts[0], PDIM);
    db->putString("d_data_problem", d_data_problem);
+   db->putDouble("d_C_manning", d_C_manning);
+   db->putDouble("d_mindepth",  d_mindepth);  
+   db->putInteger("d_fluxorder",d_fluxorder);
+   db->putInteger("d_transverse",d_transverse);
+   db->putInteger("d_frictype",d_frictype);
 
    db->putIntegerArray("d_master_bdry_edge_conds", d_master_bdry_edge_conds);
    db->putIntegerArray("d_master_bdry_node_conds", d_master_bdry_node_conds);
@@ -2192,6 +2294,11 @@ void swe::getFromRestart()
    }
 
    d_data_problem = db->getString("d_data_problem");
+   d_C_manning    = db->getDouble("d_C_manning");
+   d_mindepth     = db->getDouble("d_mindepth");
+   d_fluxorder    = db->getInteger("d_fluxorder");
+   d_frictype     = db->getInteger("d_frictype");
+   d_frictype     = db->getInteger("d_trasnverse");
 
    d_master_bdry_edge_conds = db->getIntegerArray("d_master_bdry_edge_conds");
    d_master_bdry_node_conds = db->getIntegerArray("d_master_bdry_node_conds");

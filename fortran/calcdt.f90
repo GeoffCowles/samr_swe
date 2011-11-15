@@ -61,22 +61,22 @@ subroutine calcdt(dx,i1,i2,j1,j2,igst,jgst,h,vh,b,stabdt)
   do i=il1,il2
 	do j=jl1,jl2
 	  
-	 !   !gwc new
-	 ! 	  !wetting/drying adjust velocity and depth
-	 ! 	  if(h(i,j) <= 1e-3)then
-	 ! 		vh(i,j,1) = zero
-	 ! 		vh(i,j,2) = zero
-	 ! 		h(i,j) = zero
-	 ! 	  endif	  
+	    !gwc new
+	  	  !wetting/drying adjust velocity and depth
+	  	  if(h(i,j) <= mindepth)then
+	  		vh(i,j,1) = zero
+	  		vh(i,j,2) = zero
+	  		h(i,j) = zero !gwc why is this zero?
+	  	  endif	  
 
-      cwave = sqrt(gravity*h(i,j)) 
-      maxspeed(1) = max(maxspeed(1),abs(vh(i,j,1)/h(i,j))+cwave)
-      maxspeed(2) = max(maxspeed(2),abs(vh(i,j,2)/h(i,j))+cwave)
+      cwave = max(sqrt(gravity*h(i,j)),0.0) 
+      maxspeed(1) = max(maxspeed(1),abs(vh(i,j,1)/max(h(i,j),1e-9))+cwave)
+      maxspeed(2) = max(maxspeed(2),abs(vh(i,j,2)/max(h(i,j),1e-9))+cwave)
     
     enddo
   enddo
   
-  stabdt = min((dx(1)/maxspeed(1)),(dx(2)/maxspeed(2)))
+  stabdt = max(0.,min((dx(1)/maxspeed(1)),(dx(2)/maxspeed(2))))
   
   return
 

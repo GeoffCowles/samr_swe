@@ -1,23 +1,34 @@
-// dampbreak test 
+// step inlet test
 // 
 
 swe {
   
-   data_problem         = "STEP"      
+   data_problem         = "STEP"  
 
-//   Initial_data {
-//      radius            = 6.0
-//      center            = 34.0 , 28.0
-//
-//      density_inside    = 8.0
-//      velocity_inside   = 0.0 , 0.0  
-//      pressure_inside   = 40.0
-//
-//      density_outside    = 1.0
-//      velocity_outside   = 0.0 , 0.0 
-//      pressure_outside   = 1.0
-//
-//   }
+// frictype:  select the friction type
+//   = 0 => no friction
+//   = 1 => linear friction
+//   = 2 => Manning style friction
+   frictype             = 2
+
+// C_manning:  manning (n) friction coefficient (only used if frictype == 2)
+   C_manning            = 0.03
+
+// fluxorder: order of the spatial flux
+//    = 1 => 1st order
+//    = 2 => 2nd order
+   fluxorder            = 2
+
+// transverse
+//    = 0 => no transverse flux propagation
+//    = 1 => transverse flux propagation, no corrections
+//    = 2 => transverse flux propagation, with corrections
+   transverse           = 0
+
+// mindepth: set the minimum depth (if depth is < mindepth), velocities are set to zero
+   mindepth             = 1.e-3
+
+
 
    Refinement_data {
       refine_criteria = "DEPTH_GRADIENT"
@@ -67,6 +78,9 @@ swe {
 }
 
 Main {
+   dim = 2
+   base_name = "swe"
+
 // log file parameters 
    log_file_name    = "step.log"
    log_all_nodes    = TRUE
@@ -79,7 +93,7 @@ Main {
  
 // visualization dump parameters
    viz_writer            = "VisIt" // use: "Vizamrai", "VisIt" for both
-   viz_dump_interval     = 10          // zero to turn off
+   viz_dump_interval     = 1          // zero to turn off
    viz_dump_dirname      = "viz_step"
    viz_dump_filename     = "step"   // not used by VisIt
    visit_file_cluster_size = 1        // not used by Vizamrai
@@ -108,8 +122,8 @@ StandardTagAndInitialize{
    tagging_method = "GRADIENT_DETECTOR"
 }
 
-GriddingAlgorithm {
-   max_levels          = 3         // Maximum number of levels in hierarchy.
+PatchHierarchy{
+   max_levels          = 1         // Maximum number of levels in hierarchy.
 
    ratio_to_coarser {              // vector ratio to next coarser level
       level_1            = 4 , 4
@@ -125,7 +139,8 @@ GriddingAlgorithm {
       level_0 = 8 , 8
       // all finer levels will use same values as level_0...
    }
-
+}
+GriddingAlgorithm {
    efficiency_tolerance = 0.75e0   // min % of tag cells in new patch level
    combine_efficiency   = 0.85e0   // chop box if sum of volumes of smaller
                                    // boxes < efficiency * vol of large box

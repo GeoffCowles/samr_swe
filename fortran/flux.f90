@@ -143,7 +143,6 @@ subroutine george_flux(cid,dt,dx,i1,i2,j1,j2,h,vh,b,ifluxm,jfluxm,ifluxp,jfluxp)
               fwave,s, &
               amdq,apdq,cqxx,bmasdq,bpasdq, &
               flux_order, transverse_prop)
-
 	 
     !update fluctuations - seems samrai fluxes use odd index ordering - careful
     do m=1,meqn
@@ -259,7 +258,7 @@ subroutine consdiff(dx,i1,i2,j1,j2,ifluxm,jfluxm,ifluxp,jfluxp,h,vh,b)
                -oody*(jfluxm(j+1,i,k+1)-jfluxp(j,i,k+1))
       enddo
       !gwc new - 1e-3 seems to stabilize sampson - depth threshold
-          if(h(i,j)<1e-30)then
+          if(h(i,j)< mindepth)then
               	h(i,j) = zero
               	vh(i,j,1:2) = zero
               endif

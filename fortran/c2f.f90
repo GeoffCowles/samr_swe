@@ -19,13 +19,16 @@
 !
 !==============================================================================
 
-subroutine c2f(ndims_in,nequs_in,nscal_in,ncgst_in,nfgst_in)
+subroutine c2f(ndims_in,nequs_in,nscal_in,ncgst_in,nfgst_in, & 
+      caseid_in,cmanning_in,mindepth_in,fluxorder_in,transverse_in)
 
   use gparms
   use cntrl
   implicit none
-  integer, intent(in) :: ndims_in,nequs_in,nscal_in
-  integer, intent(in) :: ncgst_in,nfgst_in
+  integer,  intent(in) :: ndims_in,nequs_in,nscal_in
+  integer,  intent(in) :: ncgst_in,nfgst_in
+  real(dp), intent(in) :: cmanning_in,mindepth_in
+  integer,  intent(in) :: caseid_in, fluxorder_in, transverse_in
 
   !set dimensions and ghost cell buffers
   NDIMS = ndims_in    !spatial dimensions of the problem
@@ -33,7 +36,22 @@ subroutine c2f(ndims_in,nequs_in,nscal_in,ncgst_in,nfgst_in)
   NSCAL = nscal_in    !number of scalar variables
   NCGST = ncgst_in    !number of ghost cells for cell-centered vars
   NFGST = nfgst_in    !number of ghost cells for face based (flux) vars
- 
+
+  !problem params 
+  caseid = caseid_in
+
+  !set physical parameters
+  mindepth   = mindepth_in
+  C_manning  = cmanning_in
+  flux_order = fluxorder_in
+  transverse_prop = transverse_in
+
+  write(*,*) 'interfacing parameters to Fortran'
+  write(*,*) 'mindepth: ',mindepth
+  write(*,*) 'flux_order: ',flux_order
+  write(*,*) 'transverse_prop:',transverse_prop
+  write(*,*) 'C_manning: ',C_manning
+  pause
   return
 
 end subroutine c2f

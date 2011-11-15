@@ -432,8 +432,13 @@ private:
    int d_data_problem_int;
 
    /*
-    * Input for SPHERE problem
+    * Input for SWE params
     */ 
+   double d_C_manning;
+   double d_mindepth;
+   int    d_frictype;
+   int    d_fluxorder;
+   int    d_transverse;
    /*
    double d_radius;
    double d_center[NDIM];

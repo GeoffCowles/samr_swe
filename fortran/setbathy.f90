@@ -100,7 +100,7 @@ subroutine setbathy(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,b)
   do i=i1-igst,i2+igst
 	do j=j1-jgst,j2+jgst
       xc = xlo(1) + dx(1)*dble(i-i1)+dx(1)/2
-	  b(i,j)   = max(zero, 0.25-an8th*abs(xc-xberm))
+	  b(i,j)   = max(zero, 0.35-an8th*abs(xc-xberm))
 	end do 
   end do
 
@@ -114,7 +114,7 @@ subroutine setbathy(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,b)
   do i=i1-igst,i2+igst
 	do j=j1-jgst,j2+jgst
       yc = xlo(2) + dx(2)*dble(j-j1)+dx(2)/2
-	  b(i,j)   = max(zero, 0.25-an8th*abs(yc-xberm))
+	  b(i,j)   = max(zero, 0.35-an8th*abs(yc-xberm))
 	end do 
   end do
   
@@ -303,6 +303,16 @@ subroutine setbathy(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,b)
       endif
  	end do 
   end do
+
+  !---------------------------------------------------------------------
+  case(roelvink)
+  !---------------------------------------------------------------------
+  do i=i1-igst,i2+igst
+     do j=j1-jgst,j2+jgst
+      b(i,j) = -2.
+     end do
+  end do
+
   
   end select 
 

@@ -40,12 +40,11 @@ subroutine drycheck(dx,dt,i1,i2,j1,j2,h,vh)
  
   !local
   integer  :: i,j
-  real(dp) :: dtol = 1e-6 !1e-30 
   return  !gwc debug airplane
   do i=i1,i2
 	do j=j1,j2
-	  if(h(i,j) <= dtol)then  !depth threshold
-	      h(i,j)    = dtol
+	  if(h(i,j) <= mindepth)then  !depth threshold
+	      h(i,j)    = mindepth
 		  vh(i,j,1) = zero
 		  vh(i,j,2) = zero
 	  endif
