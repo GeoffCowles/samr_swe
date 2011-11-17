@@ -66,6 +66,7 @@ real(dp), parameter :: r2d = 180.0_dp/pi
 !----------------------------------------------------------------
 real(dp) :: gravity  = 9.8016_dp !default
 real(dp), parameter :: omega_earth = 7.292e-5
+real(dp), parameter :: rho_w = 1025
 
 !----------------------------------------------------------------
 !large and small numbers

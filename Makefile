@@ -25,7 +25,7 @@ include $(SAMRAI)/config/Makefile.config
 CPPFLAGS_EXTRA= -DDISPLAY -DNDIM=2  -DTESTING=0
 
 CXX_OBJS      = main.o swe.o 
-F_OBJS        =  gparms.o cntrl.o philim.o limiter.o rpn.o rpt.o flux2fw_geo.o  flux.o friction.o drycheck.o wd.o grad.o init.o setbathy.o calcdt.o c2f.o junkprobe.o
+F_OBJS        =  gparms.o cntrl.o philim.o limiter.o rpn.o rpt.o flux2fw_geo.o  flux.o sedflux.o friction.o drycheck.o wd.o grad.o init.o setbathy.o calcdt.o c2f.o junkprobe.o
 
 main:
 		if test -f stamp-3d; then $(MAKE) clean; fi
@@ -79,6 +79,9 @@ wd.o:		$(FORTRAN)/wd.f90
 
 friction.o:	$(FORTRAN)/friction.f90
 		$(F90) $(FFLAGS) -c $(FORTRAN)/friction.f90 -o $@
+		
+sedflux.o:	$(FORTRAN)/sedflux.f90
+		$(F90) $(FFLAGS) -c $(FORTRAN)/sedflux.f90 -o $@
 		
 drycheck.o:	$(FORTRAN)/drycheck.f90
 		$(F90) $(FFLAGS) -c $(FORTRAN)/drycheck.f90 -o $@

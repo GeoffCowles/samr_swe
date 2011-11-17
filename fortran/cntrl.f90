@@ -59,7 +59,9 @@ module cntrl
   logical  :: conserve_volume = .false.
   logical  :: wetdry   = .true.
 
-  !other
+  !sediment
+  integer  :: sedmodel
+  real(dp) :: morphfactor
   
   !friction / roughness
   real(dp) :: C_manning !manning coefficient, set in input

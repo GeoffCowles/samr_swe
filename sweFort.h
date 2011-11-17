@@ -56,6 +56,18 @@ extern "C" {
   double*, double*, double*, double*,
   double*, double*, double* );
 
+  void flux_sed_(
+  const int&, const double&, const double*,
+  const int&, const int&, const int&, const int&,
+  double*, double*, double*, 
+  double*, double*, double*, double*);
+
+  void consdiff_sed_(
+  const double*, 
+  const int&, const int&, const int&, const int&,
+  double*, double*, double*, double*,
+  double*, double* );
+
   void friction_(
   const double*, const double&,
   const int&, const int&, const int&, const int&,
@@ -89,6 +101,7 @@ extern "C" {
      int* , int* );
 
    void c2f_(const int& , const int& , const int&, const int& , const int&,
-       const int&, const double&, const double&, const int&, const int&);
+       const int&, const double&, const double&, const int&, const int&,
+       const int&, const double& );
 
 }

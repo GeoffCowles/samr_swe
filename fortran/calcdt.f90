@@ -75,9 +75,9 @@ subroutine calcdt(dx,i1,i2,j1,j2,igst,jgst,h,vh,b,stabdt)
     
     enddo
   enddo
-  
+  !write(*,*)'checking in calcdt: ',vh(0,3,2)
   stabdt = max(0.,min((dx(1)/maxspeed(1)),(dx(2)/maxspeed(2))))
-  
+  !stabdt = 100 !GWC DEBUG!!!!
   return
 
 end subroutine calcdt

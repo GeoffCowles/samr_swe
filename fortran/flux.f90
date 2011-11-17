@@ -128,13 +128,30 @@ subroutine george_flux(cid,dt,dx,i1,i2,j1,j2,h,vh,b,ifluxm,jfluxm,ifluxp,jfluxp)
 	  q1d(iclaw,3) = vh(i,j,2)  !vh
 	  aux(iclaw,1) = b(i,j)     !b
 	end do 
+	
+! 	 if(j==j2/2)then
+! 	    write(*,*)'dirichlet values at 0',q1d(0,1:2)
+! 	    write(*,*)'dirichlet values at -1',q1d(-1,1:2)
+! 	 endif
 	 
-	if(cid==heniche)then
+	if(cid==heniche .or. cid==roelvink)then
     !set hv and hu in the ghost cells of an open boundary
 ! 	!geoff - heniche fudge - gwc FUDGE
 	q1d(-1,2) = q1d(1,2)
 	q1d( 0,2) = q1d(1,2)
     endif
+
+ !    if(j==j2/2)then
+!	    write(*,*)'dirichlet values at 0',q1d
+ ! 		do i=i1-NCGST,i2+NCGST
+ ! 		  iclaw    = i+s2ci
+ !     write(*,*)i,iclaw,q1d(iclaw,1:3),aux(iclaw,1)
+ ! end do
+ !     stop
+ !     end if
+
+
+    
 
     !compute modifications fadd and gadd to fluxes along this slice:
     call flux2(1,maxm,meqn,maux,mbc,mx,mwaves,mthlim, &
@@ -174,6 +191,24 @@ subroutine george_flux(cid,dt,dx,i1,i2,j1,j2,h,vh,b,ifluxm,jfluxm,ifluxp,jfluxp)
 	  q1d(jclaw,3) = vh(i,j,2)  !vh
 	  aux(jclaw,1) = b(i,j)     !b
 	end do 
+	
+! 	if(i==0)then
+! 	do j=j1-NCGST,j2+NCGST
+! 	  jclaw    = j+s2cj
+! 	  write(*,'(I4,4F10.5)')jclaw,q1d(jclaw,1:3),aux(jclaw,1)
+! 	end do
+! endif
+	 
+	
+	!    if(j==j2/2)then
+	!	    write(*,*)'dirichlet values at 0',q1d
+	 ! 		do i=i1-NCGST,i2+NCGST
+	 ! 		  iclaw    = i+s2ci
+	 !     write(*,*)i,iclaw,q1d(iclaw,1:3),aux(iclaw,1)
+	 ! end do
+	 !     stop
+	 !     end if
+	
 
     !compute modifications fadd and gadd to fluxes along this slice:
     call flux2(2,maxm,meqn,maux,mbc,my,mwaves,mthlim, &
@@ -236,6 +271,7 @@ subroutine consdiff(dx,i1,i2,j1,j2,ifluxm,jfluxm,ifluxp,jfluxp,h,vh,b)
   real(dp), intent(in   ) :: jfluxp(j1-NFGST:j2+1+NFGST,i1-NFGST:i2+NFGST,NEQUS)
   real(dp), intent(inout) :: h(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
   real(dp), intent(inout) :: vh(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST,NDIMS)
+  !real(dp)  :: shit(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST,NDIMS)
   real(dp), intent(in )   :: b(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
      
   !local
@@ -245,6 +281,7 @@ subroutine consdiff(dx,i1,i2,j1,j2,ifluxm,jfluxm,ifluxp,jfluxp,h,vh,b)
   !precompute 1/dx,  1/dy
   oodx = one/dx(1);
   oody = one/dx(2);
+  !shit = vh;
 
   !loop over internal cells, update state variables using convervative diff on fluxes
   do i=i1,i2
@@ -262,6 +299,13 @@ subroutine consdiff(dx,i1,i2,j1,j2,ifluxm,jfluxm,ifluxp,jfluxp,h,vh,b)
               	h(i,j) = zero
               	vh(i,j,1:2) = zero
               endif
+!       if(j==j2/2)then
+! 	    write(*,'(I5,3F10.6)')i,h(i,j),vh(i,j,1),vh(i,j,2)
+! 	  endif
+!        if(i==0)then
+!  	    write(*,'(I5,3F10.6)')j,h(i,j),vh(i,j,1),vh(i,j,2),shit(i,j,2)
+!         write(*,'(I5,4F12.2)')j,ifluxm(i+1,j,2),ifluxp(i,j,2),jfluxm(j+1,i,2),jfluxp(j,i,2)  
+!  	  endif
 
 !       !dry bed adjustment
 !       depth = zeta(i,j)-zb(i,j)

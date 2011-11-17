@@ -416,6 +416,12 @@ private:
    tbox::Pointer< pdat::FaceVariable<double> > d_fluxm;
    tbox::Pointer< pdat::FaceVariable<double> > d_fluxp;
 
+   //Sediment model
+   tbox::Pointer< pdat::CellVariable<double> > d_bedlevel;
+	tbox::Pointer< pdat::FaceVariable<double> > d_fluxsedm;
+   tbox::Pointer< pdat::FaceVariable<double> > d_fluxsedp;
+
+
    //physical constants
    double d_rho;
    double d_gravity;
@@ -439,6 +445,9 @@ private:
    int    d_frictype;
    int    d_fluxorder;
    int    d_transverse;
+
+	int    d_sedmodel;
+	double d_morphfactor;
    /*
    double d_radius;
    double d_center[NDIM];

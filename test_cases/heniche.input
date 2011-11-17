@@ -46,7 +46,7 @@ swe {
          depth = 1.0
          bathy = 0.0
          veldepth = 0.0,0.0
-      }
+     }
       boundary_edge_xhi {
          boundary_condition      = "REFLECT"
       }

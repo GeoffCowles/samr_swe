@@ -41,7 +41,13 @@ swe {
    }
 
    // valid boundary_condition values are "FLOW", "REFLECT", "DIRICHLET"
-   Boundary_data {
+//   Boundary_data {
+//      boundary_edge_xlo {
+//         boundary_condition      = "DIRICHLET"
+//         depth = .1 
+//         bathy = 0.0
+//         veldepth = .3,0.   
+//      }
       boundary_edge_xlo {
          boundary_condition      = "FLOW"      
       }
@@ -93,7 +99,7 @@ Main {
  
 // visualization dump parameters
    viz_writer            = "VisIt" // use: "Vizamrai", "VisIt" for both
-   viz_dump_interval     = 1          // zero to turn off
+   viz_dump_interval     = 10          // zero to turn off
    viz_dump_dirname      = "viz_step"
    viz_dump_filename     = "step"   // not used by VisIt
    visit_file_cluster_size = 1        // not used by Vizamrai
@@ -123,7 +129,7 @@ StandardTagAndInitialize{
 }
 
 PatchHierarchy{
-   max_levels          = 1         // Maximum number of levels in hierarchy.
+   max_levels          = 3         // Maximum number of levels in hierarchy.
 
    ratio_to_coarser {              // vector ratio to next coarser level
       level_1            = 4 , 4
@@ -155,7 +161,7 @@ HyperbolicLevelIntegrator{
 
 TimeRefinementIntegrator{
    start_time           = 0.e0     // initial simulation time
-   end_time             = 7e0  // final simulation time
+   end_time             = 10.0  // final simulation time
    grow_dt              = 1.1e0    // growth factor for timesteps
    max_integrator_steps = 3000      // max number of simulation timesteps
 }

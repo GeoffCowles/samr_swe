@@ -309,7 +309,13 @@ subroutine setbathy(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,b)
   !---------------------------------------------------------------------
   do i=i1-igst,i2+igst
      do j=j1-jgst,j2+jgst
-      b(i,j) = -2.
+	  xc = xlo(1)+dx(1)*dble(i-i1)+dx(1)/2
+	  if(xc < 5000)then
+	    fac    = xc/5000.
+	    b(i,j) = -10*(1-fac) + -2*(fac)
+	  else
+		b(i,j) = -2
+	  end if
      end do
   end do
 

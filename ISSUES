@@ -1,0 +1,8 @@
+1.)  Why are the contours disjointed when we have multiple patches?  Are we not properly filling the ghost cells for visit
+
+
+2.) STEP case doesn't reach a steady state.  Not sure how the FLOW BC's work.  Tried dirichlet on inflow and we have the same problem where the steady state more or less sets up and then everything creeps upstream against the flow.  Setting dirichlet with 3 levels causes the solution to blow up.  Fudgicle.
+
+3.) Not sure how to do gradient based adaptation on derived flow quantities (zeta, u, etc.).  We may need to call a routine to fill our scalar flow quantity (currently not used).  
+
+

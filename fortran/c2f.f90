@@ -20,7 +20,8 @@
 !==============================================================================
 
 subroutine c2f(ndims_in,nequs_in,nscal_in,ncgst_in,nfgst_in, & 
-      caseid_in,cmanning_in,mindepth_in,fluxorder_in,transverse_in)
+      caseid_in,cmanning_in,mindepth_in,fluxorder_in,transverse_in, & 
+      sedmodel_in, morphfactor_in)
 
   use gparms
   use cntrl
@@ -29,6 +30,8 @@ subroutine c2f(ndims_in,nequs_in,nscal_in,ncgst_in,nfgst_in, &
   integer,  intent(in) :: ncgst_in,nfgst_in
   real(dp), intent(in) :: cmanning_in,mindepth_in
   integer,  intent(in) :: caseid_in, fluxorder_in, transverse_in
+  integer,  intent(in) :: sedmodel_in
+  real(dp), intent(in) :: morphfactor_in
 
   !set dimensions and ghost cell buffers
   NDIMS = ndims_in    !spatial dimensions of the problem
@@ -46,12 +49,18 @@ subroutine c2f(ndims_in,nequs_in,nscal_in,ncgst_in,nfgst_in, &
   flux_order = fluxorder_in
   transverse_prop = transverse_in
 
+  !set sediment parameters
+  sedmodel = sedmodel_in
+  morphfactor = morphfactor_in
+
   write(*,*) 'interfacing parameters to Fortran'
   write(*,*) 'mindepth: ',mindepth
   write(*,*) 'flux_order: ',flux_order
   write(*,*) 'transverse_prop:',transverse_prop
   write(*,*) 'C_manning: ',C_manning
-  pause
+  write(*,*) 'sedmodel: ',sedmodel
+  write(*,*) 'morphfactor: ',morphfactor
+  !pause
   return
 
 end subroutine c2f

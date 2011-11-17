@@ -179,9 +179,12 @@ swe::swe(
    d_drycell   = new pdat::CellVariable<double>(d_dim, "drycell", 1);
    d_addvol    = new pdat::CellVariable<double>(d_dim, "addvol", 1);
    d_bathy     = new pdat::CellVariable<double>(d_dim, "bathymetry",1);
+   d_bedlevel  = new pdat::CellVariable<double>(d_dim, "bedlevel",1);
    d_veldepth  = new pdat::CellVariable<double>(d_dim, "veldepth", d_dim.getValue());
    d_fluxm     = new pdat::FaceVariable<double>(d_dim, "fluxm", NSTATE);
    d_fluxp     = new pdat::FaceVariable<double>(d_dim, "fluxp", NSTATE);
+  	d_fluxsedm  = new pdat::FaceVariable<double>(d_dim, "fluxsedm", 1);
+   d_fluxsedp  = new pdat::FaceVariable<double>(d_dim, "fluxsedp", 1);
    d_scalar    = new pdat::CellVariable<double>(d_dim, "scalar", NSCAL);
 
    //default physical parameters
@@ -336,7 +339,8 @@ swe::swe(
 
    //bind the control parameters between C++ and fortran 
    c2f_(d_dim.getValue(),NSTATE,NSCAL,CELLG,FLUXG, //FORTRAN
-	d_data_problem_int,d_C_manning,d_mindepth,d_fluxorder,d_transverse); 
+	d_data_problem_int,d_C_manning,d_mindepth,d_fluxorder,d_transverse,
+	d_sedmodel,d_morphfactor); 
               
 }  // <=  end of swe constructor
 
@@ -391,6 +395,13 @@ void swe::registerModelVariables(algs::HyperbolicLevelIntegrator* integrator)
 		d_grid_geometry,
 		"CONSERVATIVE_COARSEN",
 		"CONSERVATIVE_LINEAR_REFINE");
+		
+	integrator->registerVariable(
+		d_bedlevel ,d_nghosts, 
+		algs::HyperbolicLevelIntegrator::TIME_DEP,
+		d_grid_geometry,
+		"CONSERVATIVE_COARSEN",
+		"CONSERVATIVE_LINEAR_REFINE");
 
    integrator->registerVariable(
 		d_drycell ,d_nghosts, 
@@ -433,6 +444,20 @@ void swe::registerModelVariables(algs::HyperbolicLevelIntegrator* integrator)
 		d_grid_geometry,
 		"CONSERVATIVE_COARSEN",
 		"NO_REFINE");
+		
+	integrator->registerVariable(
+		d_fluxsedm, d_fluxghosts, 
+		algs::HyperbolicLevelIntegrator::FLUX,
+		d_grid_geometry,
+		"CONSERVATIVE_COARSEN",
+		"NO_REFINE");
+
+   integrator->registerVariable(
+		d_fluxsedp, d_fluxghosts, 
+		algs::HyperbolicLevelIntegrator::FLUX,
+		d_grid_geometry,
+		"CONSERVATIVE_COARSEN",
+		"NO_REFINE");
 
    //the variable database is used for setting up output (visualization)
    //is then discarded
@@ -452,7 +477,7 @@ void swe::registerModelVariables(algs::HyperbolicLevelIntegrator* integrator)
 			"bathy","SCALAR",vardb->mapVariableAndContextToIndex(d_bathy, d_plot_context));
 	  
 		d_visit_writer->registerPlotQuantity(
-			"scalar","SCALAR",vardb->mapVariableAndContextToIndex(d_scalar, d_plot_context));
+			"bedlevel","SCALAR",vardb->mapVariableAndContextToIndex(d_bedlevel, d_plot_context));
 			
 		d_visit_writer->registerPlotQuantity(
 			"drycell","SCALAR", vardb->mapVariableAndContextToIndex( d_drycell, d_plot_context));
@@ -565,8 +590,8 @@ void swe::initializeDataOnPatch(
           patch.getPatchData(d_addvol, getDataContext());
       tbox::Pointer< pdat::CellData<double> > drycell = 
           patch.getPatchData(d_drycell, getDataContext());
-      tbox::Pointer< pdat::CellData<double> > scalar = 
-          patch.getPatchData(d_scalar, getDataContext());
+      tbox::Pointer< pdat::CellData<double> > bedlevel = 
+          patch.getPatchData(d_bedlevel, getDataContext());
 
 #ifdef DEBUG_CHECK_ASSERTIONS
       TBOX_ASSERT(!depth.isNull());
@@ -603,7 +628,7 @@ void swe::initializeDataOnPatch(
                    depth->getPointer(),
                    veldepth->getPointer(),
                    bathy->getPointer(),
-                   scalar->getPointer());
+                   bedlevel->getPointer());
 
    } //if initial_time
 
@@ -721,24 +746,36 @@ void swe::computeFluxesOnPatch(
       patch.getPatchData(d_depth, getDataContext());
    tbox::Pointer< pdat::CellData<double> > bathy    = 
       patch.getPatchData(d_bathy, getDataContext());
+   tbox::Pointer< pdat::CellData<double> > bedlevel = 
+      patch.getPatchData(d_bedlevel, getDataContext());
    tbox::Pointer< pdat::CellData<double> > veldepth = 
       patch.getPatchData(d_veldepth, getDataContext());
    tbox::Pointer< pdat::FaceData<double> > fluxm    = 
       patch.getPatchData(d_fluxm, getDataContext());
    tbox::Pointer< pdat::FaceData<double> > fluxp    = 
        patch.getPatchData(d_fluxp, getDataContext());
+   tbox::Pointer< pdat::FaceData<double> > fluxsedm    = 
+      patch.getPatchData(d_fluxsedm, getDataContext());
+   tbox::Pointer< pdat::FaceData<double> > fluxsedp    = 
+      patch.getPatchData(d_fluxsedp, getDataContext());
 
 #ifdef DEBUG_CHECK_ASSERTIONS
    TBOX_ASSERT(!bathy.isNull());
 	TBOX_ASSERT(!depth.isNull());
+	TBOX_ASSERT(!bedlevel.isNull());
    TBOX_ASSERT(!veldepth.isNull());
    TBOX_ASSERT(!fluxm.isNull());
 	TBOX_ASSERT(!fluxp.isNull());
+	TBOX_ASSERT(!fluxsedm.isNull());
+	TBOX_ASSERT(!fluxsedp.isNull());
    TBOX_ASSERT(depth->getGhostCellWidth() == d_nghosts);
+   TBOX_ASSERT(bedlevel->getGhostCellWidth() == d_nghosts);
    TBOX_ASSERT(veldepth->getGhostCellWidth() == d_nghosts);
    TBOX_ASSERT(bathy->getGhostCellWidth() == d_nghosts);
    TBOX_ASSERT(fluxm->getGhostCellWidth() == d_fluxghosts);
    TBOX_ASSERT(fluxp->getGhostCellWidth() == d_fluxghosts);
+   TBOX_ASSERT(fluxsedm->getGhostCellWidth() == d_fluxghosts);
+   TBOX_ASSERT(fluxsedp->getGhostCellWidth() == d_fluxghosts);
 #endif
 
    
@@ -754,6 +791,18 @@ void swe::computeFluxesOnPatch(
    			  fluxm->getPointer(1),
    			  fluxp->getPointer(0),
    		     fluxp->getPointer(1));
+
+   if (d_sedmodel > 0) {
+		flux_sed_(d_data_problem_int,dt,dx, //FORTRAN
+			ifirst(0),ilast(0),ifirst(1),ilast(1),
+			depth->getPointer(),
+			veldepth->getPointer(),
+			bedlevel->getPointer(),
+			fluxsedm->getPointer(0),
+			fluxsedm->getPointer(1),
+			fluxsedp->getPointer(0),
+			fluxsedp->getPointer(1));
+	 }
 
    //stop flux computation timer
    t_compute_fluxes->stop();
@@ -809,23 +858,34 @@ void swe::conservativeDifferenceOnPatch(
       patch.getPatchData(d_depth, getDataContext());
    tbox::Pointer< pdat::CellData<double> > bathy       = 
       patch.getPatchData(d_bathy, getDataContext());
+   tbox::Pointer< pdat::CellData<double> > bedlevel    = 
+      patch.getPatchData(d_bedlevel, getDataContext());
    tbox::Pointer< pdat::CellData<double> > veldepth    = 
       patch.getPatchData(d_veldepth, getDataContext());
    tbox::Pointer< pdat::FaceData<double> > fluxm       = 
       patch.getPatchData(d_fluxm, getDataContext());
    tbox::Pointer< pdat::FaceData<double> > fluxp       = 
       patch.getPatchData(d_fluxp, getDataContext());
+   tbox::Pointer< pdat::FaceData<double> > fluxsedm       = 
+      patch.getPatchData(d_fluxsedm, getDataContext());
+   tbox::Pointer< pdat::FaceData<double> > fluxsedp       = 
+      patch.getPatchData(d_fluxsedp, getDataContext());
 
 
 #ifdef DEBUG_CHECK_ASSERTIONS
    TBOX_ASSERT(!depth.isNull());
    TBOX_ASSERT(!veldepth.isNull());
+   TBOX_ASSERT(!bedlevel.isNull());
    TBOX_ASSERT(!fluxm.isNull());
 	TBOX_ASSERT(!fluxp.isNull());
+	TBOX_ASSERT(!fluxsedm.isNull());
+	TBOX_ASSERT(!fluxsedp.isNull());
    TBOX_ASSERT(depth->getGhostCellWidth() == d_nghosts);
    TBOX_ASSERT(veldepth->getGhostCellWidth() == d_nghosts);
    TBOX_ASSERT(fluxm->getGhostCellWidth() == d_fluxghosts);
    TBOX_ASSERT(fluxp->getGhostCellWidth() == d_fluxghosts);
+   TBOX_ASSERT(fluxsedm->getGhostCellWidth() == d_fluxghosts);
+   TBOX_ASSERT(fluxsedp->getGhostCellWidth() == d_fluxghosts);
 #endif
 
    if (d_dim == tbox::Dimension(2)) {
@@ -839,7 +899,18 @@ void swe::conservativeDifferenceOnPatch(
 			depth->getPointer(),
 			veldepth->getPointer(),
 			bathy->getPointer());
-
+			
+		//update bed thickness if sediment model is active and bathymetry if morpho active
+		if(d_sedmodel > 0){
+			consdiff_sed_(dx,ifirst(0),ilast(0),ifirst(1),ilast(1), //FORTRAN
+				fluxsedm->getPointer(0),
+				fluxsedm->getPointer(1),
+				fluxsedp->getPointer(0),
+				fluxsedp->getPointer(1),
+				bedlevel->getPointer(),
+				bathy->getPointer());
+		}
+		
 		// friction term (d_frictype==0 => no friction)
 		if (d_frictype == 1) { //implicit Linear friction 
 			linfriction_(dx,dt,ifirst(0),ilast(0),ifirst(1),ilast(1), //FORTRAN
@@ -933,21 +1004,21 @@ void swe::boundaryReset(
       }
 
       int bnode = 2 * idir + 1;
-      if (d_dim == tbox::Dimension(2)) {
-         bdry_case = d_master_bdry_edge_conds[bnode];
-      }
+     	 if (d_dim == tbox::Dimension(2)) {
+	         bdry_case = d_master_bdry_edge_conds[bnode];
+	      }
       
 // BEGIN SIMPLE-MINDED FIX FOR STEP PROBLEM
       if ((d_data_problem == "STEP") && (bnode == 1) &&
           (tbox::MathUtilities<double>::Abs(xpatchhi[0] - xdomainhi[0]) < dx[0])) {
          bdry_case = FLOW_BC;
       }
-// BEGIN SIMPLE-MINDED FIX FOR STEP PROBLEM
+// // BEGIN SIMPLE-MINDED FIX FOR ROELVINK PROBLEM
       if ((d_data_problem == "ROELVINK") && (bnode == 1) &&
-          (tbox::MathUtilities<double>::Abs(xpatchlo[0] - xdomainlo[0]) < dx[0])) {
-         bdry_case = DIRICHLET_BC;
-      }
-// END SIMPLE-MINDED FIX FOR STEP PROBLEM
+           (tbox::MathUtilities<double>::Abs(xpatchlo[0] - xdomainlo[0]) < dx[0])) {
+          bdry_case = DIRICHLET_BC;
+       }
+// END SIMPLE-MINDED FIX FOR ROELVINK PROBLEM
       if (bdry_case == REFLECT_BC) {
          for (pdat::CellIterator ic(bdrybox[bnode]); ic; ic++) {
             for (i = 0; i < num_domain_boxes; i++) {
@@ -1046,22 +1117,33 @@ void swe::setPhysicalBoundaryConditions(
 			//d_bdry_edge_veldepth[i*PDIM+0] = u*h;
 			}
 		}
-       } else if(d_data_problem == "ROELVINK"){
-                double H0_roel = 2.0;
-                double eta0_roel = 1.0;
-                double T_roel = 3600;
-                double h; //,u;
-                for (int i = 0; i < NUM_2D_EDGES; i++) {
-                        if(d_scalar_bdry_edge_conds[i] == DIRICHLET_BC){
-                        //equation 33, Brufau et al, IJNMF v39
-                                h = H0_roel + eta0_roel*cos(2*3.14159*fill_time/T_roel);
-                                cout << "setting h on edge " << h << i ;
-                        //equation  
-                        //u = eta0_hen*sqrt(9.81/H0_hen)*cos(2*3.14159*fill_time/T_hen);
-                                d_bdry_edge_depth[i] = h;
-                        //d_bdry_edge_veldepth[i*PDIM+0] = u*h;
-                        }
-                }
+   } else if(d_data_problem == "ROELVINK"){
+		double H0_roel = 10;
+		double eta0_roel = 1.0;
+		double T_roel = 12*3600;
+		double h; //,u;
+		const tbox::Pointer<geom::CartesianPatchGeometry > patch_geom = patch.getPatchGeometry();
+		const double* dx = patch_geom->getDx();
+		const double* xpatchlow = patch_geom->getXLower();
+		const double* xdomainlow = d_grid_geometry->getXLower();
+		if (tbox::MathUtilities<double>::Abs(xpatchlow[0]-xdomainlow[0]) < dx[0]) {
+			tmp_edge_scalar_bcond[XLO] = DIRICHLET_BC;
+			tmp_edge_vector_bcond[XLO] = DIRICHLET_BC;
+		}
+		for (int i = 0; i < NUM_2D_EDGES; i++) {
+										if(tmp_edge_scalar_bcond[i] == DIRICHLET_BC){
+			//if(d_scalar_bdry_edge_conds[i] == DIRICHLET_BC){
+										//equation 33, Brufau et al, IJNMF v39
+				h = H0_roel + eta0_roel*cos(2*3.14159*fill_time/T_roel);
+				//cout << "setting h on edge " << h << "  " << i << '\n';
+										//equation  
+										//u = eta0_hen*sqrt(9.81/H0_hen)*cos(2*3.14159*fill_time/T_hen);
+				d_bdry_edge_depth[i] = h;
+				d_bdry_edge_bathy[i] = -10;  //MUST SET DIRICHLET BATHYMETRY
+												d_bdry_edge_veldepth[i*PDIM+0] = 0.; //u*h;
+												d_bdry_edge_veldepth[i*PDIM+1] = 0.; //u*h;
+			}
+		}
 	} //end if d_data_problem
 	
 	//special fix for step, set flow conditions only if it is truly the exit 
@@ -1080,20 +1162,20 @@ void swe::setPhysicalBoundaryConditions(
 
    }
 
-        //special fix for step, set dirichlet conditions only if it is truly the open boundary
-        if (d_data_problem == "ROELVINK") {
-
-      const tbox::Pointer<geom::CartesianPatchGeometry > patch_geom =
-         patch.getPatchGeometry();
-      const double* dx = patch_geom->getDx();
-      const double* xpatchlow = patch_geom->getXLower();
-      const double* xdomainlow = d_grid_geometry->getXLower();
-//gwc
-      if (tbox::MathUtilities<double>::Abs(xpatchlow[0]-xdomainlow[0]) > dx[0]) {
-         tmp_edge_scalar_bcond[XLO] = DIRICHLET_BC;
-         tmp_edge_vector_bcond[XLO] = DIRICHLET_BC;
-      }
-   }
+ //        //special fix for step, set dirichlet conditions only if it is truly the open boundary
+ //         if (d_data_problem == "ROELVINK") {
+ // 
+ //       const tbox::Pointer<geom::CartesianPatchGeometry > patch_geom =
+ //          patch.getPatchGeometry();
+ //       const double* dx = patch_geom->getDx();
+ //       const double* xpatchlow = patch_geom->getXLower();
+ //       const double* xdomainlow = d_grid_geometry->getXLower();
+ // //gwc
+ //       if (tbox::MathUtilities<double>::Abs(xpatchlow[0]-xdomainlow[0]) > dx[0]) {
+ //          tmp_edge_scalar_bcond[XLO] = DIRICHLET_BC;
+ //          tmp_edge_vector_bcond[XLO] = DIRICHLET_BC;
+ //       }
+ //    }
 
 
    
@@ -1226,6 +1308,7 @@ void swe::tagGradientDetectorCells(
     * Possible tagging criteria includes 
     *    DEPTH_GRADIENT 
     *    BATHY_GRADIENT
+	 *    U_GRADIENT
     * The criteria is specified over a time interval.
     *
     * Loop over criteria provided and check to make sure we are in the
@@ -1544,6 +1627,8 @@ bool swe::packDerivedDataIntoDoubleBuffer(
    
    tbox::Pointer< pdat::CellData<double> > depth  =
       patch.getPatchData(d_depth, d_plot_context);
+   tbox::Pointer< pdat::CellData<double> > bedlevel  =
+      patch.getPatchData(d_bedlevel, d_plot_context);
    tbox::Pointer< pdat::CellData<double> > bathy  =
       patch.getPatchData(d_bathy, d_plot_context);
    tbox::Pointer< pdat::CellData<double> > veldepth =
@@ -1551,6 +1636,7 @@ bool swe::packDerivedDataIntoDoubleBuffer(
 
 #ifdef DEBUG_CHECK_ASSERTIONS
    TBOX_ASSERT(!depth.isNull());
+   TBOX_ASSERT(!bedlevel.isNull());
    TBOX_ASSERT(!veldepth.isNull());
    TBOX_ASSERT(depth->getGhostBox() == patch.getBox());
    TBOX_ASSERT(veldepth->getGhostBox() == patch.getBox());
@@ -1605,6 +1691,27 @@ bool swe::packDerivedDataIntoDoubleBuffer(
       }
 
       data_on_patch = TRUE;
+
+  } else if (variable_name == "bedlevel") {
+#ifdef DEBUG_CHECK_ASSERTIONS
+   TBOX_ASSERT(zeta_id < PDIM);
+#endif
+
+    const double *const bval = bedlevel->getPointer();
+    int buf_b1 = 0;
+    int dat_b2 = data_box.offset(region.lower());
+
+    int dat_b1 = dat_b2;
+    for (int i1 = 0; i1 < box_w1; i1++) {
+       for (int i0 = 0; i0 < box_w0; i0++) {
+          int dat_indx = dat_b1+i0;
+          dbuffer[buf_b1+i0] = bval[dat_indx];
+       }
+       dat_b1 += dat_w0;
+       buf_b1 += box_w0;
+    }
+
+    data_on_patch = TRUE;
 
   } else if (variable_name == "u") {
 #ifdef DEBUG_CHECK_ASSERTIONS
@@ -1807,6 +1914,8 @@ void swe::printClassData(ostream &os) const
    os << "   d_frictype   =  " << d_frictype  << endl;
    os << "   d_fluxorder  =  " << d_fluxorder << endl;
    os << "   d_transverse =  " << d_transverse << endl;
+   os << "   d_sedmodel   =  " << d_sedmodel << endl;
+   os << "   d_morphfactor  =  " << d_morphfactor << endl;
 
 
 
@@ -2115,6 +2224,22 @@ void swe::getFromInput(
             << "`transverse' value not found in input." << endl);
       }
 
+     // Read the sediment model activation var
+      if (db->keyExists("sedmodel")) {
+         d_sedmodel = db->getInteger("sedmodel");
+      } else {
+         TBOX_ERROR(d_object_name << ": "
+            << "`sedmodel' value not found in input." << endl);
+      }
+
+     // Read the sediment model activation var
+      if (db->keyExists("morphfactor")) {
+         d_morphfactor = db->getDouble("morphfactor");
+      } else {
+         TBOX_ERROR(d_object_name << ": "
+            << "`morphfactor' value not found in input." << endl);
+      }
+
 
 
 
@@ -2211,6 +2336,8 @@ void swe::putToDatabase(tbox::Pointer<tbox::Database> db)
    db->putInteger("d_fluxorder",d_fluxorder);
    db->putInteger("d_transverse",d_transverse);
    db->putInteger("d_frictype",d_frictype);
+   db->putInteger("d_sedmodel",d_sedmodel);
+   db->putDouble("d_morphfactor",d_morphfactor);
 
    db->putIntegerArray("d_master_bdry_edge_conds", d_master_bdry_edge_conds);
    db->putIntegerArray("d_master_bdry_node_conds", d_master_bdry_node_conds);
@@ -2298,7 +2425,9 @@ void swe::getFromRestart()
    d_mindepth     = db->getDouble("d_mindepth");
    d_fluxorder    = db->getInteger("d_fluxorder");
    d_frictype     = db->getInteger("d_frictype");
-   d_frictype     = db->getInteger("d_trasnverse");
+   d_frictype     = db->getInteger("d_transverse");
+   d_sedmodel     = db->getInteger("d_sedmodel");
+   d_morphfactor  = db->getDouble("d_morphfactor");
 
    d_master_bdry_edge_conds = db->getIntegerArray("d_master_bdry_edge_conds");
    d_master_bdry_node_conds = db->getIntegerArray("d_master_bdry_node_conds");

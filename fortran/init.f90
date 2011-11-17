@@ -23,7 +23,7 @@
 !          
 !==============================================================================
 
-subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,scal)  
+subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,bedlevel)  
 
   use gparms
   use cntrl
@@ -34,7 +34,7 @@ subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,scal)
   real(dp), intent(inout) :: h(i1-igst:i2+igst,j1-jgst:j2+jgst)
   real(dp), intent(inout) :: vh(i1-igst:i2+igst,j1-jgst:j2+jgst,1:NDIMS)
   real(dp), intent(in   ) :: b(i1-igst:i2+igst,j1-jgst:j2+jgst)
-  real(dp), intent(inout) :: scal(i1-igst:i2+igst,j1-jgst:j2+jgst)
+  real(dp), intent(inout) :: bedlevel(i1-igst:i2+igst,j1-jgst:j2+jgst)
 
   !----- local ------------
   integer  :: i,j
@@ -43,7 +43,8 @@ subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,scal)
   
   caseid = cid
 
-  scal = zero
+  bedlevel = zero
+  
  
   select case(caseid)
   
@@ -421,7 +422,7 @@ subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,scal)
   do i=i1,i2
     do j=j1,j2
 	  h(i,j) = 0.1
-      vh(i,j,1) = h(i,j)*2.0
+      vh(i,j,1) = h(i,j)*3.0
       vh(i,j,2) = 0.0
     end do 
   end do
@@ -450,15 +451,13 @@ subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,scal)
   !---------------------------------------------------------------------
    do i=i1,i2
       do j=j1,j2
-         xc = xlo(1)+dx(1)*dble(i-i1)+dx(1)/2
-         h(i,j) = 2.
-!          if(xc < 5. )then 
-!           write(*,*)'depth is 3'
-!           h(i,j) = 3.
-!          else
-!           write(*,*)'depth is 2'
-!           h(i,j) = 2.
-!         endif
+        xc = xlo(1)+dx(1)*dble(i-i1)+dx(1)/2
+		if(xc < 5000)then
+		  fac    = xc/5000.
+		  h(i,j) = 10*(1-fac) + 2*(fac)
+		else
+	      h(i,j) = 2
+		end if
         vh(i,j,1) = zero
         vh(i,j,2) = zero
       end do

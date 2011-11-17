@@ -1,5 +1,6 @@
 function [ierr] = pencilplot(casename,iskip);
 close all
+%casename = 'roelvink';
 dir = ['../pencil_' casename];  
 scrsz = get(0,'ScreenSize');
 figure('Position',[1 1 scrsz(4)/2 scrsz(3)/2]) 
@@ -34,6 +35,7 @@ for i=0:iskip:10000
     error('got nan')
   end;
   if(i==0)
+    xinit = x;
     dinit = d;
     uinit = u;
     etainit = eta;
@@ -45,34 +47,36 @@ for i=0:iskip:10000
   clf
   drange = max(max(dinit)-min(dinit),max(dinit));
   subplot(6,1,1)
-  plot(x,dinit,'r'); hold on
+  plot(xinit,dinit,'r'); hold on
   plot(x,d,'k-+')
   title('d')
   axis([min(x),max(x),min(d)-.1*drange,max(d)+.1*drange]);
   subplot(6,1,2)
-  plot(x,uinit,'r'); hold on
+  plot(xinit,uinit,'r'); hold on
   plot(x,u,'k')
   axis([min(x),max(x),min(u)-.1,max(u)+.1]);
   title('u')
   subplot(6,1,3)
-  plot(x,etainit,'r'); hold on
+  plot(xinit,etainit,'r'); hold on
   plot(x,eta,'k')
   axis([min(x),max(x),.9*min(eta-eps),1.1*max(eta+eps)]); 
   title('eta')
   subplot(6,1,4)
-  plot(x,binit,'r'); hold on
+  plot(xinit,binit,'r'); hold on
   plot(x,b,'k')
   plot(x,b+d,'r')
+  axis([min(x),max(x),min(b)-.1,max(b+d)+.1]); 
   title('b')
   subplot(6,1,5)
-  plot(x,wdinit,'r'); hold on
+  plot(xinit,wdinit,'r'); hold on
   plot(x,wd,'k')
   title('wd')
   axis([min(x),max(x),0,1.2]);
   subplot(6,1,6)
   dx = diff(x);
-  plot(x,[dxinit',dxinit(end)'],'r'); hold on
+  plot(xinit,[dxinit',dxinit(end)'],'r'); hold on
   plot(x,[dx',dx(end)'],'k'); hold on
+  axis([min(x),max(x),min(min(dxinit),min(dx))-.01*min(dx),max(max(dxinit),max(dx))+.01*min(dx)]); 
   title('dx')
   fprintf('%d %f %f\n',i,max(abs(u)),max(eta))
   pause

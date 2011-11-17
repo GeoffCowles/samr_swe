@@ -1,4 +1,4 @@
-// roelvink inlet test
+// roelvink inlet test from Roelvink, J.A., Coastal Engineering 53, 2006, 277-287.
 // 
 
 swe {
@@ -23,12 +23,22 @@ swe {
 //    = 0 => no transverse flux propagation
 //    = 1 => transverse flux propagation, no corrections
 //    = 2 => transverse flux propagation, with corrections
-   transverse           = 0
+   transverse           = 1
 
 // mindepth: set the minimum depth (if depth is < mindepth), velocities are set to zero
    mindepth             = 1.e-3
 
 
+// sediment model parameters 
+   // sedmodel
+   // = 0:  no sediment model
+   // = 1:  track bed changes but do not update bathymetry (no morpho)
+   // = 2:  track bed changes and update bathymetry (morpho)
+   // morphfactor
+   // [0, infinity]:  Lesser style "online" morphological acceleration [=1, no acceleration]
+
+   sedmodel = 1
+   morphfactor = 0.0
 
    Refinement_data {
       refine_criteria = "DEPTH_GRADIENT"
@@ -42,8 +52,14 @@ swe {
 
    // valid boundary_condition values are "FLOW", "REFLECT", "DIRICHLET"
    Boundary_data {
+//      boundary_edge_xlo {
+//         boundary_condition      = "DIRICHLET" 
+//         depth = 1.0
+//         bathy = 0.0
+//         veldepth = 0.0,0.0
+//      }
       boundary_edge_xlo {
-         boundary_condition      = "REFLECT"   
+         boundary_condition      = "REFLECT"
       }
       boundary_edge_xhi {
          boundary_condition      = "REFLECT"
@@ -86,14 +102,14 @@ Main {
    log_all_nodes    = TRUE
 
 // matlab pencil file
-   matlab_dump_interval  = 1
+   matlab_dump_interval  = 50
    matlab_dump_filename  = "pencil"
    matlab_dump_dirname   = "./pencil_roelvink"
    matlab_pencil_direction = 0
  
 // visualization dump parameters
    viz_writer            = "VisIt" // use: "Vizamrai", "VisIt" for both
-   viz_dump_interval     = 1          // zero to turn off
+   viz_dump_interval     = 50          // zero to turn off
    viz_dump_dirname      = "viz_roelvink"
    viz_dump_filename     = "roelvink"   // not used by VisIt
    visit_file_cluster_size = 1        // not used by Vizamrai
@@ -122,10 +138,9 @@ CartesianGeometry {
                   [ (0,28) , (59,35) ],
                   [ (0,36) , (19,63) ],
                   [ (21,36) , (59,63) ]
+//   domain_boxes = [ (0,0) , (10,10) ]
 
 
-// domain_boxes = [ (0,0) , (15,19) ],
-//                  [ (16,4) , (49,19) ]
 
    x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
    x_up         = 15000, 15000  // upper end of computational domain.
@@ -168,9 +183,9 @@ HyperbolicLevelIntegrator{
 
 TimeRefinementIntegrator{
    start_time           = 0.e0     // initial simulation time
-   end_time             = 3600.  // final simulation time
+   end_time             = 86400.   // final simulation time
    grow_dt              = 1.1e0    // growth factor for timesteps
-   max_integrator_steps = 3000      // max number of simulation timesteps
+   max_integrator_steps = 300000       // max number of simulation timesteps
 }
 
 LoadBalancer {
