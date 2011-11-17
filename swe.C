@@ -104,6 +104,7 @@ using namespace std;
 #define STEP            (20)
 #define SUPERCRIT       (21)
 #define ROELVINK        (22)
+#define ROELVINKY       (23)
 
 // defines for cell tagging routines
 #define RICHARDSON_NEWLY_TAGGED (-10)
@@ -301,6 +302,8 @@ swe::swe(
 	  d_data_problem_int = SUPERCRIT;
 	} else if (d_data_problem == "ROELVINK") {
 	  d_data_problem_int = ROELVINK;
+	} else if (d_data_problem == "ROELVINKY") {
+	  d_data_problem_int = ROELVINKY;
    } else {
       TBOX_ERROR(d_object_name << ": "
          << "Unknown d_data_problem string = "
@@ -1019,6 +1022,12 @@ void swe::boundaryReset(
           bdry_case = DIRICHLET_BC;
        }
 // END SIMPLE-MINDED FIX FOR ROELVINK PROBLEM
+// // BEGIN SIMPLE-MINDED FIX FOR ROELVINKY PROBLEM
+      if ((d_data_problem == "ROELVINKY") && (bnode == 3) &&
+           (tbox::MathUtilities<double>::Abs(xpatchlo[1] - xdomainlo[1]) < dx[1])) {
+          bdry_case = DIRICHLET_BC;
+       }
+// END SIMPLE-MINDED FIX FOR ROELVINKY PROBLEM
       if (bdry_case == REFLECT_BC) {
          for (pdat::CellIterator ic(bdrybox[bnode]); ic; ic++) {
             for (i = 0; i < num_domain_boxes; i++) {
@@ -1117,6 +1126,12 @@ void swe::setPhysicalBoundaryConditions(
 			//d_bdry_edge_veldepth[i*PDIM+0] = u*h;
 			}
 		}
+		// set open boundary forcing for ROELVINK test where open boundary is at X=0 
+		// Note we are forcing the free surface (actually the depth) but do not specify the velocity
+		// thus we are resetting the scalar_bcond to DIRICHLET (which then uses the values we provide)
+		// and we are resetting the vector_bcond to FLOW (which seems to automatically use zeroth-order 
+		// extrapolation for ud/vd)
+		// note we do not set values for d_bdry_edge_veldepth
    } else if(d_data_problem == "ROELVINK"){
 		double H0_roel = 10;
 		double eta0_roel = 1.0;
@@ -1128,7 +1143,7 @@ void swe::setPhysicalBoundaryConditions(
 		const double* xdomainlow = d_grid_geometry->getXLower();
 		if (tbox::MathUtilities<double>::Abs(xpatchlow[0]-xdomainlow[0]) < dx[0]) {
 			tmp_edge_scalar_bcond[XLO] = DIRICHLET_BC;
-			tmp_edge_vector_bcond[XLO] = DIRICHLET_BC;
+		 	tmp_edge_vector_bcond[XLO] = FLOW_BC;
 		}
 		for (int i = 0; i < NUM_2D_EDGES; i++) {
 										if(tmp_edge_scalar_bcond[i] == DIRICHLET_BC){
@@ -1140,10 +1155,45 @@ void swe::setPhysicalBoundaryConditions(
 										//u = eta0_hen*sqrt(9.81/H0_hen)*cos(2*3.14159*fill_time/T_hen);
 				d_bdry_edge_depth[i] = h;
 				d_bdry_edge_bathy[i] = -10;  //MUST SET DIRICHLET BATHYMETRY
-												d_bdry_edge_veldepth[i*PDIM+0] = 0.; //u*h;
-												d_bdry_edge_veldepth[i*PDIM+1] = 0.; //u*h;
+				//								d_bdry_edge_veldepth[i*PDIM+0] = 0.; //u*h;
+				//								d_bdry_edge_veldepth[i*PDIM+1] = 0.; //u*h;
 			}
 		}
+	// set open boundary forcing for ROELVINK test where open boundary is at Y=0. 
+	// Note we are forcing the free surface (actually the depth) but do not specify the velocity
+	// thus we are resetting the scalar_bcond to DIRICHLET (which then uses the values we provide)
+	// and we are resetting the vector_bcond to FLOW (which seems to automatically use zeroth-order 
+	// extrapolation for ud/vd)
+	// note we do not set values for d_bdry_edge_veldepth 
+	} else if(d_data_problem == "ROELVINKY"){
+		double H0_roel = 10;
+		double eta0_roel = 1.0;
+		double T_roel = 12*3600;
+		double h; //,u;
+		const tbox::Pointer<geom::CartesianPatchGeometry > patch_geom = patch.getPatchGeometry();
+		const double* dx = patch_geom->getDx();
+		const double* xpatchlow = patch_geom->getXLower();
+		const double* xdomainlow = d_grid_geometry->getXLower();
+		if (tbox::MathUtilities<double>::Abs(xpatchlow[1]-xdomainlow[1]) < dx[1]) {
+			tmp_edge_scalar_bcond[YLO] = DIRICHLET_BC;
+			tmp_edge_vector_bcond[YLO] = FLOW_BC;
+		}
+		for (int i = 0; i < NUM_2D_EDGES; i++) {
+										if(tmp_edge_scalar_bcond[i] == DIRICHLET_BC){
+			//if(d_scalar_bdry_edge_conds[i] == DIRICHLET_BC){
+										//equation 33, Brufau et al, IJNMF v39
+				h = H0_roel + eta0_roel*cos(2*3.14159*fill_time/T_roel);
+				//cout << "setting h on edge " << h << "  " << i << '\n';
+										//equation  
+										//u = eta0_hen*sqrt(9.81/H0_hen)*cos(2*3.14159*fill_time/T_hen);
+				d_bdry_edge_depth[i] = h;
+				d_bdry_edge_bathy[i] = -10;  //MUST SET DIRICHLET BATHYMETRY
+												//d_bdry_edge_veldepth[i*PDIM+0] = 0.; //u*h;
+												//d_bdry_edge_veldepth[i*PDIM+1] = 0.; //u*h;
+			}
+		}
+		
+		
 	} //end if d_data_problem
 	
 	//special fix for step, set flow conditions only if it is truly the exit 

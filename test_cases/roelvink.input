@@ -12,7 +12,7 @@ swe {
    frictype             = 2
 
 // C_manning:  manning (n) friction coefficient (only used if frictype == 2)
-   C_manning            = 0.03
+   C_manning            = 0.01
 
 // fluxorder: order of the spatial flux
 //    = 1 => 1st order
@@ -23,7 +23,7 @@ swe {
 //    = 0 => no transverse flux propagation
 //    = 1 => transverse flux propagation, no corrections
 //    = 2 => transverse flux propagation, with corrections
-   transverse           = 1
+   transverse           = 2
 
 // mindepth: set the minimum depth (if depth is < mindepth), velocities are set to zero
    mindepth             = 1.e-3
@@ -133,11 +133,16 @@ CartesianGeometry {
 //	          [ (0,14) , (29,17) ],
 //	          [ (0,18) , (9,31) ],
 //                  [ (11,18) , (29,31) ]
+//   domain_boxes = [ (0,0) , (19,27) ],
+//                  [ (21,0) , (59,27) ],
+//                  [ (0,28) , (59,35) ],
+//                  [ (0,36) , (19,63) ],
+//                  [ (21,36) , (59,63) ]
    domain_boxes = [ (0,0) , (19,27) ],
-                  [ (21,0) , (59,27) ],
-                  [ (0,28) , (59,35) ],
-                  [ (0,36) , (19,63) ],
-                  [ (21,36) , (59,63) ]
+                  [ (0,28), (20,35) ],
+                  [ (0,36), (19,63) ],
+                  [ (21,0), (59,63) ]
+
 //   domain_boxes = [ (0,0) , (10,10) ]
 
 
@@ -159,7 +164,7 @@ PatchHierarchy{
    }
 
    largest_patch_size {
-      level_0 = 32 , 32
+      level_0 = 32 ,32 
       // all finer levels will use same values as level_0...
    }
 

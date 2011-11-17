@@ -62,10 +62,13 @@ subroutine flux_sed(cid,dt,dx,i1,i2,j1,j2,h,vh,bedlevel,ifluxm,jfluxm,ifluxp,jfl
 
   do j=j1-NCGST,j2+NCGST
     do i=i1-NCGST,i2+NCGST
-	  fac2 = (h(i,j)**(-7/3))*sqrt(vh(i,j,1)**2 + vh(i,j,2)**2)
+	  fac2 = (h(i,j)**(-7./3.))*sqrt(vh(i,j,1)**2 + vh(i,j,2)**2)
 	  taux(i,j) = fac1*fac2*vh(i,j,1)
 	  tauy(i,j) = fac1*fac2*vh(i,j,2)
 	  bedlevel(i,j) = rho_w*sqrt(taux(i,j)**2 + tauy(i,j)**2)
+	  if(h(i,j) < mindepth)then
+	    bedlevel(i,j) = 0.
+	  endif
 	end do
   end do
 

@@ -1,9 +1,9 @@
-// heniche test (Brufau et al, IJNMF 39, 2002), non-constant slope
+// roelvink inlet test from Roelvink, J.A., Coastal Engineering 53, 2006, 277-287.
 // 
 
 swe {
   
-   data_problem         = "HENICHE"   
+   data_problem         = "ROELVINKY"  
 
 // frictype:  select the friction type
 //   = 0 => no friction
@@ -12,7 +12,7 @@ swe {
    frictype             = 2
 
 // C_manning:  manning (n) friction coefficient (only used if frictype == 2)
-   C_manning            = 0.03
+   C_manning            = 0.01
 
 // fluxorder: order of the spatial flux
 //    = 1 => 1st order
@@ -23,12 +23,13 @@ swe {
 //    = 0 => no transverse flux propagation
 //    = 1 => transverse flux propagation, no corrections
 //    = 2 => transverse flux propagation, with corrections
-   transverse           = 0
+   transverse           = 2
 
 // mindepth: set the minimum depth (if depth is < mindepth), velocities are set to zero
    mindepth             = 1.e-3
 
-// sediment model parameters
+
+// sediment model parameters 
    // sedmodel
    // = 0:  no sediment model
    // = 1:  track bed changes but do not update bathymetry (no morpho)
@@ -39,13 +40,11 @@ swe {
    sedmodel = 1
    morphfactor = 0.0
 
-
-
    Refinement_data {
       refine_criteria = "DEPTH_GRADIENT"
  
       DEPTH_GRADIENT {
-         grad_tol = 0.02 
+         grad_tol = 3.0  
       }
 
       
@@ -53,12 +52,15 @@ swe {
 
    // valid boundary_condition values are "FLOW", "REFLECT", "DIRICHLET"
    Boundary_data {
+//      boundary_edge_xlo {
+//         boundary_condition      = "DIRICHLET" 
+//         depth = 1.0
+//         bathy = 0.0
+//         veldepth = 0.0,0.0
+//      }
       boundary_edge_xlo {
-         boundary_condition      = "DIRICHLET"
-         depth = 1.0
-         bathy = 0.0
-         veldepth = 0.0,0.0
-     }
+         boundary_condition      = "REFLECT"
+      }
       boundary_edge_xhi {
          boundary_condition      = "REFLECT"
       }
@@ -94,21 +96,22 @@ swe {
 Main {
    dim = 2
    base_name = "swe"
+
 // log file parameters 
-   log_file_name    = "heniche.log"
+   log_file_name    = "roelvinky.log"
    log_all_nodes    = TRUE
 
 // matlab pencil file
-   matlab_dump_interval  = 10 
+   matlab_dump_interval  = 50
    matlab_dump_filename  = "pencil"
-   matlab_dump_dirname   = "./pencil_heniche"
+   matlab_dump_dirname   = "./pencil_roelvinky"
    matlab_pencil_direction = 0
  
 // visualization dump parameters
    viz_writer            = "VisIt" // use: "Vizamrai", "VisIt" for both
-   viz_dump_interval     = 10         // zero to turn off
-   viz_dump_dirname      = "viz_heniche"
-   viz_dump_filename     = "heniche"   // not used by VisIt
+   viz_dump_interval     = 50          // zero to turn off
+   viz_dump_dirname      = "viz_roelvinky"
+   viz_dump_filename     = "roelvinky"   // not used by VisIt
    visit_file_cluster_size = 1        // not used by Vizamrai
 
 // restart dump parameters
@@ -124,53 +127,50 @@ TimerManager{
                               "algs::HyperbolicLevelIntegrator::*"
 }
 
-CartesianGeometry{
-   domain_boxes	= [(0,0),(99,4)]
-//   domain_boxes	= [(0,0),(19,4)],
-//   [(20,0),(39,4)],
-//   [(40,0),(59,4)],
-//   [(60,0),(79,4)],
-//   [(80,0),(99,4)]
+CartesianGeometry {
+   domain_boxes = [ (0,0) , (19,27) ],
+                  [ (0,28), (20,35) ],
+                  [ (0,36), (19,63) ],
+                  [ (21,0), (59,63) ]
+   domain_boxes = [ (0,0) , (27,19) ],
+                  [ (28,0), (35,20) ],
+                  [ (36,0), (63,19) ], 
+                  [ (0,21), (63,59) ]
 
-   x_lo = 0.e0 , 0.e0   // lower end of computational domain.
-   x_up = 500.e0 ,500.e0 // upper end of computational domain.
+//   domain_boxes = [ (0,0) , (10,10) ]
+
+
+
+   x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
+   x_up         = 15000, 15000  // upper end of computational domain.
 }
-
 
 StandardTagAndInitialize{
    tagging_method = "GRADIENT_DETECTOR"
 }
 
 PatchHierarchy{
-   max_levels = 1         // Maximum number of levels in hierarchy.
+   max_levels          = 1         // Maximum number of levels in hierarchy.
 
-   ratio_to_coarser {      // vector ratio to next coarser level
-      level_1 = 2 , 1
-      level_2 = 2 , 2
+   ratio_to_coarser {              // vector ratio to next coarser level
+      level_1            = 4 , 4
+      level_2            = 4 , 4
    }
 
-//   max_levels = 1         // Maximum number of levels in hierarchy.
-//
-//   ratio_to_coarser {      // vector ratio to next coarser level
-//      level_1 = 2 , 2
-//   }
-
    largest_patch_size {
-      level_0 = 200 , 200
+      level_0 = 32 , 32
       // all finer levels will use same values as level_0...
    }
 
    smallest_patch_size {
-      level_0 = 8 , 4 
-      level_1 = 4,  4 
-      // all finer levels will use same values as level_1...
+      level_0 = 4 , 4
+      // all finer levels will use same values as level_0...
    }
 }
-GriddingAlgorithm{
-
-   efficiency_tolerance    = 0.50e0   // min % of tag cells in new patch level
-   combine_efficiency      = 0.75e0   // chop box if sum of volumes of smaller
-                                      // boxes < efficiency * vol of large box
+GriddingAlgorithm {
+   efficiency_tolerance = 0.75e0   // min % of tag cells in new patch level
+   combine_efficiency   = 0.85e0   // chop box if sum of volumes of smaller
+                                   // boxes < efficiency * vol of large box
 }
 
 HyperbolicLevelIntegrator{
@@ -182,9 +182,9 @@ HyperbolicLevelIntegrator{
 
 TimeRefinementIntegrator{
    start_time           = 0.e0     // initial simulation time
-   end_time             = 3600e0  // final simulation time
+   end_time             = 86400.   // final simulation time
    grow_dt              = 1.1e0    // growth factor for timesteps
-   max_integrator_steps = 300000      // max number of simulation timesteps
+   max_integrator_steps = 300000       // max number of simulation timesteps
 }
 
 LoadBalancer {

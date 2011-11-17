@@ -130,15 +130,20 @@ subroutine george_flux(cid,dt,dx,i1,i2,j1,j2,h,vh,b,ifluxm,jfluxm,ifluxp,jfluxp)
 	end do 
 	
 ! 	 if(j==j2/2)then
-! 	    write(*,*)'dirichlet values at 0',q1d(0,1:2)
-! 	    write(*,*)'dirichlet values at -1',q1d(-1,1:2)
+! 	    write(*,'(9F12.4)')q1d(-1,1:3),q1d(0,1:3),q1d(1,1:3)
 ! 	 endif
 	 
-	if(cid==heniche .or. cid==roelvink)then
+	!not this is dangerous because the following is being set on all patches
+	!regardless if the left boundary is the inflow.  In debugging the roelvink test
+	!case we discovered that we can reset the scalar_bcond to DIRICHLET and vector_bcond
+	!to FlOW_BC and this zeroth order extrapolation we enforce here below happens automatically
+	!but only to the correct patch.  At some point we need to modify HENICHE in the same manner
+	!(this is in swe::setPhysicalBoundaryConditions) and get rid of this fudge below.
+	if(cid==heniche)then !.or. cid==roelvink)then
     !set hv and hu in the ghost cells of an open boundary
 ! 	!geoff - heniche fudge - gwc FUDGE
-	q1d(-1,2) = q1d(1,2)
-	q1d( 0,2) = q1d(1,2)
+  	q1d(-1,2) = q1d(1,2)
+   	q1d( 0,2) = q1d(1,2)
     endif
 
  !    if(j==j2/2)then

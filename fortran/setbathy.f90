@@ -319,6 +319,21 @@ subroutine setbathy(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,b)
      end do
   end do
 
+	!---------------------------------------------------------------------
+	case(roelvinky)
+	!---------------------------------------------------------------------
+	do i=i1-igst,i2+igst
+	   do j=j1-jgst,j2+jgst
+		  yc = xlo(2)+dx(2)*dble(j-j1)+dx(2)/2
+		  if(yc < 5000)then
+		    fac    = yc/5000.
+		    b(i,j) = -10*(1-fac) + -2*(fac)
+		  else
+			b(i,j) = -2
+		  end if
+	   end do
+	end do
+
   
   end select 
 

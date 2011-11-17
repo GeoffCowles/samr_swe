@@ -5,4 +5,17 @@
 
 3.) Not sure how to do gradient based adaptation on derived flow quantities (zeta, u, etc.).  We may need to call a routine to fill our scalar flow quantity (currently not used).  
 
+4.) Still concerned about Dirichlet condition on inflow of Roelvink.  We are not explicitly setting the velocity, unless we are in fact setting it to zero.  We had put a fudge in the flux.f90 previously (originally for Heniche) which extrapolated the velocity out to the two ghost cells.  However, if we have multiple patches, this will happen in every patch, even those not on the left boundary.  This is not good.  Let's visualize two solutions, one with and one without that fudge in flux.f90.  We'll look at the u velocity and we'll zoom in the range to -.1 to .1 to see the influence on the solution.
+Yes, this produces very different solutions.  
 
+Fix seems to be: 
+ - where we reset the BCs on the inflow in swe::setPhysicalBoundaryConditions
+    use: 
+    	tmp_edge_scalar_bcond[XLO] = DIRICHLET_BC;
+ 	tmp_edge_vector_bcond[XLO] = FLOW_BC; 
+    do not set d_bdry_edge_veldepth
+
+if we print the values in the ghost cells (from flux.f90) we can see that when we do this,
+  FLOW_BC sets the values for u*d to be equal to the first interior value 
+  while the value for d is getting set via our time-dependent DIRICHLET formulation. 
+  This it seems that "FLOW_BC" just zeroth order extrapolates regardless of flow direction.

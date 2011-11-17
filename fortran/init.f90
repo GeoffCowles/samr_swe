@@ -463,6 +463,24 @@ subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,bedlevel)
       end do
     end do
 
+	!---------------------------------------------------------------------
+	case(roelvinky) !inlet roelvink test (Coastal Engineering 53, 2006)
+	!---------------------------------------------------------------------
+	 do i=i1,i2
+	    do j=j1,j2
+	      yc = xlo(2)+dx(2)*dble(j-j1)+dx(2)/2
+			if(yc < 5000)then
+			  fac    = yc/5000.
+			  h(i,j) = 10*(1-fac) + 2*(fac)
+			else
+		      h(i,j) = 2
+			end if
+	      vh(i,j,1) = zero
+	      vh(i,j,2) = zero
+	    end do
+	  end do
+
+
 
  
   end select

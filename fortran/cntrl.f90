@@ -53,6 +53,7 @@ module cntrl
   integer, parameter :: step = 20
   integer, parameter :: supercrit = 21
   integer, parameter :: roelvink = 22
+  integer, parameter :: roelvinky = 23
 
   !floodying/drying
   real(dp) :: mindepth 
