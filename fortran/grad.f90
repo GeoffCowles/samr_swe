@@ -57,6 +57,7 @@ subroutine detectgrad(i1,i2,j1,j2,ngi,ngj,ngtagi,ngtagj,ngtti,ngttj,dx,gradtol, 
       endif
    
       tagcell = .false.
+      
 
       !i-direction jump
       if (.not.tagcell) then
@@ -65,6 +66,7 @@ subroutine detectgrad(i1,i2,j1,j2,ngi,ngj,ngtagi,ngtagj,ngtti,ngttj,dx,gradtol, 
         facejump = abs(var(i,j)-varm1)
         facejump = max(facejump,abs(var(i,j)-varp1))
         tagcell = ((facejump).gt.(loctol*dx(1)))
+        !write(*,*)'doing i face',i,j,tagcell,facejump,varm1,varp1,var(i,j)
       endif
       !j-direction jump
       if (.not.tagcell) then
@@ -94,11 +96,12 @@ subroutine detectgrad(i1,i2,j1,j2,ngi,ngj,ngtagi,ngtagj,ngtti,ngttj,dx,gradtol, 
       if ( tagcell ) then
         temptags(i,j) = yestag
       endif
-     
+      !write(*,*)i,j,temptags(i,j)
       
  
     enddo
   enddo
+  !stop
   return
 
 end subroutine detectgrad

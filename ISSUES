@@ -19,3 +19,15 @@ if we print the values in the ghost cells (from flux.f90) we can see that when w
   FLOW_BC sets the values for u*d to be equal to the first interior value 
   while the value for d is getting set via our time-dependent DIRICHLET formulation. 
   This it seems that "FLOW_BC" just zeroth order extrapolates regardless of flow direction.
+
+  RESOLVED
+
+
+5.) tried to get a bedlevel-based gradient detector for adaptation working.  Added everything in but we see adaption only
+along the edges of the domain.  This indicated the ghost cells had a bad value. Checked values directly in grad.  Internal 
+values were the same number set in init.f90 which means init was setting the internal state.  However, init also sets ghosts  
+but somehow they were getting reset.  Modified setPhysicalBoundaryConditions to try and set bedlevel in the Dirichlet.  
+Somehow doing this is now causing the code to crash.  We need to figure out how the ghosts are filled for bedlevel when  
+you have adaption.  Note, that even with one level, when we ran the test case, it was still seg faulting, somehting to 
+do with setting bedlevel in the ghosts in setPhysicalboundaryconditions.
+

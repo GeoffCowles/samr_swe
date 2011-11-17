@@ -42,7 +42,11 @@ swe {
 
    Refinement_data {
       refine_criteria = "DEPTH_GRADIENT"
+      //refine_criteria = "BEDLEVEL_GRADIENT"
  
+      BEDLEVEL_GRADIENT {
+         grad_tol = 3.0  
+      }
       DEPTH_GRADIENT {
          grad_tol = 3.0  
       }
@@ -102,14 +106,14 @@ Main {
    log_all_nodes    = TRUE
 
 // matlab pencil file
-   matlab_dump_interval  = 50
+   matlab_dump_interval  = 0 
    matlab_dump_filename  = "pencil"
    matlab_dump_dirname   = "./pencil_roelvink"
    matlab_pencil_direction = 0
  
 // visualization dump parameters
    viz_writer            = "VisIt" // use: "Vizamrai", "VisIt" for both
-   viz_dump_interval     = 50          // zero to turn off
+   viz_dump_interval     = 1          // zero to turn off
    viz_dump_dirname      = "viz_roelvink"
    viz_dump_filename     = "roelvink"   // not used by VisIt
    visit_file_cluster_size = 1        // not used by Vizamrai
@@ -156,11 +160,11 @@ StandardTagAndInitialize{
 }
 
 PatchHierarchy{
-   max_levels          = 1         // Maximum number of levels in hierarchy.
+   max_levels          = 2         // Maximum number of levels in hierarchy.
 
    ratio_to_coarser {              // vector ratio to next coarser level
-      level_1            = 4 , 4
-      level_2            = 4 , 4
+      level_1            = 2 , 2
+      level_2            = 2 , 2
    }
 
    largest_patch_size {
@@ -170,6 +174,7 @@ PatchHierarchy{
 
    smallest_patch_size {
       level_0 = 4 , 4
+      level_1 = 8 , 8
       // all finer levels will use same values as level_0...
    }
 }

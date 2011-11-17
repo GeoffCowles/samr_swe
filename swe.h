@@ -497,6 +497,7 @@ private:
    tbox::Array<double> d_bdry_edge_depth;
    tbox::Array<double> d_bdry_edge_bathy;
    tbox::Array<double> d_bdry_edge_veldepth;
+   tbox::Array<double> d_bdry_edge_bedlevel;
 
    /*
     * Refinement criteria parameters for gradient detector and
@@ -516,6 +517,11 @@ private:
    tbox::Array<double> d_bathy_rich_tol;
    tbox::Array<double> d_bathy_rich_time_max;
    tbox::Array<double> d_bathy_rich_time_min;
+
+   tbox::Array<double> d_bedlevel_grad_tol;
+   tbox::Array<double> d_bedlevel_grad_time_max;
+   tbox::Array<double> d_bedlevel_grad_time_min;
+  
 
    /*
     * Timers.

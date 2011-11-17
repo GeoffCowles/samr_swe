@@ -71,6 +71,17 @@ subroutine flux_sed(cid,dt,dx,i1,i2,j1,j2,h,vh,bedlevel,ifluxm,jfluxm,ifluxp,jfl
 	  endif
 	end do
   end do
+  do j=j1-NCGST,j2+NCGST
+	bedlevel(i1-NCGST:i1-1,j) = bedlevel(i1,j)
+	bedlevel(i2+1:i2+NCGST,j) = bedlevel(i2,j)
+  end do
+  do i=i1-NCGST,i2+NCGST
+	bedlevel(i,j1-NCGST:j1-1) = bedlevel(i,j1)
+	bedlevel(i,j2+1:j2+NCGST) = bedlevel(i,j2)
+  end do
+ 
+ 
+  
 
   return
 

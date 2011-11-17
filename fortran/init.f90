@@ -43,7 +43,7 @@ subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,bedlevel)
   
   caseid = cid
 
-  bedlevel = zero
+  bedlevel = 0.
   
  
   select case(caseid)

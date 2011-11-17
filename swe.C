@@ -239,8 +239,10 @@ swe::swe(
 		//These arrays hold the Dirichlet values for bathy/depth/veldepth
 		d_bdry_edge_depth.resizeArray(NUM_2D_EDGES);
 		d_bdry_edge_bathy.resizeArray(NUM_2D_EDGES);
+		d_bdry_edge_bedlevel.resizeArray(NUM_2D_EDGES);
 		d_bdry_edge_veldepth.resizeArray(NUM_2D_EDGES*d_dim.getValue());
 		tbox::MathUtilities<double>::setArrayToSignalingNaN(d_bdry_edge_depth);
+		tbox::MathUtilities<double>::setArrayToSignalingNaN(d_bdry_edge_bedlevel);
 		tbox::MathUtilities<double>::setArrayToSignalingNaN(d_bdry_edge_bathy);
 		tbox::MathUtilities<double>::setArrayToSignalingNaN(d_bdry_edge_veldepth);
 	} //end setup for PDIM=2
@@ -599,6 +601,7 @@ void swe::initializeDataOnPatch(
 #ifdef DEBUG_CHECK_ASSERTIONS
       TBOX_ASSERT(!depth.isNull());
       TBOX_ASSERT(!veldepth.isNull());
+      TBOX_ASSERT(!bedlevel.isNull());
 #endif
       const hier::IntVector& ghost_cells = veldepth->getGhostCellWidth();
 	
@@ -1067,10 +1070,14 @@ void swe::setPhysicalBoundaryConditions(
       patch.getPatchData(d_veldepth, getDataContext());
    tbox::Pointer< pdat::CellData<double> > bathy = 
       patch.getPatchData(d_bathy, getDataContext());
+   tbox::Pointer< pdat::CellData<double> > bedlevel = 
+      patch.getPatchData(d_bedlevel, getDataContext());
+
 
 #ifdef DEBUG_CHECK_ASSERTIONS
    TBOX_ASSERT(!depth.isNull());
    TBOX_ASSERT(!veldepth.isNull());
+   TBOX_ASSERT(!bedlevel.isNull());
 #endif
    hier::IntVector ghost_cells = depth->getGhostCellWidth();
 #ifdef DEBUG_CHECK_ASSERTIONS
@@ -1155,6 +1162,7 @@ void swe::setPhysicalBoundaryConditions(
 										//u = eta0_hen*sqrt(9.81/H0_hen)*cos(2*3.14159*fill_time/T_hen);
 				d_bdry_edge_depth[i] = h;
 				d_bdry_edge_bathy[i] = -10;  //MUST SET DIRICHLET BATHYMETRY
+				d_bdry_edge_bedlevel[i] = 99.0;
 				//								d_bdry_edge_veldepth[i*PDIM+0] = 0.; //u*h;
 				//								d_bdry_edge_veldepth[i*PDIM+1] = 0.; //u*h;
 			}
@@ -1245,6 +1253,13 @@ void swe::setPhysicalBoundaryConditions(
    					       ghost_width_to_fill,
    					       tmp_edge_scalar_bcond,
    					       d_bdry_edge_bathy);
+
+	// appu::CartesianBoundaryUtilities2::
+	// 	fillEdgeBoundaryData("bedlevel", bedlevel,
+	// 		patch,
+	// 		ghost_width_to_fill,
+	// 		tmp_edge_vector_bcond,
+	// 		d_bdry_edge_bedlevel);
 					
    appu::CartesianBoundaryUtilities2::
       fillEdgeBoundaryData("veldepth", veldepth,
@@ -1275,6 +1290,13 @@ void swe::setPhysicalBoundaryConditions(
 					       ghost_width_to_fill,
 					       d_scalar_bdry_node_conds,
 					       d_bdry_edge_bathy);
+					
+	// appu::CartesianBoundaryUtilities2::
+	// 	  fillNodeBoundaryData("bedlevel", bedlevel,
+	// 					       patch,
+	// 					       ghost_width_to_fill,
+	// 					       d_vector_bdry_node_conds,
+	// 					       d_bdry_edge_bedlevel);
 					
    appu::CartesianBoundaryUtilities2::
       fillNodeBoundaryData("veldepth", veldepth,
@@ -1408,6 +1430,24 @@ void swe::tagGradientDetectorCells(
 		
          time_allowed = (time_min <= regrid_time) && (time_max >= regrid_time);
       }
+			 //tag based on BEDLEVEL_GRADIENT
+		    if (ref == "BEDLEVEL_GRADIENT") {
+		    var = patch.getPatchData(d_bedlevel, getDataContext());
+		    size = d_bedlevel_grad_tol.getSize();
+		    tol = ( ( error_level_number < size) 
+		            ? d_bedlevel_grad_tol[error_level_number] 
+		            : d_bedlevel_grad_tol[size-1] );
+		    size = d_bedlevel_grad_time_min.getSize();
+		    double time_min = ( ( error_level_number < size) 
+		            ? d_bedlevel_grad_time_min[error_level_number] 
+		            : d_bedlevel_grad_time_min[size-1] );
+		    size = d_bedlevel_grad_time_max.getSize();
+		    double time_max = ( ( error_level_number < size) 
+		            ? d_bedlevel_grad_time_max[error_level_number] 
+		            : d_bedlevel_grad_time_max[size-1] );
+	
+		    time_allowed = (time_min <= regrid_time) && (time_max >= regrid_time);
+		 }
 
 	     if (time_allowed) {
 
@@ -1420,7 +1460,7 @@ void swe::tagGradientDetectorCells(
          hier::IntVector ttghost = temp_tags->getGhostCellWidth();
 
 	     //GRADIENT CALC 
-         if (ref == "BATHY_GRADIENT" || ref== "DEPTH_GRADIENT") {
+         if (ref == "BATHY_GRADIENT" || ref== "DEPTH_GRADIENT" || ref== "BEDLEVEL_GRADIENT") {
             detectgrad_(ifirst(0),ilast(0),   //FORTRAN
                         ifirst(1),ilast(1),
                         vghost(0),vghost(1),
@@ -2100,7 +2140,7 @@ void swe::getFromInput(
 
          if ( !(error_key == "refine_criteria") ) {
 
-            if ( !(error_key == "DEPTH_GRADIENT" || error_key=="BATHY_GRADIENT" ) ){
+            if ( !(error_key == "DEPTH_GRADIENT" || error_key=="BATHY_GRADIENT" || error_key=="BEDLEVEL_GRADIENT") ){
                TBOX_ERROR(d_object_name << ": "
                          << "Unknown refinement criteria: " << error_key
                          << "\nin input." << endl);
@@ -2169,6 +2209,35 @@ void swe::getFromInput(
                } 
 
             }
+				 if (!error_db.isNull() && error_key == "BEDLEVEL_GRADIENT") {
+
+		               if (error_db->keyExists("grad_tol")) {
+		                  d_bedlevel_grad_tol = 
+		                  error_db->getDoubleArray("grad_tol");
+		               } else {
+		                  TBOX_ERROR(d_object_name << ": "
+		                           << "No key `grad_tol' found in data for "
+		                           << error_key << endl);
+		               }
+
+		               if (error_db->keyExists("time_max")){
+		                  d_bedlevel_grad_time_max = 
+		                  error_db->getDoubleArray("time_max");
+		               } else {
+		                  d_bedlevel_grad_time_max.resizeArray(1);
+		                  d_bedlevel_grad_time_max[0] = 
+		                     tbox::MathUtilities<double>::getMax();
+		               }
+
+		               if (error_db->keyExists("time_min")){
+		                  d_bedlevel_grad_time_min = 
+		                  error_db->getDoubleArray("time_min");
+		               } else {
+		                  d_bedlevel_grad_time_min.resizeArray(1);
+		                  d_bedlevel_grad_time_min[0] = 0.;
+		               } 
+
+		            }
               
 
             if (!error_db.isNull() && error_key == "DEPTH_RICHARDSON") {
@@ -2393,6 +2462,7 @@ void swe::putToDatabase(tbox::Pointer<tbox::Database> db)
    db->putIntegerArray("d_master_bdry_node_conds", d_master_bdry_node_conds);
 
    db->putDoubleArray("d_bdry_edge_depth", d_bdry_edge_depth);
+   db->putDoubleArray("d_bdry_edge_bedlevel", d_bdry_edge_bedlevel);
    db->putDoubleArray("d_bdry_edge_bathy", d_bdry_edge_bathy);
    db->putDoubleArray("d_bdry_edge_veldepth", d_bdry_edge_veldepth);
 
@@ -2483,6 +2553,7 @@ void swe::getFromRestart()
    d_master_bdry_node_conds = db->getIntegerArray("d_master_bdry_node_conds");
 
    d_bdry_edge_depth = db->getDoubleArray("d_bdry_edge_depth");
+   d_bdry_edge_bedlevel = db->getDoubleArray("d_bdry_edge_bedlevel");
    d_bdry_edge_bathy = db->getDoubleArray("d_bdry_edge_bathy");
    d_bdry_edge_veldepth = db->getDoubleArray("d_bdry_edge_veldepth");
 
