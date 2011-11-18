@@ -25,13 +25,15 @@
 !==============================================================================
 
 
-subroutine detectgrad(i1,i2,j1,j2,ngi,ngj,ngtagi,ngtagj,ngtti,ngttj,dx,gradtol, &
-                      yestag,notag,var,tags,temptags)  
+subroutine detectgrad(time,i1,i2,j1,j2,ngi,ngj,ngtagi,ngtagj,ngtti,ngttj,dx,xlo,xhi,& 
+                      gradtol,yestag,notag,var,tags,temptags)  
   use gparms
+  use cntrl
   implicit none
   
+  real(dp), intent(in ) :: time
   integer,  intent(in ) :: i1,i2,j1,j2,ngi,ngj,ngtagi,ngtagj,ngtti,ngttj
-  real(dp), intent(in ) :: dx(2)
+  real(dp), intent(in ) :: dx(2),xlo(2),xhi(2)
   real(dp), intent(in ) :: gradtol
   integer,  intent(in ) :: yestag,notag
   real(dp), intent(in ) :: var(i1-ngi:i2+ngi,j1-ngj:j2+ngj)
@@ -40,9 +42,8 @@ subroutine detectgrad(i1,i2,j1,j2,ngi,ngj,ngtagi,ngtagj,ngtti,ngttj,dx,gradtol, 
  
   !----- local ------------
   integer  :: i,j
-  real(dp) :: tol,diag01,loctol,facejump,varm1,varp1
+  real(dp) :: tol,diag01,loctol,facejump,varm1,varp1,xc,yc
   logical  :: tagcell
- 
   tol = gradtol
   diag01 = sqrt(dx(1)**2+dx(2)**2)
   
@@ -101,7 +102,39 @@ subroutine detectgrad(i1,i2,j1,j2,ngi,ngj,ngtagi,ngtagj,ngtti,ngttj,dx,gradtol, 
  
     enddo
   enddo
-  !stop
+
+!   if(caseid==roelvink)then
+! 	do i=i1,i2
+! 		xc = xlo(1) + dx(1)*dble(i-i1)+dx(1)/2
+! 		
+! 		do j=j1,j2
+! 	      yc = xlo(2) + dx(2)*dble(j-j1)+dx(2)/2
+! 		  temptags(i,j) = notag
+! 		  if(xc >= 2500 .and. xc <=7500 .and. yc >6000 .and. yc < 10000) temptags(i,j) = yestag
+! 		end do
+! 	end do
+!   endif
+! if(caseid==roelvink)then
+! 	do i=i1,i2
+! 		xc = xlo(1) + dx(1)*dble(i-i1)+dx(1)/2		
+! 		do j=j1,j2
+! 	      yc = xlo(2) + dx(2)*dble(j-j1)+dx(2)/2
+! 		  if(xc <= 2500 .and. xc >=7500 .and. yc <6000 .and. yc > 10000) temptags(i,j) = notag
+! 		end do
+! 	end do
+! endif
+
+! below is useful if we want to just test AMR.  Advance adaption front x(t), set ICS for slosh_inlet to h=1,b=0,u=0
+! if(caseid==slosh_inlet)then
+! 	do i=i1,i2
+! 		xc = xlo(1) + dx(1)*dble(i-i1)+dx(1)/2		
+! 		do j=j1,j2
+! 			temptags(i,j) = notag
+! 			if(xc < time) temptags(i,j) = yestag
+! 	   end do
+! 	end do
+! endif
+  
   return
 
 end subroutine detectgrad

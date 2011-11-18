@@ -16,3 +16,6 @@ git push origin master
 
 - git update to be at same level as master
 git pull??
+
+- diffing updates
+git diff my_file.f90

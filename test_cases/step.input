@@ -9,7 +9,7 @@ swe {
 //   = 0 => no friction
 //   = 1 => linear friction
 //   = 2 => Manning style friction
-   frictype             = 2
+   frictype             = 0
 
 // C_manning:  manning (n) friction coefficient (only used if frictype == 2)
    C_manning            = 0.03
@@ -17,13 +17,15 @@ swe {
 // fluxorder: order of the spatial flux
 //    = 1 => 1st order
 //    = 2 => 2nd order
-   fluxorder            = 2
+   fluxorder            = 1
+// fluxorder = 2 (does not work, causes negative velocities near the root of the lambda shock)
+//     should try fluxorder 2 and transverse==2
 
 // transverse
 //    = 0 => no transverse flux propagation
 //    = 1 => transverse flux propagation, no corrections
 //    = 2 => transverse flux propagation, with corrections
-   transverse           = 0
+   transverse           = 1
 
 // mindepth: set the minimum depth (if depth is < mindepth), velocities are set to zero
    mindepth             = 1.e-3
@@ -45,7 +47,7 @@ swe {
       refine_criteria = "DEPTH_GRADIENT"
  
       DEPTH_GRADIENT {
-         grad_tol = 1.0  
+         grad_tol = 3.0  
       }
 
       
@@ -53,15 +55,15 @@ swe {
 
    // valid boundary_condition values are "FLOW", "REFLECT", "DIRICHLET"
    Boundary_data {
-//      boundary_edge_xlo {
-//         boundary_condition      = "DIRICHLET"
-//         depth = .1 
-//         bathy = 0.0
-//         veldepth = .3,0.   
-//      }
       boundary_edge_xlo {
-         boundary_condition      = "FLOW"      
+         boundary_condition      = "DIRICHLET"
+         depth = .1 
+         bathy = 0.0
+         veldepth = .3,0.   
       }
+//      boundary_edge_xlo {
+//         boundary_condition      = "FLOW"      
+//      }
       boundary_edge_xhi {
          boundary_condition      = "REFLECT"
       }
@@ -131,6 +133,8 @@ TimerManager{
 CartesianGeometry {
    domain_boxes = [ (0,0) , (15,19) ],
                   [ (16,4) , (49,19) ]
+//  domain_boxes = [ (0,0) , (31,39) ],
+//                  [ (32,9) , (99,39) ]
    x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
    x_up         = 2.5e0 , 1.e0  // upper end of computational domain.
 }
@@ -140,11 +144,11 @@ StandardTagAndInitialize{
 }
 
 PatchHierarchy{
-   max_levels          = 1        // Maximum number of levels in hierarchy.
+   max_levels          = 3        // Maximum number of levels in hierarchy.
 
    ratio_to_coarser {              // vector ratio to next coarser level
-      level_1            = 4 , 4
-      level_2            = 4 , 4
+      level_1            = 2 , 2
+      level_2            = 2 , 2
    }
 
    largest_patch_size {
@@ -172,9 +176,9 @@ HyperbolicLevelIntegrator{
 
 TimeRefinementIntegrator{
    start_time           = 0.e0     // initial simulation time
-   end_time             = 10.0  // final simulation time
+   end_time             = 20.0  // final simulation time
    grow_dt              = 1.1e0    // growth factor for timesteps
-   max_integrator_steps = 3000      // max number of simulation timesteps
+   max_integrator_steps = 10000     // max number of simulation timesteps
 }
 
 LoadBalancer {

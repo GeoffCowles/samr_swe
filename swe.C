@@ -105,6 +105,7 @@ using namespace std;
 #define SUPERCRIT       (21)
 #define ROELVINK        (22)
 #define ROELVINKY       (23)
+#define SLOSH_INLET     (24)
 
 // defines for cell tagging routines
 #define RICHARDSON_NEWLY_TAGGED (-10)
@@ -306,6 +307,8 @@ swe::swe(
 	  d_data_problem_int = ROELVINK;
 	} else if (d_data_problem == "ROELVINKY") {
 	  d_data_problem_int = ROELVINKY;
+	} else if (d_data_problem == "SLOSH_INLET") {
+	  d_data_problem_int = SLOSH_INLET;
    } else {
       TBOX_ERROR(d_object_name << ": "
          << "Unknown d_data_problem string = "
@@ -1258,8 +1261,8 @@ void swe::setPhysicalBoundaryConditions(
 	// 	fillEdgeBoundaryData("bedlevel", bedlevel,
 	// 		patch,
 	// 		ghost_width_to_fill,
-	// 		tmp_edge_vector_bcond,
-	// 		d_bdry_edge_bedlevel);
+	// 		tmp_edge_scalar_bcond,
+	// 		d_bdry_edge_bathy);
 					
    appu::CartesianBoundaryUtilities2::
       fillEdgeBoundaryData("veldepth", veldepth,
@@ -1296,7 +1299,7 @@ void swe::setPhysicalBoundaryConditions(
 	// 					       patch,
 	// 					       ghost_width_to_fill,
 	// 					       d_vector_bdry_node_conds,
-	// 					       d_bdry_edge_bedlevel);
+	// 					       d_bdry_edge_bathy);
 					
    appu::CartesianBoundaryUtilities2::
       fillNodeBoundaryData("veldepth", veldepth,
@@ -1343,9 +1346,11 @@ void swe::tagGradientDetectorCells(
 
    const int error_level_number = patch.getPatchLevelNumber();
 
-   //get patch geometry and dx/dy
+   //get patch geometry, dx/dy, and the bounding box
    const tbox::Pointer<geom::CartesianPatchGeometry > patch_geom = patch.getPatchGeometry();
-   const double* dx  = patch_geom->getDx();
+	const double* dx  = patch_geom->getDx();
+   const double* xlo = patch_geom->getXLower();
+   const double* xhi = patch_geom->getXUpper();
  
    tbox::Pointer< pdat::CellData<int> > tags        = patch.getPatchData(tag_indx);
 
@@ -1461,12 +1466,12 @@ void swe::tagGradientDetectorCells(
 
 	     //GRADIENT CALC 
          if (ref == "BATHY_GRADIENT" || ref== "DEPTH_GRADIENT" || ref== "BEDLEVEL_GRADIENT") {
-            detectgrad_(ifirst(0),ilast(0),   //FORTRAN
+            detectgrad_(regrid_time,ifirst(0),ilast(0),   //FORTRAN
                         ifirst(1),ilast(1),
                         vghost(0),vghost(1),
                         tagghost(0),tagghost(1),
                         ttghost(0),ttghost(1),
-                        dx,
+                        dx,xlo,xhi,
                         tol,
                         TRUE, FALSE,
                         var->getPointer(),

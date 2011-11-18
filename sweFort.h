@@ -89,12 +89,13 @@ extern "C" {
   double*, double*, double*);
 
   void detectgrad_(
+     const double&,
      const int& , const int& , 
      const int& , const int& , 
      const int& , const int& , 
      const int& , const int& ,
      const int& , const int& ,
-     const double* , 
+     const double* , const double*, const double*,
      const double& , 
      const int&, const int&,
      const double*,

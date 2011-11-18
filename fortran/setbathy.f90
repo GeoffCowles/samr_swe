@@ -334,6 +334,15 @@ subroutine setbathy(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,b)
 	   end do
 	end do
 
+	!---------------------------------------------------------------------
+	case(slosh_inlet)
+	!---------------------------------------------------------------------
+	do i=i1-igst,i2+igst
+	   do j=j1-jgst,j2+jgst
+		  b(i,j) = 0.0
+	   end do
+	end do
+
   
   end select 
 

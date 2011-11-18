@@ -479,6 +479,23 @@ subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,bedlevel)
 	      vh(i,j,2) = zero
 	    end do
 	  end do
+	
+	!---------------------------------------------------------------------
+	case(slosh_inlet) !roelvink test with no open boundary and flat bottom
+	!---------------------------------------------------------------------
+	 do i=i1,i2
+	    do j=j1,j2
+			xc = xlo(1)+dx(1)*dble(i-i1)+dx(1)/2
+			if(xc < 2500)then
+			  h(i,j) = 1.2
+			else
+		      h(i,j) = 1.
+			end if
+			!h(i,j) = 1.
+	      vh(i,j,1) = zero
+	      vh(i,j,2) = zero
+	    end do
+	  end do
 
 
 
