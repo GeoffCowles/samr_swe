@@ -37,7 +37,7 @@ swe {
    // morphfactor
    // [0, infinity]:  Lesser style "online" morphological acceleration [=1, no acceleration]
 
-   sedmodel = 0
+   sedmodel = 1
    morphfactor = 0.0
 
    Refinement_data {
