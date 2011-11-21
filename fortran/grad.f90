@@ -46,7 +46,9 @@ subroutine detectgrad(time,i1,i2,j1,j2,ngi,ngj,ngtagi,ngtagj,ngtti,ngttj,dx,xlo,
   logical  :: tagcell
   tol = gradtol
   diag01 = sqrt(dx(1)**2+dx(2)**2)
-  
+  ! do j=j1,j2
+  ! 	 write(*,*)var(-1,j),var(0,j),var(1,j)
+  !   end do
   do i=i1,i2
 	do j=j1,j2
       

@@ -45,7 +45,7 @@ swe {
       //refine_criteria = "BEDLEVEL_GRADIENT"
  
       BEDLEVEL_GRADIENT {
-         grad_tol = 3.0  
+         grad_tol = .0007    
       }
       DEPTH_GRADIENT {
          grad_tol = .0002 
@@ -140,15 +140,16 @@ CartesianGeometry {
 // 2-cell wide inlet on coarse mesh 
    domain_boxes = [ (0,0) , (9,13) ],
 	          [ (12,0) , (29,13) ],
-         	  [ (0,14) , (29,17) ],
+        	  [ (0,14) , (29,17) ],
 	          [ (0,18) , (9,31) ],
                   [ (12,18) , (29,31) ]
 
+// 1-cell wide inlet on coarse mesh (fails with amr)
 //   domain_boxes = [ (0,0) , (9,13) ],
 //	          [ (11,0) , (29,13) ],
 //		  [ (0,14) , (29,17) ],
 //	          [ (0,18) , (9,31) ],
-//                 [ (11,18) , (29,31) ]
+//                  [ (11,18) , (29,31) ]
 //   domain_boxes = [ (0,0) , (19,27) ],
 //                  [ (21,0) , (59,27) ],
 //                  [ (0,28) , (59,35) ],

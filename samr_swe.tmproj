@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>swe.C</string>
+	<string>fortran/grad.f90</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -20,7 +20,7 @@
 			<key>filename</key>
 			<string>main.C</string>
 			<key>lastUsed</key>
-			<date>2011-11-17T18:50:36Z</date>
+			<date>2011-11-18T15:37:14Z</date>
 		</dict>
 		<dict>
 			<key>filename</key>
@@ -44,21 +44,19 @@
 			<key>filename</key>
 			<string>swe.C</string>
 			<key>lastUsed</key>
-			<date>2011-11-17T22:43:15Z</date>
-			<key>selected</key>
-			<true/>
+			<date>2011-11-18T21:15:24Z</date>
 		</dict>
 		<dict>
 			<key>filename</key>
 			<string>swe.h</string>
 			<key>lastUsed</key>
-			<date>2011-11-17T21:54:18Z</date>
+			<date>2011-11-18T21:13:42Z</date>
 		</dict>
 		<dict>
 			<key>filename</key>
 			<string>sweFort.h</string>
 			<key>lastUsed</key>
-			<date>2011-11-17T02:25:58Z</date>
+			<date>2011-11-18T21:14:31Z</date>
 		</dict>
 	</array>
 	<key>fileHierarchyDrawerWidth</key>
@@ -156,9 +154,9 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>38</integer>
+				<integer>40</integer>
 				<key>line</key>
-				<integer>55</integer>
+				<integer>56</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
@@ -205,7 +203,7 @@
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>110</integer>
+			<integer>11</integer>
 		</dict>
 		<key>fortran/flux2fw_geo.f</key>
 		<dict>
@@ -226,9 +224,9 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>0</integer>
+				<integer>1</integer>
 				<key>line</key>
-				<integer>47</integer>
+				<integer>43</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
@@ -254,28 +252,28 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>17</integer>
+				<integer>7</integer>
 				<key>line</key>
-				<integer>41</integer>
+				<integer>124</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>21</integer>
+			<integer>92</integer>
 		</dict>
 		<key>fortran/init.f90</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>14</integer>
+				<integer>4</integer>
 				<key>line</key>
-				<integer>45</integer>
+				<integer>493</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>13</integer>
+			<integer>457</integer>
 		</dict>
 		<key>fortran/philim.f</key>
 		<dict>
@@ -340,12 +338,12 @@
 				<key>column</key>
 				<integer>16</integer>
 				<key>line</key>
-				<integer>328</integer>
+				<integer>341</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>285</integer>
+			<integer>301</integer>
 		</dict>
 		<key>fortran/step2_geo.f</key>
 		<dict>
@@ -394,28 +392,44 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>27</integer>
+				<integer>65</integer>
 				<key>line</key>
-				<integer>735</integer>
+				<integer>725</integer>
 			</dict>
+			<key>columnSelection</key>
+			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>706</integer>
+			<integer>700</integer>
+			<key>selectFrom</key>
+			<dict>
+				<key>column</key>
+				<integer>57</integer>
+				<key>line</key>
+				<integer>725</integer>
+			</dict>
+			<key>selectTo</key>
+			<dict>
+				<key>column</key>
+				<integer>65</integer>
+				<key>line</key>
+				<integer>725</integer>
+			</dict>
 		</dict>
 		<key>swe.C</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>42</integer>
+				<integer>0</integer>
 				<key>line</key>
-				<integer>1267</integer>
+				<integer>1465</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>1232</integer>
+			<integer>1452</integer>
 		</dict>
 		<key>swe.h</key>
 		<dict>
@@ -429,21 +443,21 @@
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>489</integer>
+			<integer>460</integer>
 		</dict>
 		<key>sweFort.h</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>33</integer>
+				<integer>19</integer>
 				<key>line</key>
-				<integer>104</integer>
+				<integer>91</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>51</integer>
+			<integer>58</integer>
 		</dict>
 	</dict>
 	<key>openDocuments</key>
@@ -478,6 +492,6 @@
 	<key>showFileHierarchyDrawer</key>
 	<true/>
 	<key>windowFrame</key>
-	<string>{{836, 159}, {960, 936}}</string>
+	<string>{{864, 127}, {960, 936}}</string>
 </dict>
 </plist>

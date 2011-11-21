@@ -15,7 +15,7 @@
 !               School for Marine Science and Technology     
 !               University of Massachusetts-Dartmouth
 !
-! Comments:     Calculate Sediment fluxes using upwinded Exner Equation
+! Comments:     Calculate Sediment fluxes using upwinded Exner Equation and MPM load
 !
 !       Input:
 !                    dt:  global time step on the patch
@@ -26,7 +26,7 @@
 !          =>  ifluxm,jfluxm,ifluxp,jfluxp: fluxes on the edges
 !==============================================================================
 
-subroutine flux_sed(cid,dt,dx,i1,i2,j1,j2,h,vh,bedlevel,ifluxm,jfluxm,ifluxp,jfluxp)  
+subroutine flux_sed(cid,dt,dx,i1,i2,j1,j2,h,vh,bedlevel,iflux,jflux)  
 
  
   use gparms
@@ -40,45 +40,71 @@ subroutine flux_sed(cid,dt,dx,i1,i2,j1,j2,h,vh,bedlevel,ifluxm,jfluxm,ifluxp,jfl
   real(dp), intent(in   ) :: h(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
   real(dp), intent(in   ) :: vh(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST,NDIMS)
   real(dp), intent(inout) :: bedlevel(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
-  real(dp), intent(inout) :: ifluxm(i1-NFGST:i2+1+NFGST,j1-NFGST:j2+NFGST)
-  real(dp), intent(inout) :: jfluxm(j1-NFGST:j2+1+NFGST,i1-NFGST:i2+NFGST)
-  real(dp), intent(inout) :: ifluxp(i1-NFGST:i2+1+NFGST,j1-NFGST:j2+NFGST)
-  real(dp), intent(inout) :: jfluxp(j1-NFGST:j2+1+NFGST,i1-NFGST:i2+NFGST)
+  real(dp), intent(inout) :: iflux(i1-NFGST:i2+1+NFGST,j1-NFGST:j2+NFGST)
+  real(dp), intent(inout) :: jflux(j1-NFGST:j2+1+NFGST,i1-NFGST:i2+NFGST)
 
   !local
   real(dp) :: taux(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
   real(dp) :: tauy(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
-  real(dp) :: fac1,fac2
+  real(dp) :: qx(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
+  real(dp) :: qy(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
+  real(dp) :: fac1,fac2,shieldfac,gprime,facMPM,taub
   integer i,j
 
   !zero out fluxes 
-  ifluxm = zero
-  ifluxp = zero
-  jfluxm = zero
-  jfluxp = zero
+  iflux = zero
+  jflux = zero
+
+  !zero out local vars
+  qx     = zero
+  qy     = zero
   taux   = zero
   tauy   = zero
-  fac1 = gravity*C_manning*C_manning
 
+  !set up the constants
+  fac1      = gravity*C_manning*C_manning
+  bedlevel  = zero
+  gprime    = gravity*(rho_sed/rho_w-1)  !reduced gravity
+  shieldfac = 1./(gprime*d50) !converts stress (in units of m^2/s^2) to nondim stress
+  !dimload   = sqrt((rho_sed/rho_w-1)*gravity*d50)*d50*rho_sed
+
+  !compute solid load at cell centers (units = m^2/s)
   do j=j1-NCGST,j2+NCGST
     do i=i1-NCGST,i2+NCGST
+
+	  !(re)compute the stresses from the Manning formulation
 	  fac2 = (h(i,j)**(-7./3.))*sqrt(vh(i,j,1)**2 + vh(i,j,2)**2)
 	  taux(i,j) = fac1*fac2*vh(i,j,1)
-	  tauy(i,j) = fac1*fac2*vh(i,j,2)
-	  bedlevel(i,j) = rho_w*sqrt(taux(i,j)**2 + tauy(i,j)**2)
-	  if(h(i,j) < mindepth)then
-	    bedlevel(i,j) = 0.
-	  endif
+	  tauy(i,j) = fac1*fac2*vh(i,j,2)       
+	  taub = sqrt(taux(i,j)**2 + tauy(i,j)**2)  !magnitude of bottom stress [m^2/s^2]
+	
+	  !compute the load at cell centers (ignore slope for now) using MPM formula
+	  !see eq. 11 de Swart and Zimmerman 2000.
+	  facMPM = 8.0*sqrt(gprime*(d50**3))*(max(taub*shieldfac - shields_crit,0.0)**1.5)
+	  qx(i,j) = facMPM*taux(i,j)/taub
+	  qy(i,j) = facMPM*tauy(i,j)/taub
+	 end do
 	end do
-  end do
-  do j=j1-NCGST,j2+NCGST
-	bedlevel(i1-NCGST:i1-1,j) = bedlevel(i1,j)
-	bedlevel(i2+1:i2+NCGST,j) = bedlevel(i2,j)
-  end do
-  do i=i1-NCGST,i2+NCGST
-	bedlevel(i,j1-NCGST:j1-1) = bedlevel(i,j1)
-	bedlevel(i,j2+1:j2+NCGST) = bedlevel(i,j2)
-  end do
+	
+	!compute load fluxes on edges using upwinded formulation
+	
+	do i=i1,i2+1
+		do j=j1,j2+1
+			tau_edge = .5*(taux(i,j)+taux(i+1,j))
+			iflux(i,j) = 0.5*dt*((1-sign(1.,tau_edge))*qx(i,j)+(1+sign(1.,tau_edge))*qx(i,j))
+			jflux(j,i) = dt*
+		end do
+	end do
+
+  
+ !  do j=j1-NCGST,j2+NCGST
+ ! 	bedlevel(i1-NCGST:i1-1,j) = bedlevel(i1,j)
+ ! 	bedlevel(i2+1:i2+NCGST,j) = bedlevel(i2,j)
+ !   end do
+ !   do i=i1-NCGST,i2+NCGST
+ ! 	bedlevel(i,j1-NCGST:j1-1) = bedlevel(i,j1)
+ ! 	bedlevel(i,j2+1:j2+NCGST) = bedlevel(i,j2)
+ !   end do
  
  
   
@@ -91,17 +117,15 @@ end subroutine flux_sed
 ! note: dimensioning on jflux (j before i)
 !==============================================================================
 
-subroutine consdiff_sed(dx,i1,i2,j1,j2,ifluxm,jfluxm,ifluxp,jfluxp,bedlevel,b)
+subroutine consdiff_sed(dx,i1,i2,j1,j2,iflux,jflux,bedlevel,b)
     
   use gparms
   use cntrl
   implicit none
   integer,  intent(in   ) :: i1,i2,j1,j2
   real(dp), intent(in   ) :: dx(2)
-  real(dp), intent(in   ) :: ifluxm(i1-NFGST:i2+1+NFGST,j1-NFGST:j2+NFGST)
-  real(dp), intent(in   ) :: jfluxm(j1-NFGST:j2+1+NFGST,i1-NFGST:i2+NFGST)
-  real(dp), intent(in   ) :: ifluxp(i1-NFGST:i2+1+NFGST,j1-NFGST:j2+NFGST)
-  real(dp), intent(in   ) :: jfluxp(j1-NFGST:j2+1+NFGST,i1-NFGST:i2+NFGST)
+  real(dp), intent(in   ) :: iflux(i1-NFGST:i2+1+NFGST,j1-NFGST:j2+NFGST)
+  real(dp), intent(in   ) :: jflux(j1-NFGST:j2+1+NFGST,i1-NFGST:i2+NFGST)
   real(dp), intent(inout) :: bedlevel(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
   real(dp), intent(inout) :: b(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
   
@@ -121,8 +145,8 @@ subroutine consdiff_sed(dx,i1,i2,j1,j2,ifluxm,jfluxm,ifluxp,jfluxp,bedlevel,b)
   do i=i1,i2
 	do j=j1,j2
       bedlevel(i,j) = bedlevel(i,j) &
-               -oodx*(ifluxm(i+1,j)-ifluxp(i,j)) &
-               -oody*(jfluxm(j+1,i)-jfluxp(j,i)) 
+               -oodx*(iflux(i+1,j)-iflux(i,j)) &
+               -oody*(jflux(j+1,i)-jflux(j,i)) 
     enddo
   end do
 

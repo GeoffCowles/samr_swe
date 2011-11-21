@@ -39,7 +39,10 @@ subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,bedlevel)
   !----- local ------------
   integer  :: i,j
   real(dp) :: xhalf,xc,yc,depth_left,depth_right,x0,xberm,fac,fac2,zeta,u_left
-  real(dp) :: theta_scrit
+  real(dp) :: theta_scrit,t1,t2,t3,t4,f1,f2
+
+ 
+
   
   caseid = cid
 
@@ -452,7 +455,7 @@ subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,bedlevel)
    do i=i1,i2
       do j=j1,j2
         xc = xlo(1)+dx(1)*dble(i-i1)+dx(1)/2
-		if(xc < 5000)then
+		if(xc < -5000)then
 		  fac    = xc/5000.
 		  h(i,j) = 10*(1-fac) + 2*(fac)
 		else
@@ -491,10 +494,44 @@ subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,bedlevel)
 			else
 		      h(i,j) = 1.
 			end if
-			!h(i,j) = 1.
+			!h(i,j) = 1.  !uncomment this for zero motion slosh_inlet
 	      vh(i,j,1) = zero
 	      vh(i,j,2) = zero
 	    end do
+	  end do
+	
+	!---------------------------------------------------------------------
+	case(trench) !warner migrating trench case
+	!---------------------------------------------------------------------
+	t1 = trench_mid-(trench_half_width+trench_slope_width);
+	t2 = trench_mid-trench_half_width;
+	t3 = trench_mid+trench_half_width;
+	t4 = trench_mid+(trench_half_width+trench_slope_width);
+	
+	 do i=i1,i2
+	    do j=j1,j2
+			xc = xlo(1)+dx(1)*dble(i-i1)+dx(1)/2
+			
+			if(xc > t1 .and. xc < t4)then
+			  h(i,j) = bath_trench2
+			else if (xc > t1 .and. xc < t2)then
+				f1 = (xc-t1)/trench_slope_width
+				f2 = 1-f1;
+				h(i,j) = f2*bath_trench1 + f1*bath_trench2
+			else if (xc > t3 .and. xc < t4)then
+				f1 = (xc-t3)/trench_slope_width;
+				f2 = 1-f1;
+				h(i,j) = f1*bath_trench1 + f2*bath_trench2
+			else
+				h(i,j) = bath_trench1
+			end if
+	      vh(i,j,1) = 0.2
+	      vh(i,j,2) = 0.0
+	       if(j==1)then
+			  write(*,*)xc,h(i,j)
+			 endif
+	    end do
+	   
 	  end do
 
 

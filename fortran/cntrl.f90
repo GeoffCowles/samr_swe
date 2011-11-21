@@ -55,6 +55,7 @@ module cntrl
   integer, parameter :: roelvink = 22
   integer, parameter :: roelvinky = 23
   integer, parameter :: slosh_inlet = 24
+  integer, parameter :: trench = 25
 
   !floodying/drying
   real(dp) :: mindepth 
@@ -63,7 +64,18 @@ module cntrl
 
   !sediment
   integer  :: sedmodel
+  real(dp) :: sedinit
+  real(dp) :: taucrit
   real(dp) :: morphfactor
+  real(dp) :: d50 = .001
+
+  !trench params
+  real(dp), parameter :: trench_half_width = 2.0
+  real(dp), parameter :: trench_slope_width = 0.5
+  real(dp), parameter :: bath_trench1 = .4
+  real(dp), parameter :: bath_trench2 = .56
+  real(dp), parameter :: back_slope = 4e-4
+  real(dp), parameter :: trench_mid = 11.
   
   !friction / roughness
   real(dp) :: C_manning !manning coefficient, set in input

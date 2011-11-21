@@ -60,12 +60,12 @@ extern "C" {
   const int&, const double&, const double*,
   const int&, const int&, const int&, const int&,
   double*, double*, double*, 
-  double*, double*, double*, double*);
+  double*, double* );
 
   void consdiff_sed_(
   const double*, 
   const int&, const int&, const int&, const int&,
-  double*, double*, double*, double*,
+  double*, double*, 
   double*, double* );
 
   void friction_(
@@ -103,6 +103,6 @@ extern "C" {
 
    void c2f_(const int& , const int& , const int&, const int& , const int&,
        const int&, const double&, const double&, const int&, const int&,
-       const int&, const double& );
+       const int&, const double&, const double&, const double& );
 
 }

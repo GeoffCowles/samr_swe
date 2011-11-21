@@ -69,6 +69,16 @@ real(dp), parameter :: omega_earth = 7.292e-5
 real(dp), parameter :: rho_w = 1025
 
 !----------------------------------------------------------------
+!sediment parameters
+!    rho_sed :: sediment density [kg/m^3]
+!    por_sed :: sediment parosity [-]
+!    shields_crit :: critical shields parameter [-]
+!----------------------------------------------------------------
+real(dp), parameter :: rho_sed = 2650
+real(dp), parameter :: por_sed = .5
+real(dp), parameter :: shields_crit = .047
+
+!----------------------------------------------------------------
 !large and small numbers
 !    hugenum = largest float
 !    tinynum = smallest float

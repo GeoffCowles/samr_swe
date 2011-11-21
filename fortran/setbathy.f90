@@ -37,6 +37,7 @@ subroutine setbathy(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,b)
   integer  :: i,j
   real(dp) :: xhalf,xc,yc,depth_left,depth_right,x0,xberm
   real(dp) :: inner_rad,outer_rad,con_height,fac,rad,theta_scrit
+  real(dp) :: t1,t2,t3,t4,f1,f2
   
 
   
@@ -310,7 +311,7 @@ subroutine setbathy(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,b)
   do i=i1-igst,i2+igst
      do j=j1-jgst,j2+jgst
 	  xc = xlo(1)+dx(1)*dble(i-i1)+dx(1)/2
-	  if(xc < 5000)then
+	  if(xc < -5000)then
 	    fac    = xc/5000.
 	    b(i,j) = -10*(1-fac) + -2*(fac)
 	  else
@@ -342,7 +343,39 @@ subroutine setbathy(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,b)
 		  b(i,j) = 0.0
 	   end do
 	end do
-
+	
+	!---------------------------------------------------------------------
+	case(trench) !warner migrating trench case
+	!---------------------------------------------------------------------
+	t1 = trench_mid-(trench_half_width+trench_slope_width);
+	t2 = trench_mid-trench_half_width;
+	t3 = trench_mid+trench_half_width;
+	t4 = trench_mid+(trench_half_width+trench_slope_width);
+	
+	 do i=i1,i2
+	    do j=j1,j2
+			xc = xlo(1)+dx(1)*dble(i-i1)+dx(1)/2
+			
+			if(xc > t1 .and. xc < t4)then
+			  b(i,j) = bath_trench2
+			else if (xc > t1 .and. xc < t2)then
+				f1 = (xc-t1)/trench_slope_width
+				f2 = 1-f1;
+				b(i,j) = f2*bath_trench1 + f1*bath_trench2
+			else if (xc > t3 .and. xc < t4)then
+				f1 = (xc-t3)/trench_slope_width;
+				f2 = 1-f1;
+				b(i,j) = f1*bath_trench1 + f2*bath_trench2
+			else
+				b(i,j) = bath_trench1
+			endif
+	      b(i,j) = -b(i,j)+bath_trench1
+	      if(j==1)then
+		     write(*,*)xc,b(i,j)
+		   endif
+	    end do
+	  end do
+     write(*,*)t1,t2,t3,t4
   
   end select 
 

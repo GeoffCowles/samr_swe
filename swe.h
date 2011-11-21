@@ -418,8 +418,7 @@ private:
 
    //Sediment model
    tbox::Pointer< pdat::CellVariable<double> > d_bedlevel;
-	tbox::Pointer< pdat::FaceVariable<double> > d_fluxsedm;
-   tbox::Pointer< pdat::FaceVariable<double> > d_fluxsedp;
+	tbox::Pointer< pdat::FaceVariable<double> > d_fluxsed;
 
 
    //physical constants
@@ -447,6 +446,8 @@ private:
    int    d_transverse;
 
 	int    d_sedmodel;
+	double d_sedinit;
+	double d_taucrit;
 	double d_morphfactor;
    /*
    double d_radius;

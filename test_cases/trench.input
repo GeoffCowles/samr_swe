@@ -1,9 +1,9 @@
-// roelvink inlet test from Roelvink, J.A., Coastal Engineering 53, 2006, 277-287.
+// migrating trench case from Warner 
 // 
 
 swe {
   
-   data_problem         = "ROELVINK"  
+   data_problem         = "TRENCH"    
 
 // frictype:  select the friction type
 //   = 0 => no friction
@@ -66,17 +66,17 @@ swe {
 
    // valid boundary_condition values are "FLOW", "REFLECT", "DIRICHLET"
    Boundary_data {
-//      boundary_edge_xlo {
-//         boundary_condition      = "DIRICHLET" 
-//         depth = 1.0
-//         bathy = 0.0
-//         veldepth = 0.0,0.0
-//      }
       boundary_edge_xlo {
-         boundary_condition      = "REFLECT"
+         boundary_condition      = "DIRICHLET" 
+         depth = 0.4
+         bathy = 0.0
+         veldepth = 0.2,0.0
       }
+//      boundary_edge_xlo {
+//         boundary_condition      = "REFLECT"
+//      }
       boundary_edge_xhi {
-         boundary_condition      = "REFLECT"
+         boundary_condition      = "FLOW"    
       }
       boundary_edge_ylo {
          boundary_condition      = "REFLECT"
@@ -112,20 +112,20 @@ Main {
    base_name = "swe"
 
 // log file parameters 
-   log_file_name    = "roelvink.log"
+   log_file_name    = "trench.log"
    log_all_nodes    = TRUE
 
 // matlab pencil file
-   matlab_dump_interval  = 0 
+   matlab_dump_interval  = 1 
    matlab_dump_filename  = "pencil"
-   matlab_dump_dirname   = "./pencil_roelvink"
+   matlab_dump_dirname   = "./pencil_trench"
    matlab_pencil_direction = 0
  
 // visualization dump parameters
    viz_writer            = "VisIt" // use: "Vizamrai", "VisIt" for both
-   viz_dump_interval     = 120         // zero to turn off
-   viz_dump_dirname      = "viz_roelvink"
-   viz_dump_filename     = "roelvink"   // not used by VisIt
+   viz_dump_interval     = 1         // zero to turn off
+   viz_dump_dirname      = "viz_trench"
+   viz_dump_filename     = "trench"   // not used by VisIt
    visit_file_cluster_size = 1        // not used by Vizamrai
 
 // restart dump parameters
@@ -142,33 +142,11 @@ TimerManager{
 }
 
 CartesianGeometry {
-//   domain_boxes = [ (0,0) , (9,13) ],
-//	          [ (11,0) , (29,13) ],
-//	          [ (0,14) , (29,17) ],
-//	          [ (0,18) , (9,31) ],
-//                  [ (11,18) , (29,31) ]
-//   domain_boxes = [ (0,0) , (19,27) ],
-//                  [ (21,0) , (59,27) ],
-//                  [ (0,28) , (59,35) ],
-//                  [ (0,36) , (19,63) ],
-//                  [ (21,36) , (59,63) ]
-//   domain_boxes = [ (0,0) , (19,27) ],
-//                  [ (0,28), (20,35) ],
-//                  [ (0,36), (19,63) ],
-//                  [ (21,0), (59,63) ]
-
-// two-cell inlet (one-cell inlet crashes AMR)
-   domain_boxes = [ (0,0) , (19,27) ],
-                  [ (0,28), (21,35) ],
-                  [ (0,36), (19,63) ],
-                  [ (22,0), (59,63) ]
-
-//   domain_boxes = [ (0,0) , (10,10) ]
-
+domain_boxes = [(0,0) , (99,7)]
 
 
    x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
-   x_up         = 15000, 15000  // upper end of computational domain.
+   x_up         = 22.0,  2.0    // upper end of computational domain.
 }
 
 StandardTagAndInitialize{
@@ -176,7 +154,7 @@ StandardTagAndInitialize{
 }
 
 PatchHierarchy{
-   max_levels          = 3        // Maximum number of levels in hierarchy.
+   max_levels          = 1        // Maximum number of levels in hierarchy.
 
    ratio_to_coarser {              // vector ratio to next coarser level
       level_1            = 2 , 2
@@ -209,7 +187,7 @@ HyperbolicLevelIntegrator{
 
 TimeRefinementIntegrator{
    start_time           = 0.e0     // initial simulation time
-   end_time             = 86400.   // final simulation time
+   end_time             = 3600.    // final simulation time
    grow_dt              = 1.1e0    // growth factor for timesteps
    max_integrator_steps = 300000       // max number of simulation timesteps
 }
