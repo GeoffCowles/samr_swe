@@ -65,9 +65,9 @@ module cntrl
   !sediment
   integer  :: sedmodel
   real(dp) :: sedinit
-  real(dp) :: taucrit
+  real(dp) :: d50
   real(dp) :: morphfactor
-  real(dp) :: d50 = .0001 !.4 mm
+  !real(dp) :: d50 = .0001 !.4 mm  !note, .0001 is good for trench case
 
   !trench params
   real(dp), parameter :: trench_half_width = 2.0

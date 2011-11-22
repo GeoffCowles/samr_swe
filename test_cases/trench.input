@@ -37,7 +37,7 @@ swe {
    //
    // sedinit: start time for sediment model (allows for a ramp up of hydro before starting sediment)
    //
-   // taucrit: critical shear stress in N/m^2
+   // d50:  mean grain size in m 
    //
    // morphfactor: Lesser style "online" morphological acceleration [0, infinity]
    //   = 0:  no morphology
@@ -46,7 +46,7 @@ swe {
 
    sedmodel = 2
    sedinit  = 20.0
-   taucrit  = .1 
+   d50      = .0001 
    morphfactor = 1000.0
 
    Refinement_data {

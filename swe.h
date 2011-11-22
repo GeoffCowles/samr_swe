@@ -448,7 +448,7 @@ private:
 
 	int    d_sedmodel;
 	double d_sedinit;
-	double d_taucrit;
+	double d_d50;
 	double d_morphfactor;
    /*
    double d_radius;

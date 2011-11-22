@@ -350,7 +350,7 @@ swe::swe(
    //bind the control parameters between C++ and fortran 
    c2f_(d_dim.getValue(),NSTATE,NSCAL,CELLG,FLUXG, //FORTRAN
 	d_data_problem_int,d_C_manning,d_mindepth,d_fluxorder,d_transverse,
-	d_sedmodel,d_sedinit,d_taucrit,d_morphfactor); 
+	d_sedmodel,d_sedinit,d_d50,d_morphfactor); 
               
 }  // <=  end of swe constructor
 
@@ -2007,7 +2007,7 @@ void swe::printClassData(ostream &os) const
    os << "   d_transverse =  " << d_transverse << endl;
    os << "   d_sedmodel   =  " << d_sedmodel << endl; 
    os << "   d_sedinit    =  " << d_sedinit << endl;
-   os << "   d_taucrit    =  " << d_taucrit << endl;
+   os << "   d_d50        =  " << d_d50 << endl;
    os << "   d_morphfactor  =  " << d_morphfactor << endl;
 
 
@@ -2369,11 +2369,11 @@ void swe::getFromInput(
       }
 
 		// Read the sediment model activation var
-		if (db->keyExists("taucrit")) {
-		   d_taucrit = db->getDouble("taucrit");
+		if (db->keyExists("d50")) {
+		   d_d50 = db->getDouble("d50");
 		} else {
 		   TBOX_ERROR(d_object_name << ": "
-		      << "`taucrit' value not found in input." << endl);
+		      << "`d50' value not found in input." << endl);
 		}
 
 		// Read the sediment model initial Time var
@@ -2490,7 +2490,7 @@ void swe::putToDatabase(tbox::Pointer<tbox::Database> db)
    db->putInteger("d_frictype",d_frictype);
    db->putInteger("d_sedmodel",d_sedmodel);
    db->putDouble("d_sedinit",d_sedinit);
-   db->putDouble("d_taucrit",d_taucrit);
+   db->putDouble("d_d50",d_d50);
    db->putDouble("d_morphfactor",d_morphfactor);
 
    db->putIntegerArray("d_master_bdry_edge_conds", d_master_bdry_edge_conds);
@@ -2583,7 +2583,7 @@ void swe::getFromRestart()
    d_frictype     = db->getInteger("d_transverse");
    d_sedmodel     = db->getInteger("d_sedmodel");
    d_sedinit      = db->getDouble("d_sedinit");
-   d_taucrit      = db->getDouble("d_taucrit");
+   d_d50          = db->getDouble("d_d50");
    d_morphfactor  = db->getDouble("d_morphfactor");
 
    d_master_bdry_edge_conds = db->getIntegerArray("d_master_bdry_edge_conds");
