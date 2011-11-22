@@ -370,12 +370,8 @@ subroutine setbathy(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,b)
 				b(i,j) = bath_trench1
 			endif
 	      b(i,j) = -b(i,j)+bath_trench1
-	      if(j==1)then
-		     write(*,*)xc,b(i,j)
-		   endif
 	    end do
 	  end do
-     write(*,*)t1,t2,t3,t4
   
   end select 
 

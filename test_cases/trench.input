@@ -44,10 +44,10 @@ swe {
    //   = 1:  morphology is real time
    //   >1 :  morphology is accelerated
 
-   sedmodel = 1
-   sedinit  = 0.0
+   sedmodel = 2
+   sedinit  = 20.0
    taucrit  = .1 
-   morphfactor = 0.0
+   morphfactor = 1000.0
 
    Refinement_data {
 //     refine_criteria = "DEPTH_GRADIENT"
@@ -70,6 +70,7 @@ swe {
          boundary_condition      = "DIRICHLET" 
          depth = 0.4
          bathy = 0.0
+         bedlevel = 0.0
          veldepth = 0.2,0.0
       }
 //      boundary_edge_xlo {
@@ -116,14 +117,14 @@ Main {
    log_all_nodes    = TRUE
 
 // matlab pencil file
-   matlab_dump_interval  = 1 
+   matlab_dump_interval  = 100
    matlab_dump_filename  = "pencil"
    matlab_dump_dirname   = "./pencil_trench"
    matlab_pencil_direction = 0
  
 // visualization dump parameters
    viz_writer            = "VisIt" // use: "Vizamrai", "VisIt" for both
-   viz_dump_interval     = 1         // zero to turn off
+   viz_dump_interval     = 0         // zero to turn off
    viz_dump_dirname      = "viz_trench"
    viz_dump_filename     = "trench"   // not used by VisIt
    visit_file_cluster_size = 1        // not used by Vizamrai
@@ -142,7 +143,7 @@ TimerManager{
 }
 
 CartesianGeometry {
-domain_boxes = [(0,0) , (99,7)]
+domain_boxes = [(0,0) , (199,3)]
 
 
    x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
@@ -187,7 +188,7 @@ HyperbolicLevelIntegrator{
 
 TimeRefinementIntegrator{
    start_time           = 0.e0     // initial simulation time
-   end_time             = 3600.    // final simulation time
+   end_time             = 40000.    // final simulation time
    grow_dt              = 1.1e0    // growth factor for timesteps
    max_integrator_steps = 300000       // max number of simulation timesteps
 }

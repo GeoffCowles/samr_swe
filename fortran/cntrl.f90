@@ -67,7 +67,7 @@ module cntrl
   real(dp) :: sedinit
   real(dp) :: taucrit
   real(dp) :: morphfactor
-  real(dp) :: d50 = .001
+  real(dp) :: d50 = .0001 !.4 mm
 
   !trench params
   real(dp), parameter :: trench_half_width = 2.0

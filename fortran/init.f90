@@ -527,9 +527,6 @@ subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,bedlevel)
 			end if
 	      vh(i,j,1) = 0.2
 	      vh(i,j,2) = 0.0
-	       if(j==1)then
-			  write(*,*)xc,h(i,j)
-			 endif
 	    end do
 	   
 	  end do

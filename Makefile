@@ -12,10 +12,10 @@
 #SUBDIR        = source/test/applications/Euler
 #VPATH         = ../../../../../SAMRAI/source/test/applications/Euler
 #TESTTOOLS     = ../../testtools
-#OBJECT        = /opt/samrai_3.1.0/ifortgcc64_opt
-#SAMRAI        = /opt/samrai_3.1.0/ifortgcc64_opt
-OBJECT        = /opt/samrai_3.1.0/ifortgcc64_debug
-SAMRAI        = /opt/samrai_3.1.0/ifortgcc64_debug
+OBJECT        = /opt/samrai_3.1.0/ifortgcc64_opt
+SAMRAI        = /opt/samrai_3.1.0/ifortgcc64_opt
+#OBJECT        = /opt/samrai_3.1.0/ifortgcc64_debug
+#SAMRAI        = /opt/samrai_3.1.0/ifortgcc64_debug
 
 SRCDIR        = ./swe
 

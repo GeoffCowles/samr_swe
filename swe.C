@@ -740,6 +740,8 @@ void swe::computeFluxesOnPatch(
    //set patch_geometry + dx
    const tbox::Pointer<geom::CartesianPatchGeometry > patch_geom = patch.getPatchGeometry();
    const double* dx  = patch_geom->getDx();
+   const double* xlo = patch_geom->getXLower();
+   const double* xhi = patch_geom->getXUpper();
 
    //set computational limits
    hier::Box pbox = patch.getBox();
@@ -793,8 +795,8 @@ void swe::computeFluxesOnPatch(
    			  fluxp->getPointer(0),
    		     fluxp->getPointer(1));
 
-   if (d_sedmodel > 0) {
-		flux_sed_(d_data_problem_int,dt,dx, //FORTRAN
+   if (d_sedmodel > 0 && time > d_sedinit) {
+		flux_sed_(d_data_problem_int,dt,dx,xlo,xhi, //FORTRAN
 			ifirst(0),ilast(0),ifirst(1),ilast(1),
 			depth->getPointer(),
 			veldepth->getPointer(),
@@ -884,6 +886,7 @@ void swe::conservativeDifferenceOnPatch(
 
    if (d_dim == tbox::Dimension(2)) {
 			
+			
 		// update state variables using summation of fluxes
 		consdiff_(dx,ifirst(0),ilast(0),ifirst(1),ilast(1), //FORTRAN
 			fluxm->getPointer(0),
@@ -893,9 +896,9 @@ void swe::conservativeDifferenceOnPatch(
 			depth->getPointer(),
 			veldepth->getPointer(),
 			bathy->getPointer());
-			
+
 		//update bed thickness if sediment model is active and bathymetry if morpho active
-		if(d_sedmodel > 0){
+		if(d_sedmodel > 0 && time > d_sedinit){
 			consdiff_sed_(dx,ifirst(0),ilast(0),ifirst(1),ilast(1), //FORTRAN
 				fluxsed->getPointer(0),
 				fluxsed->getPointer(1),
@@ -1922,10 +1925,13 @@ void swe::writeData1dPencil(const tbox::Pointer<hier::Patch > patch,
          patch->getPatchData(d_bathy, getDataContext());
       tbox::Pointer< pdat::CellData<double> > veldepth =
          patch->getPatchData(d_veldepth, getDataContext());
+      tbox::Pointer< pdat::CellData<double> > bedlevel =
+         patch->getPatchData(d_bedlevel, getDataContext());
 
 #ifdef DEBUG_CHECK_ASSERTIONS
       TBOX_ASSERT(!depth.isNull());
       TBOX_ASSERT(!veldepth.isNull());
+      TBOX_ASSERT(!bedlevel.isNull());
 #endif
 
       const tbox::Pointer<geom::CartesianPatchGeometry > pgeom = patch->getPatchGeometry();
@@ -1946,6 +1952,7 @@ void swe::writeData1dPencil(const tbox::Pointer<hier::Patch > patch,
                double udval = (*veldepth)(ic(),idir);
                double vel  = udval/dval;
 			   double wetdry = 0; // wet
+				double blval = (*bedlevel)(ic(),0);
 		       if(dval < 1e-30){
 				wetdry = 1; 
 				vel = 0;
@@ -1960,6 +1967,7 @@ void swe::writeData1dPencil(const tbox::Pointer<hier::Patch > patch,
 			   file << dval+bval << " ";
 			   file << bval << " ";
 			   file << wetdry << " ";
+				file << blval << " ";
                file << endl;
             }
 
@@ -2638,6 +2646,7 @@ void swe::readDirichletBoundaryDataEntry(tbox::Pointer<tbox::Database> db,
                       bdry_location_index,
                       d_bdry_edge_depth,
                       d_bdry_edge_bathy,
+                      d_bdry_edge_bedlevel,
 					  		 d_bdry_edge_veldepth);
 	}
       
@@ -2648,6 +2657,7 @@ void swe::readStateDataEntry(tbox::Pointer<tbox::Database> db,
                                int array_indx,
                                tbox::Array<double>& depth,
                                tbox::Array<double>& bathy,
+										 tbox::Array<double>& bedlevel,
                                tbox::Array<double>& veldepth)
 {
 #ifdef DEBUG_CHECK_ASSERTIONS
@@ -2656,6 +2666,7 @@ void swe::readStateDataEntry(tbox::Pointer<tbox::Database> db,
    TBOX_ASSERT(array_indx >= 0);
    TBOX_ASSERT(depth.getSize() > array_indx);
    TBOX_ASSERT(bathy.getSize() > array_indx);
+   TBOX_ASSERT(bedlevel.getSize() > array_indx);
    TBOX_ASSERT(veldepth.getSize() > array_indx*PDIM);
 #endif
 
@@ -2671,6 +2682,13 @@ void swe::readStateDataEntry(tbox::Pointer<tbox::Database> db,
    } else {
       TBOX_ERROR(d_object_name << ": "
          << "`bathy' entry missing from " << db_name
+         << " input database. " << endl);
+   }
+   if (db->keyExists("bedlevel")) {
+      bedlevel[array_indx] = db->getDouble("bedlevel");
+   } else {
+      TBOX_ERROR(d_object_name << ": "
+         << "`bedlevel' entry missing from " << db_name
          << " input database. " << endl);
    }
    if (db->keyExists("veldepth")) {

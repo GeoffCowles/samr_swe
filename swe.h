@@ -361,6 +361,7 @@ private:
                            int array_indx,
                            tbox::Array<double>& depth,
                            tbox::Array<double>& bathy,
+                           tbox::Array<double>& bedlevel,
                            tbox::Array<double>& veldepth);
 
    /*

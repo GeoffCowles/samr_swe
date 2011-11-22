@@ -26,7 +26,7 @@
 !          =>  ifluxm,jfluxm,ifluxp,jfluxp: fluxes on the edges
 !==============================================================================
 
-subroutine flux_sed(cid,dt,dx,i1,i2,j1,j2,h,vh,bedlevel,iflux,jflux)  
+subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,iflux,jflux)  
 
  
   use gparms
@@ -37,6 +37,7 @@ subroutine flux_sed(cid,dt,dx,i1,i2,j1,j2,h,vh,bedlevel,iflux,jflux)
   integer,  intent(in)    :: i1,i2,j1,j2
   real(dp), intent(in )   :: dt
   real(dp), intent(in )   :: dx(2)
+  real(dp), intent(in )   :: xlo,xhi
   real(dp), intent(in   ) :: h(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
   real(dp), intent(in   ) :: vh(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST,NDIMS)
   real(dp), intent(inout) :: bedlevel(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
@@ -48,7 +49,7 @@ subroutine flux_sed(cid,dt,dx,i1,i2,j1,j2,h,vh,bedlevel,iflux,jflux)
   real(dp) :: tauy(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
   real(dp) :: qx(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
   real(dp) :: qy(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
-  real(dp) :: fac1,fac2,shieldfac,gprime,facMPM,taub
+  real(dp) :: fac1,fac2,shieldfac,gprime,facMPM,taub,tau_edge
   integer i,j
 
   !zero out fluxes 
@@ -63,10 +64,8 @@ subroutine flux_sed(cid,dt,dx,i1,i2,j1,j2,h,vh,bedlevel,iflux,jflux)
 
   !set up the constants
   fac1      = gravity*C_manning*C_manning
-  bedlevel  = zero
   gprime    = gravity*(rho_sed/rho_w-1)  !reduced gravity
   shieldfac = 1./(gprime*d50) !converts stress (in units of m^2/s^2) to nondim stress
-  !dimload   = sqrt((rho_sed/rho_w-1)*gravity*d50)*d50*rho_sed
 
   !compute solid load at cell centers (units = m^2/s)
   do j=j1-NCGST,j2+NCGST
@@ -80,21 +79,39 @@ subroutine flux_sed(cid,dt,dx,i1,i2,j1,j2,h,vh,bedlevel,iflux,jflux)
 	
 	  !compute the load at cell centers (ignore slope for now) using MPM formula
 	  !see eq. 11 de Swart and Zimmerman 2000.
-	  facMPM = 8.0*sqrt(gprime*(d50**3))*(max(taub*shieldfac - shields_crit,0.0)**1.5)
+	  facMPM = 8.0d0*sqrt(gprime*(d50**3))*(max(taub*shieldfac - shields_crit,0.0)**1.5d0)
 	  qx(i,j) = facMPM*taux(i,j)/taub
+	  !  if(j==1)then
+	  ! 	 	 	 		 write(*,'(I5,3F10.5)')i,qx(i,j),vh(i,j,1),h(i,j)
+	  !  	 	endif
 	  qy(i,j) = facMPM*tauy(i,j)/taub
 	 end do
 	end do
 	
 	!compute load fluxes on edges using upwinded formulation
-	
+	fac1 = ahalf*dt*morphfactor
+	do j=j1,j2
 	do i=i1,i2+1
-		do j=j1,j2+1
-			tau_edge = .5*(taux(i,j)+taux(i+1,j))
-			iflux(i,j) = 0.5*dt*((1-sign(1.,tau_edge))*qx(i,j)+(1+sign(1.,tau_edge))*qx(i,j))
-			jflux(j,i) = dt*
-		end do
+	   tau_edge = ahalf*(taux(i,j)+taux(i-1,j))
+		iflux(i,j) = fac1*((1+sign(1.,tau_edge))*qx(i-1,j)+(1-sign(1.,tau_edge))*qx(i,j))
 	end do
+   end do
+
+   !set flux to zero at left boundary !FUDGE
+   if(abs(xlo)<1e-5)then
+     iflux(0,:) = iflux(1,:)
+   endif;
+   	
+  
+
+  !  do i=i1,i2
+  ! 	do j=j1,j2+1
+  ! 	  tau_edge = .5*(tauy(i,j)+tauy(i,j+1))
+  ! 	  jflux(j,i) = fac1*((1+sign(1.,tau_edge))*qy(i,j)+(1-sign(1.,tau_edge))*qy(i+1,j))
+  ! 	end do
+  !    end do
+   
+
 
   
  !  do j=j1-NCGST,j2+NCGST
@@ -130,14 +147,14 @@ subroutine consdiff_sed(dx,i1,i2,j1,j2,iflux,jflux,bedlevel,b)
   real(dp), intent(inout) :: b(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
   
   !local
-  real(dp) :: bedlevel_last(j1-NFGST:j2+1+NFGST,i1-NFGST:i2+NFGST)
+  real(dp) :: bedlevel_last(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
   integer  :: i,j
   real(dp) :: oodx,oody
 
   !precompute 1/dx,  1/dy
   oodx = one/dx(1);
   oody = one/dx(2);
-  return
+  
   !store previous bed thickness for use in morphodynamic adjustment
   bedlevel_last = bedlevel  
 
@@ -147,8 +164,13 @@ subroutine consdiff_sed(dx,i1,i2,j1,j2,iflux,jflux,bedlevel,b)
       bedlevel(i,j) = bedlevel(i,j) &
                -oodx*(iflux(i+1,j)-iflux(i,j)) &
                -oody*(jflux(j+1,i)-jflux(j,i)) 
+   !  if(j==1)then
+   ! 	  write(*,*)i,bedlevel(i,j)
+   ! 	endif
     enddo
   end do
+  ! write(*,*)'check: ',bedlevel(i1,1),iflux(i1+1,1),iflux(i1,1)
+     !stop
 
   !update bathymetry using change in bed level morphodynamics is active
   if(sedmodel == 2)then
