@@ -38,9 +38,8 @@ subroutine setbathy(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,b)
   real(dp) :: xhalf,xc,yc,depth_left,depth_right,x0,xberm
   real(dp) :: inner_rad,outer_rad,con_height,fac,rad,theta_scrit
   real(dp) :: t1,t2,t3,t4,f1,f2
-  
+  real(dp) :: devriend_x,devriend_y,devriend_amp,devriend_rad,dist
 
-  
   caseid = cid
  
   select case(caseid)
@@ -372,6 +371,34 @@ subroutine setbathy(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,b)
 	      b(i,j) = -b(i,j)+bath_trench1
 	    end do
 	  end do
+	
+  !---------------------------------------------------------------------
+  case(devriend) !morphodynamics of gaussian hump
+  !x = 0:10:20000;
+  ! y = 0:10:10000;
+  ! [X,Y] = meshgrid(x,y);
+  ! dist = (X-5000).^2 + (Y-5000).^2;
+  ! Z = 5.*exp(-dist/(2*1000*1000));
+  ! pcolor(X,Y,Z)
+  ! shading interp
+  ! axis equal
+  !---------------------------------------------------------------------
+  devriend_amp = 5.    !amplitude of hump
+  devriend_x   = 5000. !x location of hump center
+  devriend_y   = 5000. !y location of hump center
+  devriend_rad = 1000. !radius of hump
+  do i=i1-igst,i2+igst
+	do j=j1-jgst,j2+jgst
+      xc = xlo(1)+dx(1)*dble(i-i1)+dx(1)/2
+      yc = xlo(2)+dx(2)*dble(j-j1)+dx(2)/2
+      dist = (xc-devriend_x)**2 + (yc-devriend_y)**2
+      !write(*,*)xc,yc,dist/(2*devriend_rad*devriend_rad)
+      b(i,j) = devriend_amp*exp(-dist/(2*devriend_rad*devriend_rad))
+ 	end do 
+  end do
+  !write(*,*)'max b',maxval(b),minval(b),xlo(1),xlo(2)
+  !stop
+  
   
   end select 
 

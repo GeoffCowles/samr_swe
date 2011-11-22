@@ -16,7 +16,7 @@ if(~exist('iskip'))
  iskip = 1;
 end;
 
-nplots = 6;
+nplots = 7;
 
 
 for i=0:iskip:10000
@@ -78,19 +78,22 @@ for i=0:iskip:10000
   plot(xinit,blvalinit,'r') 
   plot(x,blval,'k') 
   title('bedlevel (m)') 
-
-  if(nplots ==8)
+  if(nplots >=7)
   subplot(nplots,1,7)
-  plot(xinit,wdinit,'r'); hold on
-  plot(x,wd,'k')
-  title('wd')
-  axis([min(x),max(x),0,1.2]);
-  subplot(nplots,1,8)
   dx = diff(x);
   plot(xinit,[dxinit',dxinit(end)'],'r'); hold on
   plot(x,[dx',dx(end)'],'k'); hold on
   axis([min(x),max(x),min(min(dxinit),min(dx))-.01*min(dx),max(max(dxinit),max(dx))+.01*min(dx)]);
   title('dx')
+  end;
+
+
+  if(nplots >=8)
+  subplot(nplots,1,8)
+  plot(xinit,wdinit,'r'); hold on
+  plot(x,wd,'k')
+  title('wd')
+  axis([min(x),max(x),0,1.2]);
   end;
 
 %  axis([min(),max(x),0,1.2]);

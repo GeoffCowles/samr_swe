@@ -107,6 +107,7 @@ using namespace std;
 #define ROELVINKY       (23)
 #define SLOSH_INLET     (24)
 #define TRENCH          (25)
+#define DEVRIEND        (26)
 
 // defines for cell tagging routines
 #define RICHARDSON_NEWLY_TAGGED (-10)
@@ -311,6 +312,8 @@ swe::swe(
 	  d_data_problem_int = SLOSH_INLET;
 	} else if (d_data_problem == "TRENCH") {
 	  d_data_problem_int = TRENCH;
+	} else if (d_data_problem == "DEVRIEND") {
+	  d_data_problem_int = DEVRIEND;
    } else {
       TBOX_ERROR(d_object_name << ": "
          << "Unknown d_data_problem string = "

@@ -98,9 +98,14 @@ subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,iflux,jflux)
    end do
 
    !set flux to zero at left boundary !FUDGE
+   if(cid==trench)then
    if(abs(xlo)<1e-5)then
      iflux(0,:) = iflux(1,:)
-   endif;
+   endif
+  !     if(abs(xhi-22.)<1e-5)then
+  !    	     iflux(i2+1,:) = iflux(i2,:)
+  !    	   endif
+    endif
    	
   
 

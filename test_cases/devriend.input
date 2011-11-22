@@ -1,9 +1,9 @@
-// migrating trench case from Warner 
+// migrating devriend case from devriend (1987) as described in Lesser et al., C.E. 51, 2004, 883-915, page 909 
 // 
 
 swe {
   
-   data_problem         = "TRENCH"    
+   data_problem         = "DEVRIEND"    
 
 // frictype:  select the friction type
 //   = 0 => no friction
@@ -44,10 +44,10 @@ swe {
    //   = 1:  morphology is real time
    //   >1 :  morphology is accelerated
 
-   sedmodel = 2
-   sedinit  = 20.0
-   d50      = .0001 
-   morphfactor = 1000.0
+   sedmodel = 1
+   sedinit  = 0.0
+   d50      = .0002 
+   morphfactor = 10.0
 
    Refinement_data {
 //     refine_criteria = "DEPTH_GRADIENT"
@@ -72,10 +72,10 @@ swe {
    Boundary_data {
       boundary_edge_xlo {
          boundary_condition      = "DIRICHLET" 
-         depth = 0.4
+         depth = 10.0
          bathy = 0.0
          bedlevel = 0.0
-         veldepth = 0.2,0.0
+         veldepth = 10.,0.0
       }
       boundary_edge_xhi {
          boundary_condition      = "FLOW"    
@@ -85,10 +85,10 @@ swe {
 //      }
 //      boundary_edge_xhi {
 //         boundary_condition      = "DIRICHLET" 
-//         depth = 0.4
+//         depth = 10.0
 //         bathy = 0.0
 //         bedlevel = 0.0
-//         veldepth = -0.2,0.0
+//         veldepth = -10.0,0.0
 //      }
       boundary_edge_ylo {
          boundary_condition      = "REFLECT"
@@ -124,20 +124,20 @@ Main {
    base_name = "swe"
 
 // log file parameters 
-   log_file_name    = "trench.log"
+   log_file_name    = "devriend.log"
    log_all_nodes    = TRUE
 
 // matlab pencil file
-   matlab_dump_interval  = 100
+   matlab_dump_interval  = 0
    matlab_dump_filename  = "pencil"
-   matlab_dump_dirname   = "./pencil_trench"
+   matlab_dump_dirname   = "./pencil_devriend"
    matlab_pencil_direction = 0
  
 // visualization dump parameters
    viz_writer            = "VisIt" // use: "Vizamrai", "VisIt" for both
-   viz_dump_interval     = 0         // zero to turn off
-   viz_dump_dirname      = "viz_trench"
-   viz_dump_filename     = "trench"   // not used by VisIt
+   viz_dump_interval     = 100         // zero to turn off
+   viz_dump_dirname      = "viz_devriend"
+   viz_dump_filename     = "devriend"   // not used by VisIt
    visit_file_cluster_size = 1        // not used by Vizamrai
 
 // restart dump parameters
@@ -154,11 +154,11 @@ TimerManager{
 }
 
 CartesianGeometry {
-domain_boxes = [(0,0) , (199,3)]
+domain_boxes = [(0,0) , (199,99)]
 
 
    x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
-   x_up         = 22.0,  2.0    // upper end of computational domain.
+   x_up         = 20000.0,  10000.0   // upper end of computational domain.
 }
 
 StandardTagAndInitialize{
@@ -170,11 +170,11 @@ PatchHierarchy{
 
    ratio_to_coarser {              // vector ratio to next coarser level
       level_1            = 2 , 2
-      level_2            = 2 , 1
+      level_2            = 2 , 2
    }
 
    largest_patch_size {
-      level_0 = 32 ,32  
+      level_0 = 64, 64  
       // all finer levels will use same values as level_0...
    }
 
@@ -199,7 +199,7 @@ HyperbolicLevelIntegrator{
 
 TimeRefinementIntegrator{
    start_time           = 0.e0     // initial simulation time
-   end_time             = 40000.    // final simulation time
+   end_time             = 864000.    // final simulation time
    grow_dt              = 1.1e0    // growth factor for timesteps
    max_integrator_steps = 300000       // max number of simulation timesteps
 }

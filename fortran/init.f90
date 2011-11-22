@@ -40,6 +40,8 @@ subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,bedlevel)
   integer  :: i,j
   real(dp) :: xhalf,xc,yc,depth_left,depth_right,x0,xberm,fac,fac2,zeta,u_left
   real(dp) :: theta_scrit,t1,t2,t3,t4,f1,f2
+  real(dp) :: devriend_x,devriend_y,devriend_amp,devriend_rad,dist
+  
 
  
 
@@ -531,8 +533,25 @@ subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,bedlevel)
 	   
 	  end do
 
-
-
+	!---------------------------------------------------------------------
+	case(devriend) !de Vriend hump morphodynamic case
+	!---------------------------------------------------------------------
+	
+	devriend_amp = 5.    !amplitude of hump
+   devriend_x   = 5000. !x location of hump center
+   devriend_y   = 5000. !y location of hump center
+   devriend_rad = 1000. !radius of hump
+   do i=i1-igst,i2+igst
+	 do j=j1-jgst,j2+jgst
+      xc = xlo(1)+dx(1)*dble(i-i1)+dx(1)/2
+      yc = xlo(2)+dx(2)*dble(j-j1)+dx(2)/2
+      dist = (xc-devriend_x)**2 + (yc-devriend_y)**2
+      h(i,j) = 10.-devriend_amp*exp(-dist/(2*devriend_rad*devriend_rad))
+      vh(i,j,1) = 10.
+      vh(i,j,2) = 0.0
+ 	 end do 
+   end do
+	
  
   end select
 
