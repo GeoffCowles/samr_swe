@@ -392,8 +392,8 @@ subroutine setbathy(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,b)
       xc = xlo(1)+dx(1)*dble(i-i1)+dx(1)/2
       yc = xlo(2)+dx(2)*dble(j-j1)+dx(2)/2
       dist = (xc-devriend_x)**2 + (yc-devriend_y)**2
-      !write(*,*)xc,yc,dist/(2*devriend_rad*devriend_rad)
-      b(i,j) = devriend_amp*exp(-dist/(2*devriend_rad*devriend_rad))
+      b(i,j) = devriend_amp*exp(-dist/(2*devriend_rad*devriend_rad)) 
+      b(i,j) = b(i,j) !- xc*4.64e-5 !add slope to counteract friction? (tau = .4667 at C_manning=.01)
  	end do 
   end do
   !write(*,*)'max b',maxval(b),minval(b),xlo(1),xlo(2)

@@ -504,6 +504,8 @@ void swe::registerModelVariables(algs::HyperbolicLevelIntegrator* integrator)
 		d_visit_writer->registerDerivedPlotQuantity("zeta", "SCALAR", this);
 						
 		d_visit_writer->registerDerivedPlotQuantity("wetdry", "SCALAR", this);
+		
+		d_visit_writer->registerDerivedPlotQuantity("bedstress", "SCALAR", this);
 													  																							  
    }
 
@@ -1830,7 +1832,7 @@ bool swe::packDerivedDataIntoDoubleBuffer(
 	#endif
 
 		  const double *const dval  = depth->getPointer();
-		  const double *const udval = veldepth->getPointer(1);
+		  const double *const vdval = veldepth->getPointer(1);
 		  int buf_b1 = 0;
 		  int dat_b2 = data_box.offset(region.lower());
 
@@ -1838,7 +1840,7 @@ bool swe::packDerivedDataIntoDoubleBuffer(
 		  for (int i1 = 0; i1 < box_w1; i1++) {
 		     for (int i0 = 0; i0 < box_w0; i0++) {
 		       int dat_indx = dat_b1+i0;
-		        dbuffer[buf_b1+i0] = udval[dat_indx]/(dval[dat_indx]);
+		        dbuffer[buf_b1+i0] = vdval[dat_indx]/(dval[dat_indx]);
 		     }
 	         dat_b1 += dat_w0;
 		     buf_b1 += box_w0;
@@ -1893,6 +1895,33 @@ bool swe::packDerivedDataIntoDoubleBuffer(
 
 			  data_on_patch = TRUE;
 			
+		} else if (variable_name == "bedstress") {
+
+			 const double *const dval  = depth->getPointer();
+			 const double *const udval = veldepth->getPointer(0);
+			 const double *const vdval = veldepth->getPointer(1);
+			 int buf_b1 = 0;
+			 int dat_b2 = data_box.offset(region.lower());
+
+			 int dat_b1 = dat_b2;
+			 for (int i1 = 0; i1 < box_w1; i1++) {
+				for (int i0 = 0; i0 < box_w0; i0++) {
+				   int dat_indx = dat_b1+i0;
+			   	   if(dval[dat_indx] < 1e-6)
+			         {
+				     dbuffer[buf_b1+i0] = 0.0;
+			         }
+				   else
+				     {//(h(i,j)**(-7./3.))*sqrt(vh(i,j,1)**2 + vh(i,j,2)**2)
+				     dbuffer[buf_b1+i0] = 
+				    1025*9.81*d_C_manning*d_C_manning*pow(dval[dat_indx],-7./3.)*(pow(udval[dat_indx],2)+pow(vdval[dat_indx],2));
+			         }
+				 }
+			     dat_b1 += dat_w0;
+				 buf_b1 += box_w0;
+			  }
+
+			  data_on_patch = TRUE;
 
 
    } else {

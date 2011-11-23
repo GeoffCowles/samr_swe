@@ -545,7 +545,7 @@ subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,bedlevel)
 	 do j=j1-jgst,j2+jgst
       xc = xlo(1)+dx(1)*dble(i-i1)+dx(1)/2
       yc = xlo(2)+dx(2)*dble(j-j1)+dx(2)/2
-      dist = (xc-devriend_x)**2 + (yc-devriend_y)**2
+      dist = (xc-devriend_x)**2 +(yc-devriend_y)**2
       h(i,j) = 10.-devriend_amp*exp(-dist/(2*devriend_rad*devriend_rad))
       vh(i,j,1) = 10.
       vh(i,j,2) = 0.0

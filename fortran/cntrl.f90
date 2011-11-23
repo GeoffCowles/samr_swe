@@ -68,6 +68,8 @@ module cntrl
   real(dp) :: sedinit
   real(dp) :: d50
   real(dp) :: morphfactor
+  real(dp) :: porosity = .5 !bed porosity
+  logical  :: lesser_slope = .true.
   !real(dp) :: d50 = .0001 !.4 mm  !note, .0001 is good for trench case
 
   !trench params

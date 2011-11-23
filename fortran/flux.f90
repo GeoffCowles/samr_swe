@@ -128,7 +128,10 @@ subroutine george_flux(cid,dt,dx,i1,i2,j1,j2,h,vh,b,ifluxm,jfluxm,ifluxp,jfluxp)
 	  q1d(iclaw,3) = vh(i,j,2)  !vh
 	  aux(iclaw,1) = b(i,j)     !b
 	end do 
-	
+!	write(*,*)'flux',j,i1,i2,j1-1,j2+1
+! 	if(j==1)then
+! 	write(*,'(4F10.3)')q1d(0,1:2),q1d(1,1:2)	
+! endif
 ! 	 if(j==j2/2)then
 ! 	    write(*,'(9F12.4)')q1d(-1,1:3),q1d(0,1:3),q1d(1,1:3)
 ! 	 endif
@@ -142,6 +145,7 @@ subroutine george_flux(cid,dt,dx,i1,i2,j1,j2,h,vh,b,ifluxm,jfluxm,ifluxp,jfluxp)
 	if(cid==heniche)then !.or. cid==roelvink)then
     !set hv and hu in the ghost cells of an open boundary
 ! 	!geoff - heniche fudge - gwc FUDGE
+   write(*,*)'fudging'
   	q1d(-1,2) = q1d(1,2)
    	q1d( 0,2) = q1d(1,2)
     endif
