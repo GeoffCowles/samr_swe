@@ -58,9 +58,9 @@ extern "C" {
 
   void flux_sed_(
   const int&, const double&, const double*,
-  const double*, const double*,
+  const double*, const double*, 
   const int&, const int&, const int&, const int&,
-  double*, double*, double*, 
+  double*, double*, double*, double*,
   double*, double* );
 
   void consdiff_sed_(

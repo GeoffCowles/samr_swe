@@ -396,6 +396,34 @@ subroutine setbathy(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,b)
       b(i,j) = b(i,j) !- xc*4.64e-5 !add slope to counteract friction? (tau = .4667 at C_manning=.01)
  	end do 
   end do
+
+	!---------------------------------------------------------------------
+	case(trenchy) !warner migrating trench case in y-direction
+	!---------------------------------------------------------------------
+	t1 = trench_mid-(trench_half_width+trench_slope_width);
+	t2 = trench_mid-trench_half_width;
+	t3 = trench_mid+trench_half_width;
+	t4 = trench_mid+(trench_half_width+trench_slope_width);
+
+	 do i=i1,i2
+	    do j=j1,j2
+		   yc = xlo(2)+dx(2)*dble(j-j1)+dx(2)/2
+			if(yc > t1 .and. yc < t4)then
+			  b(i,j) = bath_trench2
+			else if (yc > t1 .and. yc < t2)then
+				f1 = (yc-t1)/trench_slope_width
+				f2 = 1-f1;
+				b(i,j) = f2*bath_trench1 + f1*bath_trench2
+			else if (yc > t3 .and. yc < t4)then
+				f1 = (yc-t3)/trench_slope_width;
+				f2 = 1-f1;
+				b(i,j) = f1*bath_trench1 + f2*bath_trench2
+			else
+				b(i,j) = bath_trench1
+			endif
+	      b(i,j) = -b(i,j)+bath_trench1
+	    end do
+	  end do
   !write(*,*)'max b',maxval(b),minval(b),xlo(1),xlo(2)
   !stop
   

@@ -108,6 +108,7 @@ using namespace std;
 #define SLOSH_INLET     (24)
 #define TRENCH          (25)
 #define DEVRIEND        (26)
+#define TRENCHY         (27)
 
 // defines for cell tagging routines
 #define RICHARDSON_NEWLY_TAGGED (-10)
@@ -314,6 +315,8 @@ swe::swe(
 	  d_data_problem_int = TRENCH;
 	} else if (d_data_problem == "DEVRIEND") {
 	  d_data_problem_int = DEVRIEND;
+	} else if (d_data_problem == "TRENCHY") {
+	  d_data_problem_int = TRENCHY;
    } else {
       TBOX_ERROR(d_object_name << ": "
          << "Unknown d_data_problem string = "
@@ -747,6 +750,8 @@ void swe::computeFluxesOnPatch(
    const double* dx  = patch_geom->getDx();
    const double* xlo = patch_geom->getXLower();
    const double* xhi = patch_geom->getXUpper();
+   // const double* ylo = patch_geom->getYLower();
+   //   const double* yhi = patch_geom->getYUpper();
 
    //set computational limits
    hier::Box pbox = patch.getBox();
@@ -806,6 +811,7 @@ void swe::computeFluxesOnPatch(
 			depth->getPointer(),
 			veldepth->getPointer(),
 			bedlevel->getPointer(),
+			bathy->getPointer(),
 			fluxsed->getPointer(0),
 			fluxsed->getPointer(1));
 	 }

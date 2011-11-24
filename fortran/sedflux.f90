@@ -26,7 +26,7 @@
 !          =>  ifluxm,jfluxm,ifluxp,jfluxp: fluxes on the edges
 !==============================================================================
 
-subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,iflux,jflux)  
+subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,b,iflux,jflux)  
 
  
   use gparms
@@ -37,10 +37,11 @@ subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,iflux,jflux)
   integer,  intent(in)    :: i1,i2,j1,j2
   real(dp), intent(in )   :: dt
   real(dp), intent(in )   :: dx(2)
-  real(dp), intent(in )   :: xlo,xhi
+  real(dp), intent(in )   :: xlo(2),xhi(2)
   real(dp), intent(in   ) :: h(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
   real(dp), intent(in   ) :: vh(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST,NDIMS)
-  real(dp), intent(inout) :: bedlevel(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
+  real(dp), intent(in   ) :: bedlevel(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
+  real(dp), intent(in   ) :: b(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
   real(dp), intent(inout) :: iflux(i1-NFGST:i2+1+NFGST,j1-NFGST:j2+NFGST)
   real(dp), intent(inout) :: jflux(j1-NFGST:j2+1+NFGST,i1-NFGST:i2+NFGST)
 
@@ -51,6 +52,7 @@ subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,iflux,jflux)
   real(dp) :: qy(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
   real(dp) :: taub,tau_edge
   real(dp) :: fac1,fac2,shieldfac,gprime,facMPM,facVR,dstar,loadMPM,loadVR,loadfac
+  real(dp) :: dzdx
   integer i,j
 
   !zero out fluxes 
@@ -95,7 +97,8 @@ subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,iflux,jflux)
 	  loadVR = facVR*loadfac*(max(taub*shieldfac/shields_crit-1,zero)**2.1)
 	  qx(i,j) = loadVR*taux(i,j)/taub
 	  qy(i,j) = loadVR*tauy(i,j)/taub
-
+     !dzdx = -(b(i+1,j)-b(i-1,j))/(2*dx(1))
+     !qx(i,j) = qx(i,j)*sed_angle/(sed_angle-dzdx)
 	 end do
 	end do
 	
@@ -105,11 +108,13 @@ subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,iflux,jflux)
 	!porosity is included as a factor 1./(1-porosity) to account for changes in the bed thickness
 	!need to account for fluxes into/out of the water column
 	fac1 = ahalf*dt*morphfactor*(1./(1-porosity))
-	
 	do j=j1,j2
 	do i=i1,i2+1
 	   tau_edge = ahalf*(taux(i,j)+taux(i-1,j))
 		iflux(i,j) = fac1*((1+sign(1.,tau_edge))*qx(i-1,j)+(1-sign(1.,tau_edge))*qx(i,j)) !upwind flux
+		! dzdx = -(b(i,j)-b(i-1,j))/dx(1)
+		! 		iflux(i,j) = iflux(i,j)*sed_angle/(sed_angle-dzdx)
+		
 	   !iflux(i,j) = fac1*(qx(i-1,j)+qx(i,j))  !centered flux
 	end do
    end do
@@ -143,24 +148,31 @@ subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,iflux,jflux)
 
    !set flux to zero at left boundary !FUDGE
    if(cid==trench .or. cid==devriend)then
-   if(abs(xlo)<1e-5)then
+   if(abs(xlo(1))<1e-5)then
      iflux(0,:) = iflux(1,:)
-     !write(*,'(4F10.3)')h(-1,1),h(0,1),vh(-1,1,1),vh(0,1,1)
    endif
   !     if(abs(xhi-22.)<1e-5)then
   !    	     iflux(i2+1,:) = iflux(i2,:)
   !    	   endif
     endif
-   	
+   
   
-
+   if(cid .ne. devriend)then  !fudge, shut off y-dir bedload for devriend hump case
    do i=i1,i2
   	do j=j1,j2+1
   	  tau_edge = .5*(tauy(i,j)+tauy(i,j-1))
   	  jflux(j,i) = fac1*((1+sign(1.,tau_edge))*qy(i,j-1)+(1-sign(1.,tau_edge))*qy(i,j))
+     !if(tauy(i,j)*tauy(i,j-1) < 0.0) jflux(j,i)=zero
   	end do
    end do
-   
+   endif
+
+   !set flux to zero at bottom boundary !FUDGE
+   if(cid==trenchy)then
+   if(abs(xlo(2))<1e-5)then
+     jflux(0,:) = jflux(1,:)
+   endif
+   endif
 
 
   

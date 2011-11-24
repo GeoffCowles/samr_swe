@@ -57,6 +57,7 @@ module cntrl
   integer, parameter :: slosh_inlet = 24
   integer, parameter :: trench = 25
   integer, parameter :: devriend = 26
+  integer, parameter :: trenchy = 27
 
   !floodying/drying
   real(dp) :: mindepth 

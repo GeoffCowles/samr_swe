@@ -26,7 +26,7 @@ swe {
    transverse           = 1
 
 // mindepth: set the minimum depth (if depth is < mindepth), velocities are set to zero
-   mindepth             = 1.e-3
+   mindepth             = 2.e-3
 
 
 // sediment model parameters 
@@ -62,7 +62,7 @@ swe {
          grad_tol = 1.e-4
       }
       BATHY_GRADIENT {
-         grad_tol = 1e-3 
+         grad_tol = 2e-3 
       }
 
       
@@ -135,7 +135,7 @@ Main {
    log_all_nodes    = TRUE
 
 // matlab pencil file
-   matlab_dump_interval  = 1000
+   matlab_dump_interval  = 0
    matlab_dump_filename  = "pencil"
    matlab_dump_dirname   = "./pencil_devriend"
    matlab_pencil_direction = 0
@@ -161,8 +161,10 @@ TimerManager{
 }
 
 CartesianGeometry {
-//domain_boxes = [(0,0) , (255,3)] //useful for 1-D gaussian
-domain_boxes = [(0,0) , (99,49)] 
+//domain_boxes = [(0,0) , (63,3)] //useful for 1-D gaussian
+//domain_boxes = [(0,0) , (99,49)]  //good for 3-level AMR
+domain_boxes = [(0,0) , (49,24)]  //good for 3-level AMR
+//domain_boxes = [(0,0) , (199,99)]  //
 
 
    x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
@@ -177,12 +179,12 @@ PatchHierarchy{
    max_levels          = 2        // Maximum number of levels in hierarchy.
 
    ratio_to_coarser {              // vector ratio to next coarser level
-      level_1            = 2 , 2
-      level_2            = 2 , 2
+      level_1            = 4,  4
+      level_2            = 4 , 4
    }
 
    largest_patch_size {
-      level_0 = 128, 128 
+      level_0 = 32,32    
       // all finer levels will use same values as level_0...
    }
 
@@ -193,7 +195,7 @@ PatchHierarchy{
    }
 }
 GriddingAlgorithm {
-   efficiency_tolerance = 0.75e0   // min % of tag cells in new patch level
+   efficiency_tolerance = 0.95e0   // min % of tag cells in new patch level
    combine_efficiency   = 0.85e0   // chop box if sum of volumes of smaller
                                    // boxes < efficiency * vol of large box
 }
@@ -208,6 +210,7 @@ HyperbolicLevelIntegrator{
 TimeRefinementIntegrator{
    start_time           = 0.e0     // initial simulation time
    end_time             = 1728000.   // final simulation time
+//   end_time             = 100000.   // final simulation time
    grow_dt              = 1.1e0    // growth factor for timesteps
    max_integrator_steps = 300000       // max number of simulation timesteps
 }

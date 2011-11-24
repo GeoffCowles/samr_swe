@@ -1,2 +1,4 @@
 1.) In sediment model, we are setting Exner flux at x=0 to 0.   
    Why: When we set u/uh/b/bedlevel with dirichlet on left boundary, we still have a significant gradient going from the ghost cell (i=-1) to the interior cell (i=0), this sets up a flux on the edge between the ghost cell and interior cell that is large compared to the Exner flux between the interior cell and next interior cell (0 and 1) producing large deposition at the inflow.  
+
+2.) For devriend case, bedload flux in y-dir is zeroed.

@@ -77,6 +77,7 @@ real(dp), parameter :: rho_w = 1025
 real(dp), parameter :: rho_sed = 2650
 real(dp), parameter :: por_sed = .5
 real(dp), parameter :: shields_crit = .047
+real(dp), parameter :: sed_angle = tan(33.0_dp*d2r)
 
 !----------------------------------------------------------------
 !large and small numbers

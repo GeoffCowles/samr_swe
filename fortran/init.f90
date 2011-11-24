@@ -551,6 +551,36 @@ subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,bedlevel)
       vh(i,j,2) = 0.0
  	 end do 
    end do
+
+	!---------------------------------------------------------------------
+	case(trenchy) !warner migrating trench case in y-direction
+	!---------------------------------------------------------------------
+	t1 = trench_mid-(trench_half_width+trench_slope_width);
+	t2 = trench_mid-trench_half_width;
+	t3 = trench_mid+trench_half_width;
+	t4 = trench_mid+(trench_half_width+trench_slope_width);
+
+	 do i=i1,i2
+	    do j=j1,j2
+		   yc = xlo(2)+dx(2)*dble(j-j1)+dx(2)/2
+			if(yc > t1 .and. yc < t4)then
+			  h(i,j) = bath_trench2
+			else if (yc > t1 .and. yc < t2)then
+				f1 = (yc-t1)/trench_slope_width
+				f2 = 1-f1;
+				h(i,j) = f2*bath_trench1 + f1*bath_trench2
+			else if (yc > t3 .and. yc < t4)then
+				f1 = (yc-t3)/trench_slope_width;
+				f2 = 1-f1;
+				h(i,j) = f1*bath_trench1 + f2*bath_trench2
+			else
+				h(i,j) = bath_trench1
+			end if
+	      vh(i,j,1) = 0.0
+	      vh(i,j,2) = 0.2
+	    end do
+   
+  end do
 	
  
   end select
