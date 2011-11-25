@@ -12,7 +12,7 @@ swe {
    frictype             = 0
 
 // C_manning:  manning (n) friction coefficient (only used if frictype == 2)
-   C_manning            = 0.01
+   C_manning            = 0.015
 
 // fluxorder: order of the spatial flux
 //    = 1 => 1st order
@@ -142,7 +142,7 @@ Main {
  
 // visualization dump parameters
    viz_writer            = "VisIt" // use: "Vizamrai", "VisIt" for both
-   viz_dump_interval     = 1000         // zero to turn off
+   viz_dump_interval     = 2000         // zero to turn off
    viz_dump_dirname      = "viz_devriend"
    viz_dump_filename     = "devriend"   // not used by VisIt
    visit_file_cluster_size = 1        // not used by Vizamrai
@@ -176,7 +176,7 @@ StandardTagAndInitialize{
 }
 
 PatchHierarchy{
-   max_levels          = 2        // Maximum number of levels in hierarchy.
+   max_levels          = 3        // Maximum number of levels in hierarchy.
 
    ratio_to_coarser {              // vector ratio to next coarser level
       level_1            = 4,  4
