@@ -58,6 +58,7 @@ module cntrl
   integer, parameter :: trench = 25
   integer, parameter :: devriend = 26
   integer, parameter :: trenchy = 27
+  integer, parameter :: uniform = 28
 
   !floodying/drying
   real(dp) :: mindepth 
@@ -73,6 +74,9 @@ module cntrl
   logical  :: lesser_slope = .true.
   !real(dp) :: d50 = .0001 !.4 mm  !note, .0001 is good for trench case
 
+  !morphology
+  real(dp) :: min_morph_depth = .10  !minimum depth for morpho cases (if avoiding wet/dry)
+
   !trench params
   real(dp), parameter :: trench_half_width = 2.0
   real(dp), parameter :: trench_slope_width = 0.5
@@ -80,6 +84,10 @@ module cntrl
   real(dp), parameter :: bath_trench2 = .56
   real(dp), parameter :: back_slope = 4e-4
   real(dp), parameter :: trench_mid = 11.
+
+  !uniform flow params
+  real(dp), parameter :: uniform_h = 10.
+  real(dp), parameter :: uniform_u = 1.
   
   !friction / roughness
   real(dp) :: C_manning !manning coefficient, set in input

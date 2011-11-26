@@ -88,15 +88,15 @@ subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,b,iflux,jflux)
 	
 	  !compute the load at cell centers (ignore slope for now) using MPM formula
 	  !see eq. 11 de Swart and Zimmerman 2000.
-	  ! loadMPM = facMPM*loadfac*(max(taub*shieldfac - shields_crit,0.0)**1.5d0)
-	  ! 	  qx(i,j) = loadMPM*taux(i,j)/taub
-	  ! 	  qy(i,j) = loadMPM*tauy(i,j)/taub
+	  loadMPM = facMPM*loadfac*(max(taub*shieldfac - shields_crit,0.0)**1.5d0)
+	  	  	  qx(i,j) = loadMPM*taux(i,j)/taub
+	  	  	  qy(i,j) = loadMPM*tauy(i,j)/taub
 	  
 	
 	  !compute the load at cell centers (ignore slope for now) using Van Rijn 1984
-	  loadVR = facVR*loadfac*(max(taub*shieldfac/shields_crit-1,zero)**2.1)
-	  qx(i,j) = loadVR*taux(i,j)/taub
-	  qy(i,j) = loadVR*tauy(i,j)/taub
+	  ! loadVR = facVR*loadfac*(max(taub*shieldfac/shields_crit-1,zero)**2.1)
+	  ! 	  qx(i,j) = loadVR*taux(i,j)/taub
+	  ! 	  qy(i,j) = loadVR*tauy(i,j)/taub
      !dzdx = -(b(i+1,j)-b(i-1,j))/(2*dx(1))
      !qx(i,j) = qx(i,j)*sed_angle/(sed_angle-dzdx)
 	 end do
@@ -196,34 +196,36 @@ end subroutine flux_sed
 ! note: dimensioning on jflux (j before i)
 !==============================================================================
 
-subroutine consdiff_sed(dx,i1,i2,j1,j2,iflux,jflux,bedlevel,b)
+subroutine consdiff_sed(dx,i1,i2,j1,j2,xlo,xhi,iflux,jflux,bedlevel,b,h)
     
   use gparms
   use cntrl
   implicit none
   integer,  intent(in   ) :: i1,i2,j1,j2
-  real(dp), intent(in   ) :: dx(2)
+  real(dp), intent(in   ) :: dx(2),xlo(2),xhi(2)
   real(dp), intent(in   ) :: iflux(i1-NFGST:i2+1+NFGST,j1-NFGST:j2+NFGST)
   real(dp), intent(in   ) :: jflux(j1-NFGST:j2+1+NFGST,i1-NFGST:i2+NFGST)
   real(dp), intent(inout) :: bedlevel(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
   real(dp), intent(inout) :: b(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
+  real(dp), intent(in   ) :: h(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
   
   !local
-  real(dp) :: bedlevel_last(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
+  real(dp) :: delta(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
   integer  :: i,j
-  real(dp) :: oodx,oody
+  real(dp) :: oodx,oody,xc
 
   !precompute 1/dx,  1/dy
   oodx = one/dx(1);
   oody = one/dx(2);
   
   !store previous bed thickness for use in morphodynamic adjustment
-  bedlevel_last = bedlevel  
+  delta = zero
+  !bedlevel_last = bedlevel  
 
   !loop over internal cells, update state variables using convervative diff on fluxes
   do i=i1,i2
 	do j=j1,j2
-      bedlevel(i,j) = bedlevel(i,j) &
+      delta(i,j) =  &
                -oodx*(iflux(i+1,j)-iflux(i,j)) &
                -oody*(jflux(j+1,i)-jflux(j,i)) 
    !  if(j==1)then
@@ -238,11 +240,43 @@ subroutine consdiff_sed(dx,i1,i2,j1,j2,iflux,jflux,bedlevel,b)
  !   enddo
   ! write(*,*)'check: ',bedlevel(i1,1),iflux(i1+1,1),iflux(i1,1)
      !stop
+ 
+
+  !ensure bed does not penetrate free surface - fudge
+!  if(caseid==roelvink)then
+
+   !ensure that after modification we are maintaining some kind of minimum depth
+	 delta = min(delta,h-min_morph_depth)  !kind of a fudge
+!  endif
+  ! 	do i=i1,i2
+  ! 		do j=j1,j2
+  ! 			if(bedlevel(i,j)-bedlevel_last(i,j) > (h(i,j)+.10) )then
+  ! 			  bedlevel(i,j) = bedlevel_last(i,j)
+  ! 			endif
+  ! 		end do
+  ! 	end do
+	
+  !update bedlevel
+  bedlevel = bedlevel + delta 
+
+ !  !!fudge, we are getting an accretion singularity at the wall of the inlet leading to bottom penetrating the FS
+ !    if(caseid==roelvink)then
+ !      	do i=i1,i2
+ !    	   xc = xlo(1)+dx(1)*dble(i-i1)+dx(1)/2
+ !    	   if(xc >=5000 .and. xc <= 5250)then
+ !    		  do j=j1,j2
+ !    	       bedlevel(i,j) = min(bedlevel(i,j),.8)
+ !    	     end do
+ !    	   endif
+ !    	 end do
+ !    	endif
 
   !update bathymetry using change in bed level morphodynamics is active
   if(sedmodel == 2)then
-    b = b + (bedlevel - bedlevel_last)
+    b = b + delta
   endif
+
+
 
   return
 end subroutine consdiff_sed

@@ -109,6 +109,7 @@ using namespace std;
 #define TRENCH          (25)
 #define DEVRIEND        (26)
 #define TRENCHY         (27)
+#define UNIFORM	      (28)
 
 // defines for cell tagging routines
 #define RICHARDSON_NEWLY_TAGGED (-10)
@@ -317,6 +318,8 @@ swe::swe(
 	  d_data_problem_int = DEVRIEND;
 	} else if (d_data_problem == "TRENCHY") {
 	  d_data_problem_int = TRENCHY;
+	} else if (d_data_problem == "UNIFORM") {
+	  d_data_problem_int = UNIFORM;
    } else {
       TBOX_ERROR(d_object_name << ": "
          << "Unknown d_data_problem string = "
@@ -910,11 +913,12 @@ void swe::conservativeDifferenceOnPatch(
 
 		//update bed thickness if sediment model is active and bathymetry if morpho active
 		if(d_sedmodel > 0 && time > d_sedinit){
-			consdiff_sed_(dx,ifirst(0),ilast(0),ifirst(1),ilast(1), //FORTRAN
+			consdiff_sed_(dx,ifirst(0),ilast(0),ifirst(1),ilast(1),xlo,xhi, //FORTRAN
 				fluxsed->getPointer(0),
 				fluxsed->getPointer(1),
 				bedlevel->getPointer(),
-				bathy->getPointer());
+				bathy->getPointer(),
+				depth->getPointer());
 		}
 		
 		// friction term (d_frictype==0 => no friction)
@@ -1142,7 +1146,7 @@ void swe::setPhysicalBoundaryConditions(
 		// extrapolation for ud/vd)
 		// note we do not set values for d_bdry_edge_veldepth
    } else if(d_data_problem == "ROELVINK"){
-		double H0_roel = 2;
+		double H0_roel = 10;
 		double eta0_roel = 1.0;
 		double T_roel = 12*3600;
 		double h; //,u;
@@ -1164,7 +1168,7 @@ void swe::setPhysicalBoundaryConditions(
 										//equation  
 										//u = eta0_hen*sqrt(9.81/H0_hen)*cos(2*3.14159*fill_time/T_hen);
 				d_bdry_edge_depth[i] = h;
-				d_bdry_edge_bathy[i] = -2;  //MUST SET DIRICHLET BATHYMETRY
+				d_bdry_edge_bathy[i] = -10;  //MUST SET DIRICHLET BATHYMETRY
 				//d_bdry_edge_bedlevel[i] = 99.0;
 				//								d_bdry_edge_veldepth[i*PDIM+0] = 0.; //u*h;
 				//								d_bdry_edge_veldepth[i*PDIM+1] = 0.; //u*h;

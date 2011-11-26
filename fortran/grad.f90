@@ -105,17 +105,17 @@ subroutine detectgrad(time,i1,i2,j1,j2,ngi,ngj,ngtagi,ngtagj,ngtti,ngttj,dx,xlo,
     enddo
   enddo
 
-!   if(caseid==roelvink)then
-! 	do i=i1,i2
-! 		xc = xlo(1) + dx(1)*dble(i-i1)+dx(1)/2
-! 		
-! 		do j=j1,j2
-! 	      yc = xlo(2) + dx(2)*dble(j-j1)+dx(2)/2
-! 		  temptags(i,j) = notag
-! 		  if(xc >= 2500 .and. xc <=7500 .and. yc >6000 .and. yc < 10000) temptags(i,j) = yestag
-! 		end do
-! 	end do
-!   endif
+  if(caseid==roelvink)then
+	do i=i1,i2
+		xc = xlo(1) + dx(1)*dble(i-i1)+dx(1)/2
+		
+		do j=j1,j2
+	      yc = xlo(2) + dx(2)*dble(j-j1)+dx(2)/2
+		  temptags(i,j) = notag
+		  if(xc >= 2500 .and. xc <=8000 .and. yc >5000 .and. yc < 10000) temptags(i,j) = yestag
+		end do
+	end do
+  endif
 ! if(caseid==roelvink)then
 ! 	do i=i1,i2
 ! 		xc = xlo(1) + dx(1)*dble(i-i1)+dx(1)/2		

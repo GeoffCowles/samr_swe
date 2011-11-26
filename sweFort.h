@@ -65,9 +65,10 @@ extern "C" {
 
   void consdiff_sed_(
   const double*, 
-  const int&, const int&, const int&, const int&,
+  const int&, const int&, const int&, const int&, 
+  const double*, const double*,
   double*, double*, 
-  double*, double* );
+  double*, double*,double* );
 
   void friction_(
   const double*, const double&,

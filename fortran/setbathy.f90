@@ -39,7 +39,7 @@ subroutine setbathy(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,b)
   real(dp) :: inner_rad,outer_rad,con_height,fac,rad,theta_scrit
   real(dp) :: t1,t2,t3,t4,f1,f2
   real(dp) :: devriend_x,devriend_y,devriend_amp,devriend_rad,dist
-
+  real(dp) :: slope
   caseid = cid
  
   select case(caseid)
@@ -310,7 +310,7 @@ subroutine setbathy(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,b)
   do i=i1-igst,i2+igst
      do j=j1-jgst,j2+jgst
 	  xc = xlo(1)+dx(1)*dble(i-i1)+dx(1)/2
-	  if(xc < -5000)then
+	  if(xc < 5000)then
 	    fac    = xc/5000.
 	    b(i,j) = -10*(1-fac) + -2*(fac)
 	  else
@@ -393,7 +393,7 @@ subroutine setbathy(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,b)
       yc = xlo(2)+dx(2)*dble(j-j1)+dx(2)/2
       dist = (xc-devriend_x)**2 + (yc-devriend_y)**2
       b(i,j) = devriend_amp*exp(-dist/(2*devriend_rad*devriend_rad)) 
-      b(i,j) = b(i,j) !- xc*4.64e-5 !add slope to counteract friction? (tau = .4667 at C_manning=.01)
+      b(i,j) = b(i,j) - xc*4.64e-5 !add slope to counteract friction? (tau = .4667 at C_manning=.01)
  	end do 
   end do
 
@@ -404,6 +404,7 @@ subroutine setbathy(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,b)
 	t2 = trench_mid-trench_half_width;
 	t3 = trench_mid+trench_half_width;
 	t4 = trench_mid+(trench_half_width+trench_slope_width);
+	
 
 	 do i=i1,i2
 	    do j=j1,j2
@@ -424,9 +425,21 @@ subroutine setbathy(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,b)
 	      b(i,j) = -b(i,j)+bath_trench1
 	    end do
 	  end do
-  !write(*,*)'max b',maxval(b),minval(b),xlo(1),xlo(2)
-  !stop
-  
+	
+	!---------------------------------------------------------------------
+	case(uniform) !simple uniform, subcritical flow
+	!---------------------------------------------------------------------
+    
+    slope = -gravity*C_manning*C_manning*(uniform_h**(-7./3.))*((uniform_u*uniform_h)**2)
+    slope =  slope/(uniform_h*gravity)
+    
+	 do i=i1,i2
+	    do j=j1,j2  
+		   xc = xlo(1)+dx(1)*dble(i-i1)+dx(1)/2
+		   yc = xlo(2)+dx(2)*dble(j-j1)+dx(2)/2
+	      b(i,j) = slope*xc
+	    end do
+	  end do
   
   end select 
 
