@@ -359,7 +359,7 @@ swe::swe(
    //bind the control parameters between C++ and fortran 
    c2f_(d_dim.getValue(),NSTATE,NSCAL,CELLG,FLUXG, //FORTRAN
 	d_data_problem_int,d_C_manning,d_mindepth,d_fluxorder,d_transverse,
-	d_sedmodel,d_sedinit,d_d50,d_morphfactor); 
+	d_sedmodel,d_sedinit,d_d50,d_morphfactor,d_frictype); 
               
 }  // <=  end of swe constructor
 

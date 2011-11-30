@@ -157,7 +157,7 @@ subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,b,iflux,jflux)
     endif
    
   
-   if(cid .ne. devriend)then  !fudge, shut off y-dir bedload for devriend hump case
+!   if(cid .ne. devriend)then  !fudge, shut off y-dir bedload for devriend hump case
    do i=i1,i2
   	do j=j1,j2+1
   	  tau_edge = .5*(tauy(i,j)+tauy(i,j-1))
@@ -165,7 +165,7 @@ subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,b,iflux,jflux)
      !if(tauy(i,j)*tauy(i,j-1) < 0.0) jflux(j,i)=zero
   	end do
    end do
-   endif
+!   endif
 
    !set flux to zero at bottom boundary !FUDGE
    if(cid==trenchy)then
@@ -173,6 +173,13 @@ subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,b,iflux,jflux)
      jflux(0,:) = jflux(1,:)
    endif
    endif
+
+  !  !set flux to zero along line of symmetry in devriend case
+  !    if(cid==devriend)then
+  !    if(abs(xlo(2))<1e-5)then
+  !      jflux(0,:) = zero
+  !    endif
+  !    endif
 
 
   

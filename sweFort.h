@@ -105,6 +105,6 @@ extern "C" {
 
    void c2f_(const int& , const int& , const int&, const int& , const int&,
        const int&, const double&, const double&, const int&, const int&,
-       const int&, const double&, const double&, const double& );
+       const int&, const double&, const double&, const double&, const int& );
 
 }

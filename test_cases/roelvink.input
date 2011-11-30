@@ -12,7 +12,7 @@ swe {
    frictype             = 2
 
 // C_manning:  manning (n) friction coefficient (only used if frictype == 2)
-   C_manning            = 0.015
+   C_manning            = 0.01 
 
 // fluxorder: order of the spatial flux
 //    = 1 => 1st order
@@ -124,7 +124,7 @@ Main {
  
 // visualization dump parameters
    viz_writer            = "VisIt" // use: "Vizamrai", "VisIt" for both
-   viz_dump_interval     = 120         // zero to turn off
+   viz_dump_interval     = 15700      // zero to turn off
    viz_dump_dirname      = "viz_roelvink"
    viz_dump_filename     = "roelvink"   // not used by VisIt
    visit_file_cluster_size = 1        // not used by Vizamrai
@@ -165,18 +165,63 @@ CartesianGeometry {
 //                  [ (22,0), (59,63) ]
 
 // two-cell inlet (one-cell inlet crashes AMR) at higher res
-   domain_boxes = [ (0,0) , (39,55) ],
-                  [ (0,56), (41,71) ],
-                  [ (0,72), (39,127)],
-                  [ (42,0), (119,127) ]
+//   domain_boxes = [ (0,0) , (39,55) ],
+//                  [ (0,56), (41,71) ],
+//                  [ (0,72), (39,127)],
+//                  [ (42,0), (119,127) ]
+//
+// half an inlet 
+//   domain_boxes = [ (0,0) , (41,7) ],
+//                  [ (0,8), (39,63) ],
+//                  [ (42,0), (119,63) ]
 
 
-//   domain_boxes = [ (0,0) , (10,10) ]
+// coarse model testing (will crash with AMR)
+//   domain_boxes = [ (0,0) , (10,1) ],
+//                  [ (0,4) , (9,14) ], 
+//                  [ (11,0), (29,14) ]
+//
 
+// 0.5 resolution, 1-cell inlet width, full domain
+//domain_boxes = [ (0,0) , (9,12) ],
+//               [ (0,13) , (10,16) ],
+//               [ (0,17) , (9,29) ],
+//               [ (11,0) , (29,29) ]
 
+// 0.5 resolution, 1-cell inlet width, half domain
+//domain_boxes = [ (0,0) , (10,1) ],
+//               [ (0,2) , (9,14) ],
+//               [ (0,17) , (9,29) ] 
 
-   x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
-   x_up         = 15000, 15000  // upper end of computational domain.
+// 0.5x0.25 resolution, 1-cell inlet width, half domain
+//domain_boxes = [ (0,0) , (10,3) ],
+//               [ (0,4) , (9,29) ],
+//               [ (11,0) , (29,29) ] 
+//x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
+//x_up         = 15000, 7500   // upper end of computational domain.
+
+// 0.5x0.25 resolution, 1-cell inlet width, full domain
+//domain_boxes = [ (0,0) , (9,25) ],
+//               [ (0,26) , (10,33) ],
+//               [ (0,34) , (9,59) ],
+//               [ (11,0) , (29,59) ]
+//x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
+//x_up         = 15000, 15000  // upper end of computational domain.
+
+// .25 x .25 resolution, 1-cell inlet width, half domain
+//domain_boxes = [ (0,0) , (20,3) ],
+//               [ (0,4) , (19,29) ],
+//               [ (21,0) , (59,29) ]
+//x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
+//x_up         = 15000, 7500   // upper end of computational domain.
+
+// .125 x .125 resolution, 1-cell inlet width, half domain
+domain_boxes = [ (0,0) , (40,7) ],
+               [ (0,8) , (39,59) ],
+               [ (41,0) , (119,59) ] 
+x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
+x_up         = 15000, 7500   // upper end of computational domain.
+
 }
 
 StandardTagAndInitialize{
@@ -197,7 +242,7 @@ PatchHierarchy{
    }
 
    smallest_patch_size {
-      level_0 = 4 , 4
+      level_0 = 2 , 2
       level_1 = 8 , 8
       // all finer levels will use same values as level_0...
    }
@@ -217,9 +262,12 @@ HyperbolicLevelIntegrator{
 
 TimeRefinementIntegrator{
    start_time           = 0.e0     // initial simulation time
-   end_time             = 2160000.   // final simulation time
+   end_time             = 25920000.   // final simulation time
+//   end_time             = 432000.     // final simulation time
+//   end_time = 86400.
    grow_dt              = 1.1e0    // growth factor for timesteps
-   max_integrator_steps = 300000000       // max number of simulation timesteps
+   max_integrator_steps = 30000000       // max number of simulation timesteps
+//   max_integrator_steps = 20              // max number of simulation timesteps
 }
 
 LoadBalancer {

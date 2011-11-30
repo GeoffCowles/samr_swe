@@ -9,7 +9,9 @@ swe {
 //   = 0 => no friction
 //   = 1 => linear friction
 //   = 2 => Manning style friction
-   frictype             = 2
+//    note if frictype=2, need to set dirichlet downstream (see below) and give the domain a 
+//     constant bathymetric slope (see DEVRIEND section of setdepth.f90)
+   frictype             = 0
 
 // C_manning:  manning (n) friction coefficient (only used if frictype == 2)
    C_manning            = 0.01
@@ -68,6 +70,7 @@ swe {
       
    }
 
+//     below - use dirichlet xhi if frictype above is 2
    // valid boundary_condition values are "FLOW", "REFLECT", "DIRICHLET"
    Boundary_data {
       boundary_edge_xlo {
@@ -77,16 +80,16 @@ swe {
          bedlevel = 0.0
          veldepth = 10.,0.0
       }
-      boundary_edge_xhi {
-         boundary_condition      = "DIRICHLET"
-         depth = 10.0
-         bathy = -.0928 
-         bedlevel = 0.0
-         veldepth = 10.,0.0
-      }
 //      boundary_edge_xhi {
-//         boundary_condition      = "FLOW"    
+//         boundary_condition      = "DIRICHLET"
+//         depth = 10.0
+//         bathy = -.0928 
+//         bedlevel = 0.0
+//         veldepth = 10.,0.0
 //      }
+      boundary_edge_xhi {
+         boundary_condition      = "FLOW"    
+      }
 //      boundary_edge_xlo {
 //         boundary_condition      = "FLOW"
 //      }
@@ -163,11 +166,13 @@ TimerManager{
 CartesianGeometry {
 //domain_boxes = [(0,0) , (63,3)] //useful for 1-D gaussian
 //domain_boxes = [(0,0) , (99,49)]  //good for 3-level AMR
-domain_boxes = [(0,0) , (99,24)]  //good for 3-level AMR
-//domain_boxes = [(0,0) , (199,99)]  //
+//domain_boxes = [(0,0) , (95,23)]  //good for 3-level AMR
+//domain_boxes = [(0,0) , (95,49)]  //good for 3-level AMR
+domain_boxes = [(0,0) , (199,99)]  //
 
 
    x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
+ //  x_up         = 20000.0,  5000.0   // upper end of computational domain.
    x_up         = 20000.0,  10000.0   // upper end of computational domain.
 }
 
@@ -184,7 +189,7 @@ PatchHierarchy{
    }
 
    largest_patch_size {
-      level_0 = 32,32    
+      level_0 = 96,24    
       // all finer levels will use same values as level_0...
    }
 

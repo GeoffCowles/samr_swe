@@ -539,7 +539,7 @@ subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,bedlevel)
 	
 	devriend_amp = 5.    !amplitude of hump
    devriend_x   = 5000. !x location of hump center
-   devriend_y   = 5000. !y location of hump center
+   devriend_y   = 0000. !y location of hump center
    devriend_rad = 1000. !radius of hump
    do i=i1-igst,i2+igst
 	 do j=j1-jgst,j2+jgst

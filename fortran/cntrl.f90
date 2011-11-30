@@ -60,6 +60,9 @@ module cntrl
   integer, parameter :: trenchy = 27
   integer, parameter :: uniform = 28
 
+  !friction
+  integer  :: frictype !=0, no friction, =1 linear, = 2 Manning
+
   !floodying/drying
   real(dp) :: mindepth 
   logical  :: conserve_volume = .false.
@@ -72,10 +75,11 @@ module cntrl
   real(dp) :: morphfactor
   real(dp) :: porosity = .5 !bed porosity
   logical  :: lesser_slope = .true.
+
   !real(dp) :: d50 = .0001 !.4 mm  !note, .0001 is good for trench case
 
   !morphology
-  real(dp) :: min_morph_depth = .10  !minimum depth for morpho cases (if avoiding wet/dry)
+  real(dp) :: min_morph_depth = .20  !minimum depth for morpho cases (if avoiding wet/dry)
 
   !trench params
   real(dp), parameter :: trench_half_width = 2.0

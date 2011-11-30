@@ -21,7 +21,7 @@
 
 subroutine c2f(ndims_in,nequs_in,nscal_in,ncgst_in,nfgst_in, & 
       caseid_in,cmanning_in,mindepth_in,fluxorder_in,transverse_in, & 
-      sedmodel_in, sedinit_in, d50_in, morphfactor_in)
+      sedmodel_in, sedinit_in, d50_in, morphfactor_in, frictype_in)
 
   use gparms
   use cntrl
@@ -30,7 +30,7 @@ subroutine c2f(ndims_in,nequs_in,nscal_in,ncgst_in,nfgst_in, &
   integer,  intent(in) :: ncgst_in,nfgst_in
   real(dp), intent(in) :: cmanning_in,mindepth_in
   integer,  intent(in) :: caseid_in, fluxorder_in, transverse_in
-  integer,  intent(in) :: sedmodel_in
+  integer,  intent(in) :: sedmodel_in,frictype_in
   real(dp), intent(in) :: sedinit_in,d50_in,morphfactor_in
 
   !set dimensions and ghost cell buffers
@@ -54,6 +54,7 @@ subroutine c2f(ndims_in,nequs_in,nscal_in,ncgst_in,nfgst_in, &
   sedinit     = sedinit_in
   d50         = d50_in
   morphfactor = morphfactor_in
+  frictype    = frictype_in
 
   write(*,*) 'interfacing parameters to Fortran'
   write(*,*) 'mindepth: ',mindepth

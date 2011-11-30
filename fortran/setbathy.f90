@@ -385,15 +385,20 @@ subroutine setbathy(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,b)
   !---------------------------------------------------------------------
   devriend_amp = 5.    !amplitude of hump
   devriend_x   = 5000. !x location of hump center
-  devriend_y   = 5000. !y location of hump center
+  devriend_y   = 0000. !y location of hump center
   devriend_rad = 1000. !radius of hump
+  if(frictype==0)then
+	 fac = 0.
+  else
+	 fac = 1.
+  endif
   do i=i1-igst,i2+igst
 	do j=j1-jgst,j2+jgst
       xc = xlo(1)+dx(1)*dble(i-i1)+dx(1)/2
       yc = xlo(2)+dx(2)*dble(j-j1)+dx(2)/2
       dist = (xc-devriend_x)**2 + (yc-devriend_y)**2
       b(i,j) = devriend_amp*exp(-dist/(2*devriend_rad*devriend_rad)) 
-      b(i,j) = b(i,j) - xc*4.64e-5 !add slope to counteract friction? (tau = .4667 at C_manning=.01)
+      b(i,j) = b(i,j) - fac*xc*4.64e-5 !add slope to counteract friction? (tau = .4667 at C_manning=.01)
  	end do 
   end do
 
