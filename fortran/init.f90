@@ -514,7 +514,7 @@ subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,bedlevel)
 	    do j=j1,j2
 			xc = xlo(1)+dx(1)*dble(i-i1)+dx(1)/2
 			
-			if(xc > t1 .and. xc < t4)then
+			if(xc > t2 .and. xc < t3)then
 			  h(i,j) = bath_trench2
 			else if (xc > t1 .and. xc < t2)then
 				f1 = (xc-t1)/trench_slope_width
@@ -563,7 +563,7 @@ subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,bedlevel)
 	 do i=i1,i2
 	    do j=j1,j2
 		   yc = xlo(2)+dx(2)*dble(j-j1)+dx(2)/2
-			if(yc > t1 .and. yc < t4)then
+			if(yc > t2 .and. yc < t3)then
 			  h(i,j) = bath_trench2
 			else if (yc > t1 .and. yc < t2)then
 				f1 = (yc-t1)/trench_slope_width

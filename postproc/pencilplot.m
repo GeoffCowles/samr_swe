@@ -67,12 +67,14 @@ for i=0:iskip:10000
   title('eta')
   subplot(nplots,1,4)
   plot(xinit,binit,'r'); hold on
-  plot(x,b,'k')
+  plot(x,b,'k+')
   plot(x,b+d,'r')
   axis([min(x),max(x),min(b)-.1,max(b+d)+.1]); 
   title('b')
   subplot(nplots,1,5)
-  plot(x,ST_manning(d,u,C_manning),'k')
+  taux = ST_manning(d,u,C_manning);
+  plot(x,taux,'k')
+  axis([min(x),max(x),min(taux)-.1,max(taux)+.1]); 
   title('taub (N)')
   subplot(nplots,1,6)
   plot(xinit,blvalinit,'r') 

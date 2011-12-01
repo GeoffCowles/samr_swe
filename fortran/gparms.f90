@@ -73,11 +73,12 @@ real(dp), parameter :: rho_w = 1025
 !    rho_sed :: sediment density [kg/m^3]
 !    por_sed :: sediment parosity [-]
 !    shields_crit :: critical shields parameter [-]
+!    sed_repose_slope :: slope for angle of repose of sediment
 !----------------------------------------------------------------
 real(dp), parameter :: rho_sed = 2650
 real(dp), parameter :: por_sed = .5
 real(dp), parameter :: shields_crit = .047
-real(dp), parameter :: sed_angle = tan(33.0_dp*d2r)
+real(dp), parameter :: sed_repose_slope = tan(33.0_dp*d2r)
 
 !----------------------------------------------------------------
 !large and small numbers

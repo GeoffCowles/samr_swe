@@ -2,8 +2,8 @@
 clear all;
 
 full = 0;
-dx = .125;
-dy = .125; %must be integer fraction 1
+dx = .05;
+dy = .05; %must be integer fraction 1
 wallthick = 1;
 inlet = 2;
 lx = 15.;

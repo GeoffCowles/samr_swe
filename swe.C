@@ -1091,10 +1091,12 @@ void swe::setPhysicalBoundaryConditions(
 
    //set boundary conditions for cells corresponding to patch edges
    tbox::Array<int> tmp_edge_scalar_bcond(NUM_2D_EDGES);
+   tbox::Array<int> tmp_edge_bathy_bcond(NUM_2D_EDGES);
    tbox::Array<int> tmp_edge_veldepth_bcond(NUM_2D_EDGES);
    tbox::Array<int> tmp_edge_vector_bcond(NUM_2D_EDGES);
    for (int i = 0; i < NUM_2D_EDGES; i++) {
       tmp_edge_scalar_bcond[i] = d_scalar_bdry_edge_conds[i];
+      tmp_edge_bathy_bcond[i] = FLOW_BC;
       tmp_edge_veldepth_bcond[i] = d_scalar_bdry_edge_conds[i];
       tmp_edge_vector_bcond[i] = d_vector_bdry_edge_conds[i];
    }
@@ -1258,7 +1260,8 @@ void swe::setPhysicalBoundaryConditions(
       fillEdgeBoundaryData("bathy", bathy,
    	                   patch,
    					       ghost_width_to_fill,
-   					       tmp_edge_scalar_bcond,
+   					       //tmp_edge_bathy_bcond,
+                         tmp_edge_scalar_bcond,
    					       d_bdry_edge_bathy);
 
 	appu::CartesianBoundaryUtilities2::

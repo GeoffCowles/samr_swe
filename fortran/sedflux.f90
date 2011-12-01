@@ -51,7 +51,8 @@ subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,b,iflux,jflux)
   real(dp) :: qx(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
   real(dp) :: qy(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
   real(dp) :: taub,tau_edge
-  real(dp) :: fac1,fac2,shieldfac,gprime,facMPM,facVR,dstar,loadMPM,loadVR,loadfac
+  real(dp) :: fac1,fac2,shieldfac,gprime,facMPM,facVR,dstar,loadMPM,loadVR,loadEH,loadfac
+  real(dp) :: slope_fac,dbdx,dbdy,slmax,oo2dx,oo2dy
   real(dp) :: dzdx
   integer i,j
 
@@ -76,7 +77,7 @@ subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,b,iflux,jflux)
   
   
  
-  !compute solid load at cell centers (units = m^2/s)
+  !compute solid load at cell centers (units = m^2/s) [=> qx,qy]
   do j=j1-NCGST,j2+NCGST
     do i=i1-NCGST,i2+NCGST
 
@@ -89,8 +90,8 @@ subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,b,iflux,jflux)
 	  !compute the load at cell centers (ignore slope for now) using MPM formula
 	  !see eq. 11 de Swart and Zimmerman 2000.
 	  loadMPM = facMPM*loadfac*(max(taub*shieldfac - shields_crit,0.0)**1.5d0)
-	  	  	  qx(i,j) = loadMPM*taux(i,j)/taub
-	  	  	  qy(i,j) = loadMPM*tauy(i,j)/taub
+	  qx(i,j) = loadMPM*taux(i,j)/taub
+	  qy(i,j) = loadMPM*tauy(i,j)/taub
 	  
 	
 	  !compute the load at cell centers (ignore slope for now) using Van Rijn 1984
@@ -98,8 +99,36 @@ subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,b,iflux,jflux)
 	  ! 	  qx(i,j) = loadVR*taux(i,j)/taub
 	  ! 	  qy(i,j) = loadVR*tauy(i,j)/taub
      !dzdx = -(b(i+1,j)-b(i-1,j))/(2*dx(1))
+     
      !qx(i,j) = qx(i,j)*sed_angle/(sed_angle-dzdx)
+
+     !engelund and hansen (x-dir only for now) !fudge
+     !see van der wegen and roelvink, JGR 2008
+     !loadEH = .05*((vh(i,j,1)/h(i,j))**5)/(sqrt(gravity)*((h(i,j)**(1./6.)/C_manning)**3)*((rho_sed/rho_w-1)**2)*d50)
+     !qx(i,j) = loadEH*taux(i,j)/taub
 	 end do
+	end do
+	
+	!modify loads using bedslope formulations (e.g. lesser et al. in Warner, VDW & ROELVINK)
+	!note the minus sign on dbdx/dbdy.  Our stresses here are in the sense of direction of the flow
+	!a +u flow will produce a +taux.  We would then want a positive bed slope (rising in x) to 
+	!have an adverse effect (< 0) on the load 
+	
+
+	oo2dx = 1./(2*dx(1))
+	oo2dy = 1./(2*dx(2))
+	slmax = .9*sed_repose_slope  !limit the bedslope to 90% of the angle of repose
+	do j=j1-1,j2+1
+	    do i=i1-1,i2+1
+         dbdx = -sign(1.,taux(i,j))*min( (b(i+1,j)-b(i-1,j))*oo2dx , slmax)
+         slope_fac = sed_repose_slope/( cos(atan(dbdx))*(sed_repose_slope - dbdx) )
+         !write(*,*)i,slope_fac,dbdx/(-sign(1.,taux(i,j)))
+         qx(i,j) = qx(i,j)*slope_fac
+
+         dbdy = -sign(1.,tauy(i,j))*min( (b(i,j+1)-b(i,j-1))*oo2dy , slmax)
+         slope_fac = sed_repose_slope/( cos(atan(dbdy))*(sed_repose_slope - dbdy) )
+         qy(i,j) = qy(i,j)*slope_fac
+		end do
 	end do
 	
 	!compute load fluxes on edges using upwinded formulation
@@ -112,8 +141,9 @@ subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,b,iflux,jflux)
 	do i=i1,i2+1
 	   tau_edge = ahalf*(taux(i,j)+taux(i-1,j))
 		iflux(i,j) = fac1*((1+sign(1.,tau_edge))*qx(i-1,j)+(1-sign(1.,tau_edge))*qx(i,j)) !upwind flux
-		! dzdx = -(b(i,j)-b(i-1,j))/dx(1)
-		! 		iflux(i,j) = iflux(i,j)*sed_angle/(sed_angle-dzdx)
+		 !dzdx = -(b(i,j)-b(i-1,j))/dx(1)   !need these for trench case
+		 !dzdx = -(b(i+1,j)-b(i-1,j))/(2*dx(1))
+		 !iflux(i,j) = iflux(i,j)*sed_angle/(sed_angle-dzdx)  !need for trench case
 		
 	   !iflux(i,j) = fac1*(qx(i-1,j)+qx(i,j))  !centered flux
 	end do
@@ -149,11 +179,11 @@ subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,b,iflux,jflux)
    !set flux to zero at left boundary !FUDGE
    if(cid==trench .or. cid==devriend)then
    if(abs(xlo(1))<1e-5)then
-     iflux(0,:) = iflux(1,:)
-   endif
-  !     if(abs(xhi-22.)<1e-5)then
-  !    	     iflux(i2+1,:) = iflux(i2,:)
-  !    	   endif
+           iflux(0,:) = iflux(1,:)
+         endif
+   !    if(abs(xhi(1)-22.)<1)then
+   !        	     iflux(i2+1,:) = iflux(i2,:)
+   !        	   endif
     endif
    
   
@@ -162,7 +192,7 @@ subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,b,iflux,jflux)
   	do j=j1,j2+1
   	  tau_edge = .5*(tauy(i,j)+tauy(i,j-1))
   	  jflux(j,i) = fac1*((1+sign(1.,tau_edge))*qy(i,j-1)+(1-sign(1.,tau_edge))*qy(i,j))
-     !if(tauy(i,j)*tauy(i,j-1) < 0.0) jflux(j,i)=zero
+     !if(tauy(i,j)*tauy(i,j-1) <= 0.0) jflux(j,i)=zero
   	end do
    end do
 !   endif
@@ -240,6 +270,7 @@ subroutine consdiff_sed(dx,i1,i2,j1,j2,xlo,xhi,iflux,jflux,bedlevel,b,h)
    ! 	endif
     enddo
   end do
+  
  !  do i=i1,i2
  !   do j=j1,j2
  ! 	 bedlevel(i,j) = .5*bedlevel(i,j) + .25*bedlevel(i-1,j)+.25*bedlevel(i+1,j)

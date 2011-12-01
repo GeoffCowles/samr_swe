@@ -47,7 +47,7 @@ swe {
    sedmodel = 2
    sedinit  = 20.0
    d50      = .0001 
-   morphfactor = 1000.0
+   morphfactor = 500.0 
 
    Refinement_data {
 //     refine_criteria = "DEPTH_GRADIENT"

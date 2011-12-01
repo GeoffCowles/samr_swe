@@ -222,6 +222,13 @@ domain_boxes = [ (0,0) , (40,7) ],
 x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
 x_up         = 15000, 7500   // upper end of computational domain.
 
+// .05 x .05 km resolution, 1-cell inlet width, half domain
+//domain_boxes = [ (0,0) , (100,19) ],
+//               [ (0,20) , (99,149) ],
+//               [ (101,0) , (299,149) ] 
+//x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
+//x_up         = 15000, 7500   // upper end of computational domain.
+
 }
 
 StandardTagAndInitialize{

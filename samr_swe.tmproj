@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>swe.C</string>
+	<string>fortran/sedflux.f90</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -44,9 +44,7 @@
 			<key>filename</key>
 			<string>swe.C</string>
 			<key>lastUsed</key>
-			<date>2011-11-29T21:26:58Z</date>
-			<key>selected</key>
-			<true/>
+			<date>2011-11-30T15:19:27Z</date>
 		</dict>
 		<dict>
 			<key>filename</key>
@@ -291,7 +289,7 @@
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>144</integer>
+			<integer>146</integer>
 		</dict>
 		<key>fortran/setbathy.f90</key>
 		<dict>
@@ -412,6 +410,6 @@
 	<key>showFileHierarchyDrawer</key>
 	<true/>
 	<key>windowFrame</key>
-	<string>{{893, 171}, {960, 936}}</string>
+	<string>{{931, 167}, {960, 936}}</string>
 </dict>
 </plist>
