@@ -70,26 +70,26 @@ swe {
 
    // valid boundary_condition values are "FLOW", "REFLECT", "DIRICHLET"
    Boundary_data {
-//      boundary_edge_xlo {
-//         boundary_condition      = "DIRICHLET" 
-//         depth = 0.4
-//         bathy = 0.0
-//         bedlevel = 0.0
-//         veldepth = 0.2,0.0
-//      }
-//      boundary_edge_xhi {
-//         boundary_condition      = "FLOW"    
-//      }
       boundary_edge_xlo {
-         boundary_condition      = "FLOW"
-      }
-      boundary_edge_xhi {
          boundary_condition      = "DIRICHLET" 
          depth = 0.4
          bathy = 0.0
          bedlevel = 0.0
-         veldepth = -0.2,0.0
+         veldepth = 0.2,0.0
       }
+      boundary_edge_xhi {
+         boundary_condition      = "FLOW"    
+      }
+//      boundary_edge_xlo {
+//         boundary_condition      = "FLOW"
+//      }
+//      boundary_edge_xhi {
+//         boundary_condition      = "DIRICHLET" 
+//         depth = 0.4
+//         bathy = 0.0
+//         bedlevel = 0.0
+//         veldepth = -0.2,0.0
+//      }
       boundary_edge_ylo {
          boundary_condition      = "REFLECT"
       }
@@ -135,7 +135,7 @@ Main {
  
 // visualization dump parameters
    viz_writer            = "VisIt" // use: "Vizamrai", "VisIt" for both
-   viz_dump_interval     = 0         // zero to turn off
+   viz_dump_interval     = 200         // zero to turn off
    viz_dump_dirname      = "viz_trench"
    viz_dump_filename     = "trench"   // not used by VisIt
    visit_file_cluster_size = 1        // not used by Vizamrai

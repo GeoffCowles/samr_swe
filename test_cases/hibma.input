@@ -200,7 +200,7 @@ TimeRefinementIntegrator{
 //   end_time = 86400.
    grow_dt              = 1.1e0    // growth factor for timesteps
    max_integrator_steps = 30000000       // max number of simulation timesteps
-//   max_integrator_steps = 20              // max number of simulation timesteps
+   //max_integrator_steps = 3              // max number of simulation timesteps
 }
 
 LoadBalancer {
