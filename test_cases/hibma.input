@@ -1,9 +1,9 @@
-// roelvink inlet test from Roelvink, J.A., Coastal Engineering 53, 2006, 277-287.
+// hibma channel shoal formation test case, ECSS 2003, v57 
 // 
 
 swe {
   
-   data_problem         = "ROELVINK"  
+   data_problem         = "HIBMA"     
 
 // frictype:  select the friction type
 //   = 0 => no friction
@@ -12,7 +12,7 @@ swe {
    frictype             = 2
 
 // C_manning:  manning (n) friction coefficient (only used if frictype == 2)
-   C_manning            = 0.01 
+   C_manning            = 0.026
 
 // fluxorder: order of the spatial flux
 //    = 1 => 1st order
@@ -47,8 +47,8 @@ swe {
    sedmodel = 2
    sedinit  = 43200
    // sedinit  = 60  //bug, sedinit=0 crashes, something isn't initialized properly
-   d50      = .0002  
-   morphfactor = 10. 
+   d50      = .00024 
+   morphfactor = 500. 
 
    Refinement_data {
 //     refine_criteria = "DEPTH_GRADIENT"
@@ -113,20 +113,20 @@ Main {
    base_name = "swe"
 
 // log file parameters 
-   log_file_name    = "roelvink.log"
+   log_file_name    = "hibma.log"
    log_all_nodes    = TRUE
 
 // matlab pencil file
    matlab_dump_interval  = 0 
    matlab_dump_filename  = "pencil"
-   matlab_dump_dirname   = "./pencil_roelvink"
+   matlab_dump_dirname   = "./pencil_hibma"
    matlab_pencil_direction = 0
  
 // visualization dump parameters
    viz_writer            = "VisIt" // use: "Vizamrai", "VisIt" for both
-   viz_dump_interval     = 864      // zero to turn off
-   viz_dump_dirname      = "viz_roelvink"
-   viz_dump_filename     = "roelvink"   // not used by VisIt
+   viz_dump_interval     = 2160      // zero to turn off
+   viz_dump_dirname      = "viz_hibma"
+   viz_dump_filename     = "hibma"   // not used by VisIt
    visit_file_cluster_size = 1        // not used by Vizamrai
 
 // restart dump parameters
@@ -143,108 +143,17 @@ TimerManager{
 }
 
 CartesianGeometry {
-//   domain_boxes = [ (0,0) , (9,13) ],
-//	          [ (11,0) , (29,13) ],
-//	          [ (0,14) , (29,17) ],
-//	          [ (0,18) , (9,31) ],
-//                  [ (11,18) , (29,31) ]
-//   domain_boxes = [ (0,0) , (19,27) ],
-//                  [ (21,0) , (59,27) ],
-//                  [ (0,28) , (59,35) ],
-//                  [ (0,36) , (19,63) ],
-//                  [ (21,36) , (59,63) ]
-//   domain_boxes = [ (0,0) , (19,27) ],
-//                  [ (0,28), (20,35) ],
-//                  [ (0,36), (19,63) ],
-//                  [ (21,0), (59,63) ]
 
-// two-cell inlet (one-cell inlet crashes AMR)
-//   domain_boxes = [ (0,0) , (19,27) ],
-//                  [ (0,28), (21,35) ],
-//                  [ (0,36), (19,63) ],
-//                  [ (22,0), (59,63) ]
+// very coarse Hibma mesh
+  domain_boxes = [ (0,0) , (79,4) ]
 
-// two-cell inlet (one-cell inlet crashes AMR) at higher res
-//   domain_boxes = [ (0,0) , (39,55) ],
-//                  [ (0,56), (41,71) ],
-//                  [ (0,72), (39,127)],
-//                  [ (42,0), (119,127) ]
-//
-// half an inlet 
-//   domain_boxes = [ (0,0) , (41,7) ],
-//                  [ (0,8), (39,63) ],
-//                  [ (42,0), (119,63) ]
+// coarse Hibma mesh
+//  domain_boxes = [ (0,0) , (159,9) ]
 
-
-// coarse model testing (will crash with AMR)
-//   domain_boxes = [ (0,0) , (10,1) ],
-//                  [ (0,4) , (9,14) ], 
-//                  [ (11,0), (29,14) ]
-//
-
-// 0.5 resolution, 1-cell inlet width, full domain
-//domain_boxes = [ (0,0) , (9,12) ],
-//               [ (0,13) , (10,16) ],
-//               [ (0,17) , (9,29) ],
-//               [ (11,0) , (29,29) ]
-
-// 0.5 resolution, 1-cell inlet width, half domain
-//domain_boxes = [ (0,0) , (10,1) ],
-//               [ (0,2) , (9,14) ],
-//               [ (0,17) , (9,29) ] 
-
-// 0.5x0.25 resolution, 1-cell inlet width, half domain
-//domain_boxes = [ (0,0) , (10,3) ],
-//               [ (0,4) , (9,29) ],
-//               [ (11,0) , (29,29) ] 
-//x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
-//x_up         = 15000, 7500   // upper end of computational domain.
-
-// 0.5x0.25 resolution, 1-cell inlet width, full domain
-//domain_boxes = [ (0,0) , (9,25) ],
-//               [ (0,26) , (10,33) ],
-//               [ (0,34) , (9,59) ],
-//               [ (11,0) , (29,59) ]
-//x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
-//x_up         = 15000, 15000  // upper end of computational domain.
-
-// .25 x .25 resolution, 1-cell inlet width, half domain
-//domain_boxes = [ (0,0) , (20,3) ],
-//               [ (0,4) , (19,29) ],
-//               [ (21,0) , (59,29) ]
-//x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
-//x_up         = 15000, 7500   // upper end of computational domain.
-
-// .125 x .125 resolution, 1-cell inlet width, half domain
-//domain_boxes = [ (0,0) , (40,7) ],
-//               [ (0,8) , (39,59) ],
-//               [ (41,0) , (119,59) ] 
-//x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
-//x_up         = 15000, 7500   // upper end of computational domain.
-
-// .25 x .25 res, 2-cell inlet width, half domain
-domain_boxes = [ (0,0) , (21,3) ],
-               [ (0,4) , (19,29) ],
-               [ (22,0) , (59,29) ] 
+//  Hibma mesh
+//  domain_boxes = [ (0,0) , (319,19) ]
 x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
-x_up         = 15000, 7500   // upper end of computational domain.
-
-// .05 x .05 km resolution, 1-cell inlet width, half domain
-//domain_boxes = [ (0,0) , (100,19) ],
-//               [ (0,20) , (99,149) ],
-//               [ (101,0) , (299,149) ] 
-//x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
-//x_up         = 15000, 7500   // upper end of computational domain.
-
-
-// .5 x .5 km resolution, 2-cell inlet width, full domain
-//domain_boxes = [ (0,0) , (9,12) ],
-//               [ (0,13) , (11,16) ],
-//               [ (0,17) , (9,29) ],
-//               [ (12,0) , (29,29) ]
-//x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
-//x_up         = 15000, 15000  // upper end of computational domain.
-
+x_up         = 80000, 2500  // upper end of computational domain.
 
 }
 
@@ -253,7 +162,7 @@ StandardTagAndInitialize{
 }
 
 PatchHierarchy{
-   max_levels          = 3        // Maximum number of levels in hierarchy.
+   max_levels          = 1        // Maximum number of levels in hierarchy.
 
    ratio_to_coarser {              // vector ratio to next coarser level
       level_1            = 2 , 2
@@ -261,7 +170,7 @@ PatchHierarchy{
    }
 
    largest_patch_size {
-      level_0 = 32 ,32 
+      level_0 = 128, 32
       // all finer levels will use same values as level_0...
    }
 

@@ -40,6 +40,8 @@ subroutine setbathy(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,b)
   real(dp) :: t1,t2,t3,t4,f1,f2
   real(dp) :: devriend_x,devriend_y,devriend_amp,devriend_rad,dist
   real(dp) :: slope
+  integer*4 timeArray(3)    ! Holds the hour, minute, and second
+  real rand
   caseid = cid
  
   select case(caseid)
@@ -443,10 +445,38 @@ subroutine setbathy(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,b)
 		   xc = xlo(1)+dx(1)*dble(i-i1)+dx(1)/2
 		   yc = xlo(2)+dx(2)*dble(j-j1)+dx(2)/2
 	      b(i,j) = slope*xc
+	      if(mod(i,2)==0)then
+		       fac = .25
+		    else
+			     fac = -.25
+			  endif
+	      b(i,j) = b(i,j) + fac
 	    end do
 	  end do
   
-  end select 
+
+  !---------------------------------------------------------------------
+	case(hibma) !hibma channel shoal formation case in 80x2.5 km domain
+	!---------------------------------------------------------------------
+   fac = .75
+   call itime(timeArray)     ! Get the current time
+	 i = rand ( timeArray(1)+timeArray(2)+timeArray(3) )
+	 do i=i1,i2
+	    do j=j1,j2  
+		   xc = xlo(1)+dx(1)*dble(i-i1)+dx(1)/2
+		   yc = xlo(2)+dx(2)*dble(j-j1)+dx(2)/2
+	      b(i,j) = -15 + 15*(xc/80000.) + 2*fac*(rand(0)-.5)
+	      !set odd/even bathymetry in i-direction only
+	      ! if(mod(i,2)==0)then
+	      ! 		       fac = .25
+	      ! 		    else
+	      ! 			     fac = -.25
+	      ! 			  endif
+	      ! 	      b(i,j) = -15 + 15*(xc/80000.) + fac   !odd/even bathymetry
+	    end do
+	  end do
+  
+  end select
 
   return
 

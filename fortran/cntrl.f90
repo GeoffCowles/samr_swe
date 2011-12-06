@@ -59,6 +59,7 @@ module cntrl
   integer, parameter :: devriend = 26
   integer, parameter :: trenchy = 27
   integer, parameter :: uniform = 28
+  integer, parameter :: hibma = 29
 
   !friction
   integer  :: frictype !=0, no friction, =1 linear, = 2 Manning
@@ -74,7 +75,11 @@ module cntrl
   real(dp) :: d50
   real(dp) :: morphfactor
   real(dp) :: porosity = .5 !bed porosity
-  logical  :: lesser_slope = .true.
+  integer  :: load_equation = 3
+  integer, parameter :: load_MPM = 1 !index for Meyer-Peter Mueller load calc
+  integer, parameter :: load_VR  = 2 !index for van Rijn load calc
+  integer, parameter :: load_EH  = 3 !index for Engelund + Hansen load calc
+  logical  :: sed_slope_effect = .true.
 
   !real(dp) :: d50 = .0001 !.4 mm  !note, .0001 is good for trench case
 

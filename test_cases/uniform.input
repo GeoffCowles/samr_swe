@@ -44,8 +44,8 @@ swe {
    //   = 1:  morphology is real time
    //   >1 :  morphology is accelerated
 
-   sedmodel = 0
-   sedinit  = 0.0
+   sedmodel = 2
+   sedinit  = 15000.
    d50      = .0002 
    morphfactor = 1000.0
 
@@ -135,7 +135,7 @@ Main {
    log_all_nodes    = TRUE
 
 // matlab pencil file
-   matlab_dump_interval  = 100  
+   matlab_dump_interval  = 200 
    matlab_dump_filename  = "pencil"
    matlab_dump_dirname   = "./pencil_uniform"
    matlab_pencil_direction = 0

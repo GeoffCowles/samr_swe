@@ -3,8 +3,9 @@ close all
 %casename = 'roelvink';
 dir = ['../pencil_' casename];  
 scrsz = get(0,'ScreenSize');
-figure('Position',[1 1 scrsz(4)/2 .66*scrsz(3)]) 
+%figure('Position',[1 1 scrsz(4)/2 .66*scrsz(3)]) 
 C_manning = .01;
+a = 0;
 
 %if(exist(option));
 % if(option == -1)
@@ -47,42 +48,12 @@ for i=0:iskip:10000
     dxinit = diff(x);
     blvalinit = blval;
   end;
+  if(max(blval)>.001)&(a==0)
+    ; blvalinit = blval; a=1 ; end;
+   
 
   clf
   drange = max(max(dinit)-min(dinit),max(dinit));
-  subplot(nplots,1,1)
-  plot(xinit,dinit,'r'); hold on
-  plot(x,d,'k-+')
-  title('d')
-  axis([min(x),max(x),min(d)-.1*drange,max(d)+.1*drange]);
-  subplot(nplots,1,2)
-  plot(xinit,uinit,'r'); hold on
-  plot(x,u,'k')
-  axis([min(x),max(x),min(u)-.1,max(u)+.1]);
-  title('u')
-  subplot(nplots,1,3)
-  plot(xinit,etainit,'r'); hold on
-  plot(x,eta,'k')
-  axis([min(x),max(x),.9*min(eta-eps),1.1*max(eta+eps)]); 
-  title('eta')
-  subplot(nplots,1,4)
-  plot(xinit,binit,'r'); hold on
-  plot(x,b,'k+')
-  plot(x,b+d,'r')
-  axis([min(x),max(x),min(b)-.1,max(b+d)+.1]); 
-  title('b')
-  subplot(nplots,1,5)
-  taux = ST_manning(d,u,C_manning);
-  plot(x,taux,'k')
-  axis([min(x),max(x),min(taux)-.1,max(taux)+.1]); 
-  title('taub (N)')
-  subplot(nplots,1,6)
-  plot(xinit,blvalinit,'r') 
-  plot(x,blval,'k') 
-  title('bedlevel (m)') 
-  if(nplots >=7)
-
-  subplot(nplots,1,7)
 %  dx = diff(x);
 %  plot(xinit,[dxinit',dxinit(end)'],'r'); hold on
 %  plot(x,[dx',dx(end)'],'k'); hold on
@@ -91,16 +62,16 @@ for i=0:iskip:10000
 
   taux = ST_manning(d,u,C_manning);
   taux = taux-mean(taux); 
-  plot(x,taux/max(taux),'r'); hold on;
-  plot(x,blval/max(blval),'k') 
+  plot(x,taux/max(taux),'r-o'); hold on;
+  plot(x,blval/max(blvalinit),'k-+') 
   d = d-mean(d);
-  plot(x,d/max(d),'b')
+  plot(x,d/max(d),'b-d')
   u = u-mean(u);
   plot(x,u/max(u),'g')
   b = b-mean(b);
-  plot(x,b/max(b),'m')
+  plot(x,b/max(binit),'m')
   title('bedlevel (black) and stress (red) and d (blue) and u (green) and b (magenta)')
-  end;
+  axis([.95e4,1.05e4,-1.2,1.2])
 
 
   if(nplots >=8)

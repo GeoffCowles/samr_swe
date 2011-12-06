@@ -70,26 +70,26 @@ swe {
 
    // valid boundary_condition values are "FLOW", "REFLECT", "DIRICHLET"
    Boundary_data {
-      boundary_edge_xlo {
-         boundary_condition      = "DIRICHLET" 
-         depth = 0.4
-         bathy = 0.0
-         bedlevel = 0.0
-         veldepth = 0.2,0.0
-      }
-      boundary_edge_xhi {
-         boundary_condition      = "FLOW"    
-      }
 //      boundary_edge_xlo {
-//         boundary_condition      = "FLOW"
-//      }
-//      boundary_edge_xhi {
 //         boundary_condition      = "DIRICHLET" 
 //         depth = 0.4
 //         bathy = 0.0
 //         bedlevel = 0.0
-//         veldepth = -0.2,0.0
+//         veldepth = 0.2,0.0
 //      }
+//      boundary_edge_xhi {
+//         boundary_condition      = "FLOW"    
+//      }
+      boundary_edge_xlo {
+         boundary_condition      = "FLOW"
+      }
+      boundary_edge_xhi {
+         boundary_condition      = "DIRICHLET" 
+         depth = 0.4
+         bathy = 0.0
+         bedlevel = 0.0
+         veldepth = -0.2,0.0
+      }
       boundary_edge_ylo {
          boundary_condition      = "REFLECT"
       }
@@ -199,7 +199,7 @@ HyperbolicLevelIntegrator{
 
 TimeRefinementIntegrator{
    start_time           = 0.e0     // initial simulation time
-   end_time             = 10000.      // final simulation time
+   end_time             = 300.      // final simulation time
    grow_dt              = 1.1e0    // growth factor for timesteps
    max_integrator_steps = 300000       // max number of simulation timesteps
 }

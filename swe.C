@@ -109,7 +109,8 @@ using namespace std;
 #define TRENCH          (25)
 #define DEVRIEND        (26)
 #define TRENCHY         (27)
-#define UNIFORM	      (28)
+#define UNIFORM	        (28)
+#define HIBMA           (29)
 
 // defines for cell tagging routines
 #define RICHARDSON_NEWLY_TAGGED (-10)
@@ -320,6 +321,8 @@ swe::swe(
 	  d_data_problem_int = TRENCHY;
 	} else if (d_data_problem == "UNIFORM") {
 	  d_data_problem_int = UNIFORM;
+	} else if (d_data_problem == "HIBMA") {
+		d_data_problem_int = HIBMA;
    } else {
       TBOX_ERROR(d_object_name << ": "
          << "Unknown d_data_problem string = "
@@ -1028,6 +1031,11 @@ void swe::boundaryReset(
            (tbox::MathUtilities<double>::Abs(xpatchlo[0] - xdomainlo[0]) < dx[0])) {
           bdry_case = DIRICHLET_BC;
        }
+// // BEGIN SIMPLE-MINDED FIX FOR HIBMA PROBLEM
+      if ((d_data_problem == "HIBMA") && (bnode == 1) &&
+           (tbox::MathUtilities<double>::Abs(xpatchlo[0] - xdomainlo[0]) < dx[0])) {
+          bdry_case = DIRICHLET_BC;
+       }
 // END SIMPLE-MINDED FIX FOR ROELVINK PROBLEM
 // // BEGIN SIMPLE-MINDED FIX FOR ROELVINKY PROBLEM
       if ((d_data_problem == "ROELVINKY") && (bnode == 3) &&
@@ -1171,6 +1179,38 @@ void swe::setPhysicalBoundaryConditions(
 										//u = eta0_hen*sqrt(9.81/H0_hen)*cos(2*3.14159*fill_time/T_hen);
 				d_bdry_edge_depth[i] = h;
 				d_bdry_edge_bathy[i] = -10;  //MUST SET DIRICHLET BATHYMETRY
+				//d_bdry_edge_bedlevel[i] = 99.0;
+				//								d_bdry_edge_veldepth[i*PDIM+0] = 0.; //u*h;
+				//								d_bdry_edge_veldepth[i*PDIM+1] = 0.; //u*h;
+			}
+		}
+		// set open boundary forcing for HIBMA test where open boundary is at X=0 
+		// Note we are forcing the free surface (actually the depth) but do not specify the velocity
+		// thus we are resetting the scalar_bcond to DIRICHLET (which then uses the values we provide)
+		// and we are resetting the vector_bcond to FLOW (which seems to automatically use zeroth-order 
+		// extrapolation for ud/vd)
+		// note we do not set values for d_bdry_edge_veldepth
+   } else if(d_data_problem == "HIBMA"){
+		double H0_hibma = 15;
+		double eta0_hibma = 1.75;
+		double T_hibma = 12*3600;
+		double h; //,u;
+		const tbox::Pointer<geom::CartesianPatchGeometry > patch_geom = patch.getPatchGeometry();
+		const double* dx = patch_geom->getDx();
+		const double* xpatchlow = patch_geom->getXLower();
+		const double* xdomainlow = d_grid_geometry->getXLower();
+		if (tbox::MathUtilities<double>::Abs(xpatchlow[0]-xdomainlow[0]) < dx[0]) {
+			tmp_edge_scalar_bcond[XLO] = DIRICHLET_BC;
+		 	tmp_edge_vector_bcond[XLO] = FLOW_BC;
+		  tmp_edge_veldepth_bcond[XLO] = FLOW_BC;
+		}
+		for (int i = 0; i < NUM_2D_EDGES; i++) {
+										if(tmp_edge_scalar_bcond[i] == DIRICHLET_BC){
+			
+				h = H0_hibma + eta0_hibma*cos(2*3.14159*fill_time/T_hibma);
+				
+				d_bdry_edge_depth[i] = h;
+				d_bdry_edge_bathy[i] = -15;  //MUST SET DIRICHLET BATHYMETRY
 				//d_bdry_edge_bedlevel[i] = 99.0;
 				//								d_bdry_edge_veldepth[i*PDIM+0] = 0.; //u*h;
 				//								d_bdry_edge_veldepth[i*PDIM+1] = 0.; //u*h;

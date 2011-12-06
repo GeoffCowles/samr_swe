@@ -14,7 +14,7 @@ swe {
    frictype             = 0
 
 // C_manning:  manning (n) friction coefficient (only used if frictype == 2)
-   C_manning            = 0.01
+   C_manning            = 0.015
 
 // fluxorder: order of the spatial flux
 //    = 1 => 1st order
@@ -64,7 +64,7 @@ swe {
          grad_tol = 1.e-4
       }
       BATHY_GRADIENT {
-         grad_tol = 2e-3 
+         grad_tol = 2.5e-3 
       }
 
       
@@ -145,7 +145,7 @@ Main {
  
 // visualization dump parameters
    viz_writer            = "VisIt" // use: "Vizamrai", "VisIt" for both
-   viz_dump_interval     = 2000         // zero to turn off
+   viz_dump_interval     = 600         // zero to turn off
    viz_dump_dirname      = "viz_devriend"
    viz_dump_filename     = "devriend"   // not used by VisIt
    visit_file_cluster_size = 1        // not used by Vizamrai
@@ -201,7 +201,7 @@ PatchHierarchy{
 }
 GriddingAlgorithm {
    efficiency_tolerance = 0.95e0   // min % of tag cells in new patch level
-   combine_efficiency   = 0.85e0   // chop box if sum of volumes of smaller
+   combine_efficiency   = 0.95e0   // chop box if sum of volumes of smaller
                                    // boxes < efficiency * vol of large box
 }
 
@@ -215,7 +215,7 @@ HyperbolicLevelIntegrator{
 TimeRefinementIntegrator{
    start_time           = 0.e0     // initial simulation time
 //   end_time             = 1728000.   // final simulation time
-   end_time             = 300000.   // final simulation time
+   end_time             = 432000.   // final simulation time
    grow_dt              = 1.1e0    // growth factor for timesteps
    max_integrator_steps = 300000       // max number of simulation timesteps
 }
