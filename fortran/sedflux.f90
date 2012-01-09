@@ -137,25 +137,15 @@ subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,b,iflux,jflux)
 
     !load using Engelund and Hansen
 		loadEH = facEH*taub*(shieldfac**2)*((vh(i,j,1)**2 + vh(i,j,2)**2)**1.5)*(h(i,j)**-3)*(h(i,j)**-(1./6.))
-		qx(i,j) = loadEH*taux(i,j)/taub
-		qy(i,j) = loadEH*tauy(i,j)/taub
+		qx(i,j) = loadEH*taux(i,j)/(taub+tinynum)
+		qy(i,j) = loadEH*tauy(i,j)/(taub+tinynum)
 
 		end do
 	end do
   
 	end select
 	
-	! set loads and stresses to zero in dry points (this may not be necessary)
-	do j=j1-NCGST,j2+NCGST
-		do i=i1-NCGST,i2+NCGST 
-			if(h(i,j) < mindepth)then
-				qx(i,j) = zero
-				taux(i,j) = zero
-				qy(i,j) = zero
-				tauy(i,j) = zero
-			endif
-		end do
-	end do
+
 	
 	!-----------------------------------------------------------------------------------------
 	!modify loads using bedslope formulations (e.g. lesser et al. in Warner, VDW & ROELVINK)
@@ -184,6 +174,18 @@ subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,b,iflux,jflux)
 			end do
 		end do
 	endif
+	
+	! set loads and stresses to zero in dry points (this may not be necessary)
+	do j=j1-NCGST,j2+NCGST
+		do i=i1-NCGST,i2+NCGST 
+			if(h(i,j) < mindepth)then
+				qx(i,j) = zero
+				taux(i,j) = zero
+				qy(i,j) = zero
+				tauy(i,j) = zero
+			endif
+		end do
+	end do
 	
 	
 	!-----------------------------------------------------------------------------------------

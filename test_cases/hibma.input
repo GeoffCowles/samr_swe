@@ -48,7 +48,7 @@ swe {
    sedinit  = 43200
    // sedinit  = 60  //bug, sedinit=0 crashes, something isn't initialized properly
    d50      = .00024 
-   morphfactor = 500. 
+   morphfactor = 50. 
 
    Refinement_data {
 //     refine_criteria = "DEPTH_GRADIENT"
@@ -145,13 +145,13 @@ TimerManager{
 CartesianGeometry {
 
 // very coarse Hibma mesh
-  domain_boxes = [ (0,0) , (79,4) ]
+//  domain_boxes = [ (0,0) , (79,4) ]
 
 // coarse Hibma mesh
 //  domain_boxes = [ (0,0) , (159,9) ]
 
 //  Hibma mesh
-//  domain_boxes = [ (0,0) , (319,19) ]
+  domain_boxes = [ (0,0) , (319,19) ]
 x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
 x_up         = 80000, 2500  // upper end of computational domain.
 
@@ -170,7 +170,7 @@ PatchHierarchy{
    }
 
    largest_patch_size {
-      level_0 = 128, 32
+      level_0 = 32, 32
       // all finer levels will use same values as level_0...
    }
 

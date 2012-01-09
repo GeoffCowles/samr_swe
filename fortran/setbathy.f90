@@ -458,7 +458,7 @@ subroutine setbathy(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,b)
   !---------------------------------------------------------------------
 	case(hibma) !hibma channel shoal formation case in 80x2.5 km domain
 	!---------------------------------------------------------------------
-   fac = .5
+   fac = 0.! .5
    call itime(timeArray)     ! Get the current time
 	 ii = rand ( timeArray(1)+timeArray(2)+timeArray(3) )
 	 do i=i1,i2
