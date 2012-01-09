@@ -16,6 +16,10 @@
 #include <fstream>
 using namespace std;
 
+#ifdef OPENCL
+#include <CL/cl.h>
+#endif 
+
 #ifndef _MSC_VER
 #include <unistd.h>
 #endif
@@ -197,6 +201,7 @@ void dumpProbe(const string& dirname,
 
 int main( int argc, char *argv[] )
 {
+	
 
    //initialize MPI and SAMRAI
    tbox::SAMRAI_MPI::init(&argc, &argv);
@@ -213,7 +218,7 @@ int main( int argc, char *argv[] )
    int restore_num = 0;
 
    bool is_from_restart = false;
-	bool uses_visit = true;
+	 bool uses_visit = true;
 
    //process commandline
    if ( (argc != 2) && (argc != 4) ) {
@@ -564,6 +569,23 @@ int main( int argc, char *argv[] )
       }
 #endif
       t_write_viz->stop();
+
+
+#ifdef OPENCL
+	//initialize OpenCL environment
+  cl_platform_id cpPlatform;
+  clGetPlatformIDs(1, &cpPlatform, NULL);
+
+  // Get a GPU device
+  cl_device_id cdDevice;
+  clGetDeviceIDs(cpPlatform, CL_DEVICE_TYPE_GPU, 1, &cdDevice, NULL);
+
+  char cBuffer[1024];
+  clGetDeviceInfo(cdDevice, CL_DEVICE_NAME, sizeof(cBuffer), &cBuffer, NULL);
+  printf("CL_DEVICE_NAME:       %s\n", cBuffer);
+  clGetDeviceInfo(cdDevice, CL_DRIVER_VERSION, sizeof(cBuffer), &cBuffer, NULL);
+  printf("CL_DRIVER_VERSION: %s\n\n", cBuffer);
+#endif
 
 
    //timing 

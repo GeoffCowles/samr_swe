@@ -17,6 +17,7 @@ SAMRAI        = /opt/samrai_3.1.0/ifortgcc64_opt
 #OBJECT        = /opt/samrai_3.1.0/ifortgcc64_debug
 #SAMRAI        = /opt/samrai_3.1.0/ifortgcc64_debug
 
+OPENCL       = -I/System/Library/Frameworks/OpenCL.framework/Versions/Current -lOpenCL
 SRCDIR        = ./swe
 
 default:        swe
@@ -24,7 +25,8 @@ default:        swe
 #include Makefile.config
 include $(SAMRAI)/config/Makefile.config
 
-CPPFLAGS_EXTRA= -DDISPLAY -DNDIM=2  -DTESTING=0
+CPPFLAGS_EXTRA= -DDISPLAY -DNDIM=2  -DTESTING=0   -DOPENCL -I/System/Library/Frameworks/OpenCL.framework/Versions/Current -framework OpenCL
+OTHERLIBS     = -framework OpenCL
 
 CXX_OBJS      = main.o swe.o 
 F_OBJS        =  gparms.o cntrl.o philim.o limiter.o rpn.o rpt.o flux2fw_geo.o  flux.o sedflux.o friction.o drycheck.o wd.o grad.o init.o setbathy.o calcdt.o c2f.o junkprobe.o
@@ -36,7 +38,7 @@ main:
 
 swe:	$(CXX_OBJS) $(F_OBJS) $(LIBSAMRAIDEPEND)
 		$(CXX) $(CXXFLAGS) $(LDFLAGS) $(CXX_OBJS) $(F_OBJS)	\
-		$(LIBSAMRAI2D) $(LIBSAMRAI) $(LDLIBS) -o swe 
+		$(LIBSAMRAI2D) $(LIBSAMRAI) $(LDLIBS) $(OTHERLIBS) -o swe 
 
 clean:
 		$(RM) *.f swe *.o *.mod
