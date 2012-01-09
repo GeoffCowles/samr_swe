@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>fortran/sedflux.f90</string>
+	<string>main.C</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -20,13 +20,15 @@
 			<key>filename</key>
 			<string>main.C</string>
 			<key>lastUsed</key>
-			<date>2011-12-06T22:10:08Z</date>
+			<date>2012-01-09T21:14:11Z</date>
+			<key>selected</key>
+			<true/>
 		</dict>
 		<dict>
 			<key>filename</key>
 			<string>Makefile</string>
 			<key>lastUsed</key>
-			<date>2011-12-02T02:51:09Z</date>
+			<date>2012-01-09T16:05:55Z</date>
 		</dict>
 		<dict>
 			<key>filename</key>
@@ -63,36 +65,6 @@
 	<integer>200</integer>
 	<key>metaData</key>
 	<dict>
-		<key>Makefile</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>8</integer>
-				<key>line</key>
-				<integer>79</integer>
-			</dict>
-			<key>columnSelection</key>
-			<false/>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>54</integer>
-			<key>selectFrom</key>
-			<dict>
-				<key>column</key>
-				<integer>0</integer>
-				<key>line</key>
-				<integer>79</integer>
-			</dict>
-			<key>selectTo</key>
-			<dict>
-				<key>column</key>
-				<integer>8</integer>
-				<key>line</key>
-				<integer>79</integer>
-			</dict>
-		</dict>
 		<key>Makefile.depend</key>
 		<dict>
 			<key>caret</key>
@@ -134,20 +106,6 @@
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
 			<integer>22</integer>
-		</dict>
-		<key>fortran/calcdt.f90</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>3</integer>
-				<key>line</key>
-				<integer>77</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>34</integer>
 		</dict>
 		<key>fortran/cntrl.f90</key>
 		<dict>
@@ -363,20 +321,6 @@
 			<key>firstVisibleLine</key>
 			<integer>16</integer>
 		</dict>
-		<key>fortran/sedflux.f90</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>42</integer>
-				<key>line</key>
-				<integer>140</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>90</integer>
-		</dict>
 		<key>fortran/setbathy.f90</key>
 		<dict>
 			<key>caret</key>
@@ -405,47 +349,19 @@
 			<key>firstVisibleLine</key>
 			<integer>196</integer>
 		</dict>
-		<key>fortran/stepgrid_geo.f</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>1</integer>
-				<key>line</key>
-				<integer>200</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>175</integer>
-		</dict>
-		<key>fortran/wd.f90</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>24</integer>
-				<key>line</key>
-				<integer>60</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>35</integer>
-		</dict>
 		<key>main.C</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>42</integer>
+				<integer>28</integer>
 				<key>line</key>
-				<integer>559</integer>
+				<integer>565</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>239</integer>
+			<integer>538</integer>
 		</dict>
 		<key>swe.C</key>
 		<dict>
@@ -508,34 +424,11 @@
 	</dict>
 	<key>openDocuments</key>
 	<array>
-		<string>swe.C</string>
 		<string>main.C</string>
-		<string>fortran/rpt.f</string>
-		<string>fortran/rpn.f</string>
-		<string>fortran/refine.f90</string>
-		<string>fortran/philim.f</string>
-		<string>swe.h</string>
-		<string>sweFort.h</string>
-		<string>fortran/c2f.f90</string>
-		<string>fortran/grad.f90</string>
-		<string>fortran/cntrl.f90</string>
-		<string>fortran/gparms.f90</string>
-		<string>fortran/init.f90</string>
-		<string>fortran/setbathy.f90</string>
-		<string>fortran/junkprobe.f90</string>
-		<string>fortran/friction.f90</string>
-		<string>fortran/flux.f90</string>
-		<string>fortran/drycheck.f90</string>
-		<string>fortran/coarsen.f90</string>
-		<string>fortran/sedflux.f90</string>
-		<string>fortran/stepgrid_geo.f</string>
-		<string>fortran/wd.f90</string>
-		<string>Makefile</string>
-		<string>fortran/calcdt.f90</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
 	<true/>
 	<key>windowFrame</key>
-	<string>{{746, 131}, {1174, 1012}}</string>
+	<string>{{357, 104}, {1174, 1012}}</string>
 </dict>
 </plist>
