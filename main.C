@@ -572,19 +572,31 @@ int main( int argc, char *argv[] )
 
 
 #ifdef OPENCL
-	//initialize OpenCL environment
-  cl_platform_id cpPlatform;
-  clGetPlatformIDs(1, &cpPlatform, NULL);
+	//initialize the OpenCL environment
+  cl_platform_id clPlatform;
+  clGetPlatformIDs(1, &clPlatform, NULL);
 
   // Get a GPU device
-  cl_device_id cdDevice;
-  clGetDeviceIDs(cpPlatform, CL_DEVICE_TYPE_GPU, 1, &cdDevice, NULL);
+  cl_device_id clDevice;
+  clGetDeviceIDs(clPlatform, CL_DEVICE_TYPE_GPU, 1, &clDevice, NULL);
 
+  // Get info on device name and OpenCL kernel version
   char cBuffer[1024];
-  clGetDeviceInfo(cdDevice, CL_DEVICE_NAME, sizeof(cBuffer), &cBuffer, NULL);
+  clGetDeviceInfo(clDevice, CL_DEVICE_NAME, sizeof(cBuffer), &cBuffer, NULL);
   printf("CL_DEVICE_NAME:       %s\n", cBuffer);
-  clGetDeviceInfo(cdDevice, CL_DRIVER_VERSION, sizeof(cBuffer), &cBuffer, NULL);
+  clGetDeviceInfo(clDevice, CL_DEVICE_VENDOR, sizeof(cBuffer), &cBuffer, NULL);
+  printf("CL_DEVICE_VENDOR:       %s\n", cBuffer);
+  clGetDeviceInfo(clDevice, CL_DRIVER_VERSION, sizeof(cBuffer), &cBuffer, NULL);
   printf("CL_DRIVER_VERSION: %s\n\n", cBuffer);
+ 
+  // Get specifics on device size
+  cl_uint clComputeUnits;
+  clGetDeviceInfo(clDevice, CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(cl_uint), &clComputeUnits, NULL);
+  printf("CL_DEVICE_MAX_COMPUTE_UNITS: %d\n\n", clComputeUnits);
+  cl_uint clWorkGroup;
+  clGetDeviceInfo(clDevice, CL_DEVICE_MAX_WORK_GROUP_SIZE, sizeof(cl_uint), &clWorkGroup, NULL);
+  printf("CL_DEVICE_MAX_WORK_GROUP_SIZE: %d\n\n", clWorkGroup);
+  exit(0);
 #endif
 
 
