@@ -39,7 +39,7 @@ subroutine setbathy(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,b)
   real(dp) :: inner_rad,outer_rad,con_height,fac,rad,theta_scrit
   real(dp) :: t1,t2,t3,t4,f1,f2
   real(dp) :: devriend_x,devriend_y,devriend_amp,devriend_rad,dist
-  real(dp) :: slope
+  real(dp) :: slope,alpha,beta
   integer*4 timeArray(3)    ! Holds the hour, minute, and second
   real rand,ii
   caseid = cid
@@ -478,6 +478,30 @@ subroutine setbathy(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,b)
 	      !write(*,*)i,j,rad,b(i,j)+rad
 	    end do
 	  end do
+	
+	
+	  !---------------------------------------------------------------------
+		case(channel) !channel morphology case in 80x2.5 domain
+		!---------------------------------------------------------------------
+	   alpha = -1.5*channel_mean_depth/((ahalf*channel_width)**2)
+	   beta  =  1.5*channel_mean_depth
+		 do i=i1,i2
+		    do j=j1,j2
+			   xc = xlo(1)+dx(1)*dble(i-i1)+dx(1)/2
+			   yc = xlo(2)+dx(2)*dble(j-j1)+dx(2)/2
+			   b(i,j) = channel_min_depth;
+			   !set cross-channel profile using cosine function
+				 if(abs(yc) < channel_width/2.)then
+				   b(i,j) = .5*(channel_max_depth-channel_min_depth)*(cos(yc*2*pi/channel_width)+1.)+channel_min_depth
+				 endif
+				 ! relax towards a constant depth on either end
+				  if(abs(xc) > .5*channel_length)then
+				     alpha = min( (abs(xc)-.5*channel_length)/(.5*(channel_domain*.5-.5*channel_length)), 1.0)
+				     b(i,j) = b(i,j) - alpha*(b(i,j)-channel_mean_depth);
+				  endif;
+			   b(i,j) = -b(i,j)
+			end do
+		end do
     !stop
   end select
 

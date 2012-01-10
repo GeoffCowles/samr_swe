@@ -450,6 +450,16 @@ private:
 	double d_sedinit;
 	double d_d50;
 	double d_morphfactor;
+	
+	// input for mhke params
+	int d_mhke_model;
+	double d_mhke_cp;
+	double d_mhke_area;
+	double d_mhke_xlo;
+	double d_mhke_xhi;
+	double d_mhke_ylo;
+	double d_mhke_yhi;
+	 
    /*
    double d_radius;
    double d_center[NDIM];

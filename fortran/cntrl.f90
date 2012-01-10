@@ -60,6 +60,7 @@ module cntrl
   integer, parameter :: trenchy = 27
   integer, parameter :: uniform = 28
   integer, parameter :: hibma = 29
+  integer, parameter :: channel = 30
 
   !friction
   integer  :: frictype !=0, no friction, =1 linear, = 2 Manning
@@ -86,6 +87,15 @@ module cntrl
   !morphology
   real(dp) :: min_morph_depth = .20  !minimum depth for morpho cases (if avoiding wet/dry)
 
+  !mhke
+  integer  :: mhke_model
+  real(dp) :: mhke_area
+  real(dp) :: mhke_cp
+  real(dp) :: mhke_xlo
+  real(dp) :: mhke_xhi
+  real(dp) :: mhke_ylo
+  real(dp) :: mhke_yhi
+
   !trench params
   real(dp), parameter :: trench_half_width = 2.0
   real(dp), parameter :: trench_slope_width = 0.5
@@ -97,6 +107,14 @@ module cntrl
   !uniform flow params
   real(dp), parameter :: uniform_h = 10.
   real(dp), parameter :: uniform_u = 1.
+
+  !channel parameters
+  real(dp), parameter :: channel_mean_depth = 10.
+  real(dp), parameter :: channel_max_depth = 50.
+  real(dp), parameter :: channel_min_depth = 4.
+  real(dp), parameter :: channel_width = 2000.
+  real(dp), parameter :: channel_length = 5000.
+  real(dp), parameter :: channel_domain = 15000.
   
   !friction / roughness
   real(dp) :: C_manning !manning coefficient, set in input

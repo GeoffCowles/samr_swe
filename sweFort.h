@@ -75,6 +75,11 @@ extern "C" {
   const int&, const int&, const int&, const int&,
   double*, double*, double*);
 
+  void mhke_(
+  const double&, const double*, const double*, const double*,
+  const int&, const int&, const int&, const int&,
+  double*, double*);
+
   void linfriction_(
   const double*, const double&,
   const int&, const int&, const int&, const int&,
@@ -105,6 +110,7 @@ extern "C" {
 
    void c2f_(const int& , const int& , const int&, const int& , const int&,
        const int&, const double&, const double&, const int&, const int&,
-       const int&, const double&, const double&, const double&, const int& );
+       const int&, const double&, const double&, const double&, const int&,
+       const int&, const double&, const double&, const double&, const double&, const double&, const double& );
 
 }

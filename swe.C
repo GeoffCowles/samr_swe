@@ -111,6 +111,7 @@ using namespace std;
 #define TRENCHY         (27)
 #define UNIFORM	        (28)
 #define HIBMA           (29)
+#define CHANNEL         (30)
 
 // defines for cell tagging routines
 #define RICHARDSON_NEWLY_TAGGED (-10)
@@ -323,6 +324,8 @@ swe::swe(
 	  d_data_problem_int = UNIFORM;
 	} else if (d_data_problem == "HIBMA") {
 		d_data_problem_int = HIBMA;
+	} else if (d_data_problem == "CHANNEL") {
+		d_data_problem_int = CHANNEL;
    } else {
       TBOX_ERROR(d_object_name << ": "
          << "Unknown d_data_problem string = "
@@ -362,7 +365,8 @@ swe::swe(
    //bind the control parameters between C++ and fortran 
    c2f_(d_dim.getValue(),NSTATE,NSCAL,CELLG,FLUXG, //FORTRAN
 	d_data_problem_int,d_C_manning,d_mindepth,d_fluxorder,d_transverse,
-	d_sedmodel,d_sedinit,d_d50,d_morphfactor,d_frictype); 
+	d_sedmodel,d_sedinit,d_d50,d_morphfactor,d_frictype,
+	d_mhke_model,d_mhke_area,d_mhke_cp,d_mhke_xlo,d_mhke_xhi,d_mhke_ylo,d_mhke_yhi); 
               
 }  // <=  end of swe constructor
 
@@ -936,6 +940,14 @@ void swe::conservativeDifferenceOnPatch(
 				veldepth->getPointer(), 
 				bathy->getPointer());
 		}
+		
+		// mhke term
+		if (d_mhke_model == 1) { //mhke
+			mhke_(dt,dx,xlo,xhi,ifirst(0),ilast(0),ifirst(1),ilast(1), //FORTRAN
+				depth->getPointer(),
+				veldepth->getPointer());
+		}
+		
 
 		// dry check - make sure cells have non-negative depth 
 		drycheck_(dx,dt,ifirst(0),ilast(0),ifirst(1),ilast(1), //FORTRAN
@@ -1031,6 +1043,15 @@ void swe::boundaryReset(
            (tbox::MathUtilities<double>::Abs(xpatchlo[0] - xdomainlo[0]) < dx[0])) {
           bdry_case = DIRICHLET_BC;
        }
+// // BEGIN SIMPLE-MINDED FIX FOR CHANNEL PROBLEM
+      if ((d_data_problem == "CHANNEL") && (bnode == 1) &&
+            (tbox::MathUtilities<double>::Abs(xpatchlo[0] - xdomainlo[0]) < dx[0])) {
+           bdry_case = DIRICHLET_BC;
+        }
+      	 if ((d_data_problem == "CHANNEL") && (bnode == 1) &&
+		            (tbox::MathUtilities<double>::Abs(xpatchhi[0] - xdomainhi[0]) < dx[0])) {
+		           bdry_case = DIRICHLET_BC;
+		        }
 // // BEGIN SIMPLE-MINDED FIX FOR HIBMA PROBLEM
       if ((d_data_problem == "HIBMA") && (bnode == 1) &&
            (tbox::MathUtilities<double>::Abs(xpatchlo[0] - xdomainlo[0]) < dx[0])) {
@@ -1149,6 +1170,8 @@ void swe::setPhysicalBoundaryConditions(
 			//d_bdry_edge_veldepth[i*PDIM+0] = u*h;
 			}
 		}
+	
+	 
 		// set open boundary forcing for ROELVINK test where open boundary is at X=0 
 		// Note we are forcing the free surface (actually the depth) but do not specify the velocity
 		// thus we are resetting the scalar_bcond to DIRICHLET (which then uses the values we provide)
@@ -1184,6 +1207,63 @@ void swe::setPhysicalBoundaryConditions(
 				//								d_bdry_edge_veldepth[i*PDIM+1] = 0.; //u*h;
 			}
 		}
+		// set open boundary forcing for CHANNEL test where open boundary is at X=0 
+		// Note we are forcing the free surface (actually the depth) but do not specify the velocity
+		// thus we are resetting the scalar_bcond to DIRICHLET (which then uses the values we provide)
+		// and we are resetting the vector_bcond to FLOW (which seems to automatically use zeroth-order 
+		// extrapolation for ud/vd)
+		// note we do not set values for d_bdry_edge_veldepth
+		   } else if(d_data_problem == "CHANNEL"){
+				double H0_channel = 10;
+				double eta0_channel = 1.0;
+				double T_channel = 12*3600;
+				double h; //,u;
+				const tbox::Pointer<geom::CartesianPatchGeometry > patch_geom = patch.getPatchGeometry();
+				const double* dx = patch_geom->getDx();
+				const double* xpatchlow = patch_geom->getXLower();
+				const double* xdomainlow = d_grid_geometry->getXLower();
+				const double* xpatchhi = patch_geom->getXUpper();
+				const double* xdomainhi = d_grid_geometry->getXUpper();
+				if (tbox::MathUtilities<double>::Abs(xpatchlow[0]-xdomainlow[0]) < dx[0]) {
+					tmp_edge_scalar_bcond[XLO] = DIRICHLET_BC;
+				 	tmp_edge_vector_bcond[XLO] = FLOW_BC;
+				   tmp_edge_veldepth_bcond[XLO] = FLOW_BC;
+				//}
+				for (int i = 0; i < NUM_2D_EDGES; i++) {
+											//	if(tmp_edge_scalar_bcond[i] == DIRICHLET_BC){
+					//if(d_scalar_bdry_edge_conds[i] == DIRICHLET_BC){
+												//equation 33, Brufau et al, IJNMF v39
+						h = H0_channel + eta0_channel*sin(2*3.14159*fill_time/T_channel);
+						//cout << "setting h on edge " << h << "  " << i << '\n';
+												//equation  
+												//u = eta0_hen*sqrt(9.81/H0_hen)*cos(2*3.14159*fill_time/T_hen);
+						d_bdry_edge_depth[i] = h;
+						d_bdry_edge_bathy[i] = -10;  //MUST SET DIRICHLET BATHYMETRY
+						//d_bdry_edge_bedlevel[i] = 99.0;
+						//								d_bdry_edge_veldepth[i*PDIM+0] = 0.; //u*h;
+						//								d_bdry_edge_veldepth[i*PDIM+1] = 0.; //u*h;
+					}
+				}
+				if (tbox::MathUtilities<double>::Abs(xpatchhi[0]-xdomainhi[0]) < dx[0]) {
+					tmp_edge_scalar_bcond[XHI] = DIRICHLET_BC;
+				 	tmp_edge_vector_bcond[XHI] = FLOW_BC;
+				   tmp_edge_veldepth_bcond[XHI] = FLOW_BC;
+				//}
+				for (int i = 0; i < NUM_2D_EDGES; i++) {
+											//	if(tmp_edge_scalar_bcond[i] == DIRICHLET_BC){
+					//if(d_scalar_bdry_edge_conds[i] == DIRICHLET_BC){
+												//equation 33, Brufau et al, IJNMF v39
+						h = H0_channel + eta0_channel*sin(2*3.14159*fill_time/T_channel + 2*3.14159/3.);  //same as left + 120 degree phase lag
+						//cout << "setting h on edge " << h << "  " << i << '\n';
+												//equation  
+												//u = eta0_hen*sqrt(9.81/H0_hen)*cos(2*3.14159*fill_time/T_hen);
+						d_bdry_edge_depth[i] = h;
+						d_bdry_edge_bathy[i] = -10;  //MUST SET DIRICHLET BATHYMETRY
+						//d_bdry_edge_bedlevel[i] = 99.0;
+						//								d_bdry_edge_veldepth[i*PDIM+0] = 0.; //u*h;
+						//								d_bdry_edge_veldepth[i*PDIM+1] = 0.; //u*h;
+					}
+				}
 		// set open boundary forcing for HIBMA test where open boundary is at X=0 
 		// Note we are forcing the free surface (actually the depth) but do not specify the velocity
 		// thus we are resetting the scalar_bcond to DIRICHLET (which then uses the values we provide)
@@ -2088,6 +2168,7 @@ void swe::printClassData(ostream &os) const
    os << "   d_C_manning  =  " << d_C_manning << endl;
    os << "   d_mindepth   =  " << d_mindepth  << endl;
    os << "   d_frictype   =  " << d_frictype  << endl;
+	
    os << "   d_fluxorder  =  " << d_fluxorder << endl;
    os << "   d_transverse =  " << d_transverse << endl;
    os << "   d_sedmodel   =  " << d_sedmodel << endl; 
@@ -2095,7 +2176,16 @@ void swe::printClassData(ostream &os) const
    os << "   d_d50        =  " << d_d50 << endl;
    os << "   d_morphfactor  =  " << d_morphfactor << endl;
 
-
+   //mhke stuff
+   os << "   d_mhke_model =  " << d_mhke_model << endl;
+   if(d_mhke_model == 1){
+   	 os << "   d_mhke_cp    =  " << d_mhke_cp << endl;
+	   os << "   d_mhke_area  =  " << d_mhke_area << endl;
+	   os << "   d_mhke_xlo   =  " << d_mhke_xlo << endl;
+	   os << "   d_mhke_ylo   =  " << d_mhke_ylo << endl;
+	   os << "   d_mhke_xhi   =  " << d_mhke_xhi << endl;
+	   os << "   d_mhke_yhi   =  " << d_mhke_yhi << endl;
+   }
 
    os << "   Boundary condition data " << endl;
    os << " Dirichlet BC is type " << DIRICHLET_BC << endl ;
@@ -2477,6 +2567,62 @@ void swe::getFromInput(
             << "`morphfactor' value not found in input." << endl);
       }
 
+      // Read the turbine variables
+	    if (db->keyExists("mhke_model")) {
+         d_mhke_model = db->getInteger("mhke_model");
+      } else {
+				d_mhke_model = 0;
+				d_mhke_area  = 0.0;
+				d_mhke_cp    = 0.0;
+				d_mhke_xlo   = 0.0;
+				d_mhke_xhi   = 0.0;
+				d_mhke_ylo   = 0.0;
+				d_mhke_yhi   = 0.0;
+      }
+      if(d_mhke_model == 1){
+				 if (db->keyExists("mhke_area")) {
+		         d_mhke_area = db->getDouble("mhke_area");
+		      } else {
+		         TBOX_ERROR(d_object_name << ": "
+		            << "mhke_area value not found in input." << endl);
+		      }
+		      if (db->keyExists("mhke_cp")) {
+		         d_mhke_cp = db->getDouble("mhke_cp");
+		      } else {
+		         TBOX_ERROR(d_object_name << ": "
+		            << "mhke_cp value not found in input." << endl);
+		      }
+		      if (db->keyExists("mhke_xlo")) {
+		         d_mhke_xlo = db->getDouble("mhke_xlo");
+		      } else {
+		         TBOX_ERROR(d_object_name << ": "
+		            << "mhke_xlo value not found in input." << endl);
+		      }
+		      if (db->keyExists("mhke_xhi")) {
+		         d_mhke_xhi = db->getDouble("mhke_xhi");
+		      } else {
+		         TBOX_ERROR(d_object_name << ": "
+		            << "mhke_xhi value not found in input." << endl);
+		      }
+		      if (db->keyExists("mhke_ylo")) {
+		         d_mhke_ylo = db->getDouble("mhke_ylo");
+		      } else {
+		         TBOX_ERROR(d_object_name << ": "
+		            << "mhke_ylo value not found in input." << endl);
+		      }
+		      if (db->keyExists("mhke_yhi")) {
+		         d_mhke_yhi = db->getDouble("mhke_yhi");
+		      } else {
+		         TBOX_ERROR(d_object_name << ": "
+		            << "mhke_yhi value not found in input." << endl);
+		      }
+				}
+	
+	
+	
+	
+
+
 
 
 
@@ -2577,6 +2723,13 @@ void swe::putToDatabase(tbox::Pointer<tbox::Database> db)
    db->putDouble("d_sedinit",d_sedinit);
    db->putDouble("d_d50",d_d50);
    db->putDouble("d_morphfactor",d_morphfactor);
+	 db->putInteger("d_mhke_model",d_mhke_model);
+	 db->putDouble("d_mhke_area",d_mhke_area);
+	 db->putDouble("d_mhke_cp",d_mhke_cp);
+	 db->putDouble("d_mhke_xlo",d_mhke_xlo);
+	 db->putDouble("d_mhke_xhi",d_mhke_xhi);
+	 db->putDouble("d_mhke_ylo",d_mhke_ylo); 
+	 db->putDouble("d_mhke_yhi",d_mhke_yhi);
 
    db->putIntegerArray("d_master_bdry_edge_conds", d_master_bdry_edge_conds);
    db->putIntegerArray("d_master_bdry_node_conds", d_master_bdry_node_conds);
@@ -2670,6 +2823,14 @@ void swe::getFromRestart()
    d_sedinit      = db->getDouble("d_sedinit");
    d_d50          = db->getDouble("d_d50");
    d_morphfactor  = db->getDouble("d_morphfactor");
+
+	 d_mhke_model   = db->getInteger("d_mhke_model");
+	 d_mhke_area    = db->getDouble("d_mhke_area");
+	 d_mhke_cp      = db->getDouble("d_mhke_cp");
+	 d_mhke_xlo     = db->getDouble("d_mhke_xlo"); 
+	 d_mhke_xhi     = db->getDouble("d_mhke_xhi");
+	 d_mhke_ylo     = db->getDouble("d_mhke_ylo");
+	 d_mhke_yhi     = db->getDouble("d_mhke_yhi");
 
    d_master_bdry_edge_conds = db->getIntegerArray("d_master_bdry_edge_conds");
    d_master_bdry_node_conds = db->getIntegerArray("d_master_bdry_node_conds");

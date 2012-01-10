@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>main.C</string>
+	<string>swe.C</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -20,9 +20,7 @@
 			<key>filename</key>
 			<string>main.C</string>
 			<key>lastUsed</key>
-			<date>2012-01-10T01:24:11Z</date>
-			<key>selected</key>
-			<true/>
+			<date>2012-01-10T16:17:21Z</date>
 		</dict>
 		<dict>
 			<key>filename</key>
@@ -46,7 +44,9 @@
 			<key>filename</key>
 			<string>swe.C</string>
 			<key>lastUsed</key>
-			<date>2011-12-06T20:09:37Z</date>
+			<date>2012-01-10T16:17:21Z</date>
+			<key>selected</key>
+			<true/>
 		</dict>
 		<dict>
 			<key>filename</key>
@@ -354,44 +354,28 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>43</integer>
+				<integer>33</integer>
 				<key>line</key>
-				<integer>597</integer>
+				<integer>628</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>558</integer>
+			<integer>774</integer>
 		</dict>
 		<key>swe.C</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>23</integer>
+				<integer>1</integer>
 				<key>line</key>
-				<integer>1747</integer>
+				<integer>1743</integer>
 			</dict>
-			<key>columnSelection</key>
-			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>1715</integer>
-			<key>selectFrom</key>
-			<dict>
-				<key>column</key>
-				<integer>20</integer>
-				<key>line</key>
-				<integer>1747</integer>
-			</dict>
-			<key>selectTo</key>
-			<dict>
-				<key>column</key>
-				<integer>23</integer>
-				<key>line</key>
-				<integer>1747</integer>
-			</dict>
+			<integer>806</integer>
 		</dict>
 		<key>swe.h</key>
 		<dict>
@@ -425,10 +409,11 @@
 	<key>openDocuments</key>
 	<array>
 		<string>main.C</string>
+		<string>swe.C</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
 	<true/>
 	<key>windowFrame</key>
-	<string>{{499, 0}, {1174, 878}}</string>
+	<string>{{632, 200}, {1174, 878}}</string>
 </dict>
 </plist>

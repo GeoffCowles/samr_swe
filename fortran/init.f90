@@ -41,6 +41,7 @@ subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,bedlevel)
   real(dp) :: xhalf,xc,yc,depth_left,depth_right,x0,xberm,fac,fac2,zeta,u_left
   real(dp) :: theta_scrit,t1,t2,t3,t4,f1,f2
   real(dp) :: devriend_x,devriend_y,devriend_amp,devriend_rad,dist
+  real(dp) :: alpha,beta
   
 
  
@@ -610,6 +611,29 @@ subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,bedlevel)
 		   h(i,j)    = 15 - 15*(xc/80000.)
 		end do
   end do
+
+	!---------------------------------------------------------------------
+	case(channel) !channel morphology case in 80x2.5 domain
+	!---------------------------------------------------------------------
+   
+	 do i=i1,i2
+	    do j=j1,j2
+		   xc = xlo(1)+dx(1)*dble(i-i1)+dx(1)/2
+		   yc = xlo(2)+dx(2)*dble(j-j1)+dx(2)/2
+		   vh(i,j,1) = 0.0
+		   vh(i,j,2) = 0.0
+		   h(i,j) = channel_min_depth;
+		   !set cross-channel profile using cosine function
+			 if(abs(yc) < channel_width/2.)then
+			   h(i,j) = .5*(channel_max_depth-channel_min_depth)*(cos(yc*2*pi/channel_width)+1.)+channel_min_depth
+			 endif
+			 ! relax towards a constant depth on either end
+			  if(abs(xc) > .5*channel_length)then
+			     alpha = min( (abs(xc)-.5*channel_length)/(.5*(channel_domain*.5-.5*channel_length)), 1.0)
+			     h(i,j) = h(i,j) - alpha*(h(i,j)-channel_mean_depth);
+			  endif;
+		end do
+	end do
 	
  
   end select

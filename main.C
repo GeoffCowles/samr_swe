@@ -573,29 +573,61 @@ int main( int argc, char *argv[] )
 
 #ifdef OPENCL
 	//initialize the OpenCL environment
+	printf("\n----- Initializing OpenCL environment -------\n"); 
+	printf("\n");
+	
+	// OpenCL vars
   cl_platform_id clPlatform;
+	cl_device_id   clDevice;
+	char clDeviceName[1024];
+	char clDeviceVendor[1024];
+	char clDriverVersion[1024];
+	cl_uint clComputeUnits;
+	cl_uint clWorkGroup;
+	cl_context clContext;
+	cl_command_queue clQueue;
+	int clErr;
+	
+	// Get the Platform ID
   clGetPlatformIDs(1, &clPlatform, NULL);
 
   // Get a GPU device
-  cl_device_id clDevice;
   clGetDeviceIDs(clPlatform, CL_DEVICE_TYPE_GPU, 1, &clDevice, NULL);
 
   // Get info on device name and OpenCL kernel version
-  char cBuffer[1024];
-  clGetDeviceInfo(clDevice, CL_DEVICE_NAME, sizeof(cBuffer), &cBuffer, NULL);
-  printf("CL_DEVICE_NAME:       %s\n", cBuffer);
-  clGetDeviceInfo(clDevice, CL_DEVICE_VENDOR, sizeof(cBuffer), &cBuffer, NULL);
-  printf("CL_DEVICE_VENDOR:       %s\n", cBuffer);
-  clGetDeviceInfo(clDevice, CL_DRIVER_VERSION, sizeof(cBuffer), &cBuffer, NULL);
-  printf("CL_DRIVER_VERSION: %s\n\n", cBuffer);
+  clGetDeviceInfo(clDevice, CL_DEVICE_NAME,   sizeof(clDeviceName), &clDeviceName, NULL);
+  clGetDeviceInfo(clDevice, CL_DEVICE_VENDOR, sizeof(clDeviceVendor),&clDeviceVendor, NULL);
+  clGetDeviceInfo(clDevice, CL_DRIVER_VERSION,sizeof(clDriverVersion), &clDriverVersion, NULL);
  
-  // Get specifics on device size
-  cl_uint clComputeUnits;
-  clGetDeviceInfo(clDevice, CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(cl_uint), &clComputeUnits, NULL);
-  printf("CL_DEVICE_MAX_COMPUTE_UNITS: %d\n\n", clComputeUnits);
-  cl_uint clWorkGroup;
+  // Get specifics on device size which can be used to tweak algorithm
+  clGetDeviceInfo(clDevice, CL_DEVICE_MAX_COMPUTE_UNITS,   sizeof(cl_uint), &clComputeUnits, NULL);
   clGetDeviceInfo(clDevice, CL_DEVICE_MAX_WORK_GROUP_SIZE, sizeof(cl_uint), &clWorkGroup, NULL);
-  printf("CL_DEVICE_MAX_WORK_GROUP_SIZE: %d\n\n", clWorkGroup);
+
+  //Report
+  printf("CL_DEVICE_VENDOR:       %s\n", clDeviceVendor);
+  printf("CL_DEVICE_NAME:       %s\n", clDeviceName);
+  printf("CL_DRIVER_VERSION: %s\n", clDriverVersion);
+  printf("CL_DEVICE_MAX_COMPUTE_UNITS: %d\n", clComputeUnits);
+  printf("CL_DEVICE_MAX_WORK_GROUP_SIZE: %d\n", clWorkGroup);
+  
+  // Create a compute context
+  clContext = clCreateContext(0, 1, &clDevice, NULL, NULL, &clErr);
+  if (!clContext) 
+	    {
+	        printf("Error: Failed to create a compute context!\n");
+	        return EXIT_FAILURE;
+	    }
+	printf("CL COMPUTE CONTEXT CREATED \n");
+	
+	// Create a command queue
+	clQueue = clCreateCommandQueue(clContext,  clDevice, 0, &clErr);
+	if (!clQueue)
+	    {
+	        printf("Error: Failed to create a command queue!\n");
+	        return EXIT_FAILURE;
+	    }
+	printf("CL COMMAND QUEUE CREATED \n");
+	
   exit(0);
 #endif
 
