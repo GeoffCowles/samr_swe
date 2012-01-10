@@ -1,0 +1,201 @@
+// channel inlet test from Roelvink, J.A., Coastal Engineering 53, 2006, 277-287.
+// 
+
+swe {
+  
+   data_problem         = "CHANNEL"  
+
+// frictype:  select the friction type
+//   = 0 => no friction
+//   = 1 => linear friction
+//   = 2 => Manning style friction
+   frictype             = 2
+
+// C_manning:  manning (n) friction coefficient (only used if frictype == 2)
+   C_manning            = 0.01 
+
+// fluxorder: order of the spatial flux
+//    = 1 => 1st order
+//    = 2 => 2nd order
+   fluxorder            = 2
+
+// transverse
+//    = 0 => no transverse flux propagation
+//    = 1 => transverse flux propagation, no corrections
+//    = 2 => transverse flux propagation, with corrections
+   transverse           = 1
+
+// mindepth: set the minimum depth (if depth is < mindepth), velocities are set to zero
+   mindepth             = 1.e-3
+
+
+// sediment model parameters 
+   // sedmodel: sediment model selector
+   // = 0:  no sediment model
+   // = 1:  track bed changes but do not update bathymetry (no morpho)
+   // = 2:  track bed changes and update bathymetry (morpho)
+   //
+   // sedinit: start time for sediment model (allows for a ramp up of hydro before starting sediment)
+   //
+   // taucrit: critical shear stress in N/m^2
+   //
+   // morphfactor: Lesser style "online" morphological acceleration [0, infinity]
+   //   = 0:  no morphology
+   //   = 1:  morphology is real time
+   //   >1 :  morphology is accelerated
+
+   sedmodel = 0
+   sedinit  = 43200
+   // sedinit  = 60  //bug, sedinit=0 crashes, something isn't initialized properly
+   d50      = .0002  
+   morphfactor = 10. 
+
+   Refinement_data {
+//     refine_criteria = "DEPTH_GRADIENT"
+     refine_criteria = "BEDLEVEL_GRADIENT"
+ 
+      BEDLEVEL_GRADIENT {
+         grad_tol = .001 
+         time_min = 43200.
+      }
+      DEPTH_GRADIENT {
+         grad_tol = .005 
+      }
+
+      
+   }
+
+   // valid boundary_condition values are "FLOW", "REFLECT", "DIRICHLET"
+   Boundary_data {
+//      boundary_edge_xlo {
+//         boundary_condition      = "DIRICHLET" 
+//         depth = 1.0
+//         bathy = 0.0
+//         veldepth = 0.0,0.0
+//      }
+      boundary_edge_xlo {
+         boundary_condition      = "REFLECT"
+      }
+      boundary_edge_xhi {
+         boundary_condition      = "REFLECT"
+      }
+      boundary_edge_ylo {
+         boundary_condition      = "REFLECT"
+      }
+      boundary_edge_yhi {
+         boundary_condition      = "REFLECT"
+      }
+
+      // IMPORTANT: If a *REFLECT, *DIRICHLET, or *FLOW condition is given
+      //            for a node, the condition must match that of the
+      //            appropriate adjacent edge above.  This is enforced for
+      //            consistency.  However, note when a REFLECT edge condition
+      //            is given and the other adjacent edge has either a FLOW
+      //            or REFLECT condition, the resulting node boundary values
+      //            will be the same regardless of which edge is used.
+      boundary_node_xlo_ylo {
+         boundary_condition      = "YREFLECT"
+      }
+      boundary_node_xhi_ylo {
+         boundary_condition      = "YREFLECT"
+      }
+      boundary_node_xlo_yhi {
+         boundary_condition      = "YREFLECT"
+      }
+      boundary_node_xhi_yhi {
+         boundary_condition      = "YREFLECT"
+      }
+   }
+}
+
+Main {
+   dim = 2
+   base_name = "swe"
+
+// log file parameters 
+   log_file_name    = "channel.log"
+   log_all_nodes    = TRUE
+
+// matlab pencil file
+   matlab_dump_interval  = 0 
+   matlab_dump_filename  = "pencil"
+   matlab_dump_dirname   = "./pencil_channel"
+   matlab_pencil_direction = 0
+ 
+// visualization dump parameters
+   viz_writer            = "VisIt" // use: "Vizamrai", "VisIt" for both
+   viz_dump_interval     = 900      // zero to turn off
+   viz_dump_dirname      = "viz_channel"
+   viz_dump_filename     = "channel"   // not used by VisIt
+   visit_file_cluster_size = 1        // not used by Vizamrai
+
+// restart dump parameters
+   restart_interval       = 0         // zero to turn off
+   restart_write_dirname  = "restart_room2d"
+}
+
+TimerManager{
+   print_exclusive      = TRUE   // output exclusive time
+   timer_list               = "apps::main::*",
+                              "apps::swe::*",
+                              "algs::GriddingAlgorithm::*",
+                              "algs::HyperbolicLevelIntegrator::*"
+}
+
+CartesianGeometry {
+
+// .5 x .5 km resolution, 2-cell inlet width, full domain
+domain_boxes = [ (0,0) , (74,24) ] 
+x_lo         = -7500 , -2500   // lower end of computational domain.
+x_up         = 7500, 2500  // upper end of computational domain.
+
+
+}
+
+StandardTagAndInitialize{
+   tagging_method = "GRADIENT_DETECTOR"
+}
+
+PatchHierarchy{
+   max_levels          = 1        // Maximum number of levels in hierarchy.
+
+   ratio_to_coarser {              // vector ratio to next coarser level
+      level_1            = 2 , 2
+      level_2            = 2 , 2
+   }
+
+   largest_patch_size {
+      level_0 = 32 ,32 
+      // all finer levels will use same values as level_0...
+   }
+
+   smallest_patch_size {
+      level_0 = 2 , 2
+      level_1 = 8 , 8
+      // all finer levels will use same values as level_0...
+   }
+}
+GriddingAlgorithm {
+   efficiency_tolerance = 0.95e0   // min % of tag cells in new patch level
+   combine_efficiency   = 0.95e0   // chop box if sum of volumes of smaller
+                                   // boxes < efficiency * vol of large box
+}
+
+HyperbolicLevelIntegrator{
+   cfl                       = 0.5e0    // max cfl factor used in problem
+   cfl_init                  = 0.1e0    // initial cfl factor
+   lag_dt_computation        = TRUE
+   use_ghosts_to_compute_dt  = TRUE
+}
+
+TimeRefinementIntegrator{
+   start_time           = 0.e0     // initial simulation time
+   end_time             = 43200.   // final simulation time
+   grow_dt              = 1.1e0    // growth factor for timesteps
+   max_integrator_steps = 30000000       // max number of simulation timesteps
+//   max_integrator_steps = 20              // max number of simulation timesteps
+}
+
+LoadBalancer {
+// using default uniform load balance configuration (see mesh_LoadBalancerX.h.sed)
+}
