@@ -25,11 +25,11 @@ default:        swe
 #include Makefile.config
 include $(SAMRAI)/config/Makefile.config
 
-CPPFLAGS_EXTRA= -DDISPLAY -DNDIM=2  -DTESTING=0   -DOPENCL -I/System/Library/Frameworks/OpenCL.framework/Versions/Current -framework OpenCL
+CPPFLAGS_EXTRA= -DDISPLAY -DNDIM=2  -DTESTING=0   -DNOPENCL -I/System/Library/Frameworks/OpenCL.framework/Versions/Current -framework OpenCL
 OTHERLIBS     = -framework OpenCL
 
 CXX_OBJS      = main.o swe.o 
-F_OBJS        =  gparms.o cntrl.o philim.o limiter.o rpn.o rpt.o flux2fw_geo.o  flux.o sedflux.o friction.o drycheck.o wd.o grad.o init.o setbathy.o calcdt.o c2f.o junkprobe.o
+F_OBJS        =  gparms.o cntrl.o philim.o limiter.o rpn.o rpt.o flux2fw_geo.o  flux.o sedflux.o friction.o drycheck.o wd.o grad.o init.o setbathy.o mhke.o calcdt.o c2f.o junkprobe.o
 
 main:
 		if test -f stamp-3d; then $(MAKE) clean; fi
@@ -104,6 +104,9 @@ setbathy.o:		$(FORTRAN)/setbathy.f90
 
 calcdt.o:	$(FORTRAN)/calcdt.f90
 		$(F90) $(FFLAGS) -c $(FORTRAN)/calcdt.f90 -o $@
+
+mhke.o:		$(FORTRAN)/mhke.f90
+		$(F90) $(FFLAGS) -c $(FORTRAN)/mhke.f90 -o $@
 
 c2f.o:		$(FORTRAN)/c2f.f90
 		$(F90) $(FFLAGS) -c $(FORTRAN)/c2f.f90 -o $@
