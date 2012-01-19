@@ -156,6 +156,8 @@ subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,b,iflux,jflux)
 
 		end do
 	end do
+	write(*,*)'issue is that we arent computing taux/tauy, they are zero, we need to use velocity to set direction'
+	stop
   
 	end select
 	
@@ -211,6 +213,7 @@ subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,b,iflux,jflux)
 	!-----------------------------------------------------------------------------------------
 	
 	fac1 = ahalf*dt*morphfactor*(1./(1-porosity))
+	write(*,*)'here: ',fac1,qx(5,1)
 	
 	! idir
 	do j=j1,j2
@@ -308,6 +311,7 @@ subroutine consdiff_sed(dx,i1,i2,j1,j2,xlo,xhi,iflux,jflux,bedlevel,b,h)
 
   !loop over internal cells, update state variables using convervative diff on fluxes
   do i=i1,i2
+	   write(*,*)iflux(i,1),iflux(i+1,1)
 	do j=j1,j2
       delta(i,j) =  &
                -oodx*(iflux(i+1,j)-iflux(i,j)) &

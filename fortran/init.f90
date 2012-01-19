@@ -651,7 +651,8 @@ subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,bedlevel)
 	
  
   end select
-
+  write(*,*)'please note, currently using weird porosity, load formulation, and no bedslope effects for exner test'
+  pause
   return
 
 end subroutine initflow
