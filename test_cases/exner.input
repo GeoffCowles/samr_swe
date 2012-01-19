@@ -1,18 +1,18 @@
-// channel inlet test from Roelvink, J.A., Coastal Engineering 53, 2006, 277-287.
+// migrating hump Exner case following Kubatko et al, ocean modelling 15 (2006). 
 // 
 
 swe {
   
-   data_problem         = "CHANNEL"  
+   data_problem         = "EXNER"    
 
 // frictype:  select the friction type
 //   = 0 => no friction
 //   = 1 => linear friction
 //   = 2 => Manning style friction
-   frictype             = 2
+   frictype             = 0
 
 // C_manning:  manning (n) friction coefficient (only used if frictype == 2)
-   C_manning            = 0.01 
+   C_manning            = 0.01  
 
 // fluxorder: order of the spatial flux
 //    = 1 => 1st order
@@ -23,7 +23,7 @@ swe {
 //    = 0 => no transverse flux propagation
 //    = 1 => transverse flux propagation, no corrections
 //    = 2 => transverse flux propagation, with corrections
-   transverse           = 2
+   transverse           = 1
 
 // mindepth: set the minimum depth (if depth is < mindepth), velocities are set to zero
    mindepth             = 1.e-3
@@ -37,7 +37,7 @@ swe {
    //
    // sedinit: start time for sediment model (allows for a ramp up of hydro before starting sediment)
    //
-   // taucrit: critical shear stress in N/m^2
+   // d50:  mean grain size in m 
    //
    // morphfactor: Lesser style "online" morphological acceleration [0, infinity]
    //   = 0:  no morphology
@@ -45,37 +45,24 @@ swe {
    //   >1 :  morphology is accelerated
 
    sedmodel = 1
-   sedinit  = 43200
-   // sedinit  = 60  //bug, sedinit=0 crashes, something isn't initialized properly
-   d50      = .0004  //.4mm = medium sand
-   morphfactor = 2. 
-
-// mhke parameters
-   // mhke_model: mhke model activator
-   // = 1: active
-   // = 0: not active
-   //
-   // mhke_cp: mhke efficiency
-   // mhke_area: cross-sectional area of turbine
-   mhke_model = 0
-   mhke_cp = .4
-   mhke_area = 2000
-   mhke_xlo = 0.
-   mhke_xhi = 10.
-   mhke_ylo = -200.
-   mhke_yhi = 200.
-
+   sedinit  = 0.0
+   d50      = .0001   
+   morphfactor = 1.00
 
    Refinement_data {
 //     refine_criteria = "DEPTH_GRADIENT"
-     refine_criteria = "BEDLEVEL_GRADIENT"
+     refine_criteria = "BATHY_GRADIENT"
+//      refine_criteria = "BEDLEVEL_GRADIENT"
  
       BEDLEVEL_GRADIENT {
-         grad_tol = .001 
+         grad_tol = .004 
          time_min = 43200.
       }
       DEPTH_GRADIENT {
-         grad_tol = .005 
+         grad_tol = 1.e-4
+      }
+      BATHY_GRADIENT {
+         grad_tol = 1e-5 
       }
 
       
@@ -83,18 +70,26 @@ swe {
 
    // valid boundary_condition values are "FLOW", "REFLECT", "DIRICHLET"
    Boundary_data {
-//      boundary_edge_xlo {
-//         boundary_condition      = "DIRICHLET" 
-//         depth = 1.0
-//         bathy = 0.0
-//         veldepth = 0.0,0.0
-//      }
       boundary_edge_xlo {
-         boundary_condition      = "REFLECT"
+         boundary_condition      = "DIRICHLET" 
+         depth = 2.0
+         bathy = 1.0
+         bedlevel = 0.0
+         veldepth = 1.0,0.0
       }
       boundary_edge_xhi {
-         boundary_condition      = "REFLECT"
+         boundary_condition      = "FLOW"    
       }
+//      boundary_edge_xlo {
+//         boundary_condition      = "FLOW"
+//      }
+//      boundary_edge_xhi {
+//         boundary_condition      = "DIRICHLET" 
+//         depth = 0.4
+//         bathy = 0.0
+//         bedlevel = 0.0
+//         veldepth = -0.2,0.0
+//      }
       boundary_edge_ylo {
          boundary_condition      = "REFLECT"
       }
@@ -129,20 +124,20 @@ Main {
    base_name = "swe"
 
 // log file parameters 
-   log_file_name    = "channel.log"
+   log_file_name    = "exner.log"
    log_all_nodes    = TRUE
 
 // matlab pencil file
-   matlab_dump_interval  = 0 
+   matlab_dump_interval  = 1  
    matlab_dump_filename  = "pencil"
-   matlab_dump_dirname   = "./pencil_channel"
+   matlab_dump_dirname   = "./pencil_exner"
    matlab_pencil_direction = 0
  
 // visualization dump parameters
    viz_writer            = "VisIt" // use: "Vizamrai", "VisIt" for both
-   viz_dump_interval     = 1600     // zero to turn off
-   viz_dump_dirname      = "viz_channel"
-   viz_dump_filename     = "channel"   // not used by VisIt
+   viz_dump_interval     = 0         // zero to turn off
+   viz_dump_dirname      = "viz_exner"
+   viz_dump_filename     = "exner"   // not used by VisIt
    visit_file_cluster_size = 1        // not used by Vizamrai
 
 // restart dump parameters
@@ -159,14 +154,11 @@ TimerManager{
 }
 
 CartesianGeometry {
-
-//domain_boxes = [ (0,0) , (74,24) ] 
-//domain_boxes = [ (0,0) , (149,49) ] 
-domain_boxes = [ (0,0) , (299,99) ] 
-x_lo         = -7500 , -2500   // lower end of computational domain.
-x_up         = 7500, 2500  // upper end of computational domain.
+domain_boxes = [(0,0) , (49,3)]
 
 
+   x_lo         = -10.e0 , 0.e0   // lower end of computational domain.
+   x_up         =  10.0,  0.3     // upper end of computational domain.
 }
 
 StandardTagAndInitialize{
@@ -178,23 +170,23 @@ PatchHierarchy{
 
    ratio_to_coarser {              // vector ratio to next coarser level
       level_1            = 2 , 2
-      level_2            = 2 , 2
+      level_2            = 2 , 1
    }
 
    largest_patch_size {
-      level_0 = 128,128
+      level_0 = 224,32  
       // all finer levels will use same values as level_0...
    }
 
    smallest_patch_size {
-      level_0 = 2 , 2
-      level_1 = 8 , 8
+      level_0 = 32 , 4
+      level_1 = 32 , 4
       // all finer levels will use same values as level_0...
    }
 }
 GriddingAlgorithm {
-   efficiency_tolerance = 0.95e0   // min % of tag cells in new patch level
-   combine_efficiency   = 0.95e0   // chop box if sum of volumes of smaller
+   efficiency_tolerance = 0.75e0   // min % of tag cells in new patch level
+   combine_efficiency   = 0.85e0   // chop box if sum of volumes of smaller
                                    // boxes < efficiency * vol of large box
 }
 
@@ -207,11 +199,9 @@ HyperbolicLevelIntegrator{
 
 TimeRefinementIntegrator{
    start_time           = 0.e0     // initial simulation time
-   end_time             = 864000.   // final simulation time
+   end_time             = 5.      // final simulation time
    grow_dt              = 1.1e0    // growth factor for timesteps
-   //max_integrator_steps = 2700       // max number of simulation timesteps
-   max_integrator_steps = 43200000          // max number of simulation timesteps
-   //max_integrator_steps = 2           // max number of simulation timesteps
+   max_integrator_steps = 300000       // max number of simulation timesteps
 }
 
 LoadBalancer {

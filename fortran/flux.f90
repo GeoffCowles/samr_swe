@@ -286,7 +286,9 @@ subroutine consdiff(dx,i1,i2,j1,j2,ifluxm,jfluxm,ifluxp,jfluxp,h,vh,b)
   !local
   integer  :: i,j,k
   real(dp) :: oodx,oody
+  logical  :: ifound = .false.
 
+  ifound = .false.
   !precompute 1/dx,  1/dy
   oodx = one/dx(1);
   oody = one/dx(2);
@@ -296,8 +298,8 @@ subroutine consdiff(dx,i1,i2,j1,j2,ifluxm,jfluxm,ifluxp,jfluxp,h,vh,b)
   do i=i1,i2
 	do j=j1,j2
       h(i,j) = h(i,j) &
-               -oodx*(ifluxm(i+1,j,1)-ifluxp(i,j,1)) &
-               -oody*(jfluxm(j+1,i,1)-jfluxp(j,i,1)) 
+                                   -oodx*(ifluxm(i+1,j,1)-ifluxp(i,j,1)) &
+                                   -oody*(jfluxm(j+1,i,1)-jfluxp(j,i,1)) 
       do k=1,NDIMS
        vh(i,j,k) = vh(i,j,k) &
                -oodx*(ifluxm(i+1,j,k+1)-ifluxp(i,j,k+1)) &
@@ -325,6 +327,7 @@ subroutine consdiff(dx,i1,i2,j1,j2,ifluxm,jfluxm,ifluxp,jfluxp,h,vh,b)
       
     enddo
   end do
+ 
 
 
  

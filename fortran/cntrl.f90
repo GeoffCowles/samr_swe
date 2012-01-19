@@ -61,6 +61,7 @@ module cntrl
   integer, parameter :: uniform = 28
   integer, parameter :: hibma = 29
   integer, parameter :: channel = 30
+  integer, parameter :: exner = 31
 
   !friction
   integer  :: frictype !=0, no friction, =1 linear, = 2 Manning
@@ -70,17 +71,27 @@ module cntrl
   logical  :: conserve_volume = .false.
   logical  :: wetdry   = .true.
 
+  !diffusion
+  integer :: diffusivity_type = 0
+  integer, parameter :: no_diffusivity = 0
+  integer, parameter :: constant_diffusivity = 1
+  integer, parameter :: smagorinsky_diffusivity = 2
+  integer, parameter :: mixing_length_diffusivity = 3
+  real(dp) :: diffusivity_coefficient = 5.
+  real(dp) :: smagorinsky_coefficient = .0
+
   !sediment
   integer  :: sedmodel
   real(dp) :: sedinit
   real(dp) :: d50
   real(dp) :: morphfactor
-  real(dp) :: porosity = .5 !bed porosity
-  integer  :: load_equation = 3
+  real(dp) :: porosity = 0. !bed porosity
+  integer  :: load_equation = 4
   integer, parameter :: load_MPM = 1 !index for Meyer-Peter Mueller load calc
   integer, parameter :: load_VR  = 2 !index for van Rijn load calc
   integer, parameter :: load_EH  = 3 !index for Engelund + Hansen load calc
-  logical  :: sed_slope_effect = .true.
+  integer, parameter :: load_linear = 4 !linear load = A*u
+  logical  :: sed_slope_effect = .false.
 
   !real(dp) :: d50 = .0001 !.4 mm  !note, .0001 is good for trench case
 
@@ -104,14 +115,23 @@ module cntrl
   real(dp), parameter :: back_slope = 4e-4
   real(dp), parameter :: trench_mid = 11.
 
+  !exner params
+  real(dp), parameter :: exner_a0 = 1.0
+  real(dp), parameter :: exner_a1 = 1.0
+  real(dp), parameter :: exner_Aqf = 1.0
+  real(dp), parameter :: exner_lambda = 20.0
+  real(dp), parameter :: exner_zeta = 3.0
+  real(dp), parameter :: exner_qf = 1.0
+  
+
   !uniform flow params
   real(dp), parameter :: uniform_h = 10.
   real(dp), parameter :: uniform_u = 1.
 
   !channel parameters
-  real(dp), parameter :: channel_mean_depth = 10.
-  real(dp), parameter :: channel_max_depth = 50.
-  real(dp), parameter :: channel_min_depth = 4.
+  real(dp), parameter :: channel_mean_depth = 30.
+  real(dp), parameter :: channel_max_depth = 30.
+  real(dp), parameter :: channel_min_depth = 10.
   real(dp), parameter :: channel_width = 2000.
   real(dp), parameter :: channel_length = 5000.
   real(dp), parameter :: channel_domain = 15000.

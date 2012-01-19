@@ -112,6 +112,7 @@ using namespace std;
 #define UNIFORM	        (28)
 #define HIBMA           (29)
 #define CHANNEL         (30)
+#define EXNER           (31)
 
 // defines for cell tagging routines
 #define RICHARDSON_NEWLY_TAGGED (-10)
@@ -326,6 +327,8 @@ swe::swe(
 		d_data_problem_int = HIBMA;
 	} else if (d_data_problem == "CHANNEL") {
 		d_data_problem_int = CHANNEL;
+  } else if (d_data_problem == "EXNER") {
+		d_data_problem_int = EXNER;
    } else {
       TBOX_ERROR(d_object_name << ": "
          << "Unknown d_data_problem string = "
@@ -941,6 +944,11 @@ void swe::conservativeDifferenceOnPatch(
 				bathy->getPointer());
 		}
 		
+		// diffusivity
+		calc_diffusion_(dt,dx,ifirst(0),ilast(0),ifirst(1),ilast(1), //FORTRAN
+			depth->getPointer(),
+			veldepth->getPointer());
+		
 		// mhke term
 		if (d_mhke_model == 1) { //mhke
 			mhke_(dt,dx,xlo,xhi,ifirst(0),ilast(0),ifirst(1),ilast(1), //FORTRAN
@@ -1214,8 +1222,8 @@ void swe::setPhysicalBoundaryConditions(
 		// extrapolation for ud/vd)
 		// note we do not set values for d_bdry_edge_veldepth
 		   } else if(d_data_problem == "CHANNEL"){
-				double H0_channel = 10;
-				double eta0_channel = 1.0;
+				double H0_channel = 30;
+				double eta0_channel = 0.3;
 				double T_channel = 12*3600;
 				double h; //,u;
 				const tbox::Pointer<geom::CartesianPatchGeometry > patch_geom = patch.getPatchGeometry();
@@ -1224,45 +1232,23 @@ void swe::setPhysicalBoundaryConditions(
 				const double* xdomainlow = d_grid_geometry->getXLower();
 				const double* xpatchhi = patch_geom->getXUpper();
 				const double* xdomainhi = d_grid_geometry->getXUpper();
+				//set left boundary forcing an eta0_channel amplitude tide wave of period T_channel
 				if (tbox::MathUtilities<double>::Abs(xpatchlow[0]-xdomainlow[0]) < dx[0]) {
 					tmp_edge_scalar_bcond[XLO] = DIRICHLET_BC;
 				 	tmp_edge_vector_bcond[XLO] = FLOW_BC;
-				   tmp_edge_veldepth_bcond[XLO] = FLOW_BC;
-				//}
-				for (int i = 0; i < NUM_2D_EDGES; i++) {
-											//	if(tmp_edge_scalar_bcond[i] == DIRICHLET_BC){
-					//if(d_scalar_bdry_edge_conds[i] == DIRICHLET_BC){
-												//equation 33, Brufau et al, IJNMF v39
-						h = H0_channel + eta0_channel*sin(2*3.14159*fill_time/T_channel);
-						//cout << "setting h on edge " << h << "  " << i << '\n';
-												//equation  
-												//u = eta0_hen*sqrt(9.81/H0_hen)*cos(2*3.14159*fill_time/T_hen);
-						d_bdry_edge_depth[i] = h;
-						d_bdry_edge_bathy[i] = -10;  //MUST SET DIRICHLET BATHYMETRY
-						//d_bdry_edge_bedlevel[i] = 99.0;
-						//								d_bdry_edge_veldepth[i*PDIM+0] = 0.; //u*h;
-						//								d_bdry_edge_veldepth[i*PDIM+1] = 0.; //u*h;
-					}
+				  tmp_edge_veldepth_bcond[XLO] = FLOW_BC;
+					h = H0_channel + eta0_channel*sin(2*3.14159*fill_time/T_channel);
+					d_bdry_edge_depth[XLO] = h;
+					d_bdry_edge_bathy[XLO] = -H0_channel;  //MUST SET DIRICHLET BATHYMETRY
 				}
+				//set left boundary forcing an eta0_channel amplitude tide wave of period T_channel with 120 degree phase lag
 				if (tbox::MathUtilities<double>::Abs(xpatchhi[0]-xdomainhi[0]) < dx[0]) {
 					tmp_edge_scalar_bcond[XHI] = DIRICHLET_BC;
 				 	tmp_edge_vector_bcond[XHI] = FLOW_BC;
-				   tmp_edge_veldepth_bcond[XHI] = FLOW_BC;
-				//}
-				for (int i = 0; i < NUM_2D_EDGES; i++) {
-											//	if(tmp_edge_scalar_bcond[i] == DIRICHLET_BC){
-					//if(d_scalar_bdry_edge_conds[i] == DIRICHLET_BC){
-												//equation 33, Brufau et al, IJNMF v39
-						h = H0_channel + eta0_channel*sin(2*3.14159*fill_time/T_channel + 2*3.14159/3.);  //same as left + 120 degree phase lag
-						//cout << "setting h on edge " << h << "  " << i << '\n';
-												//equation  
-												//u = eta0_hen*sqrt(9.81/H0_hen)*cos(2*3.14159*fill_time/T_hen);
-						d_bdry_edge_depth[i] = h;
-						d_bdry_edge_bathy[i] = -10;  //MUST SET DIRICHLET BATHYMETRY
-						//d_bdry_edge_bedlevel[i] = 99.0;
-						//								d_bdry_edge_veldepth[i*PDIM+0] = 0.; //u*h;
-						//								d_bdry_edge_veldepth[i*PDIM+1] = 0.; //u*h;
-					}
+				  tmp_edge_veldepth_bcond[XHI] = FLOW_BC;
+					h = H0_channel + eta0_channel*sin(2*3.14159*fill_time/T_channel - 2*3.14159/3.);  //same as left - 120 degree lag
+					d_bdry_edge_depth[XHI] = h;
+					d_bdry_edge_bathy[XHI] = -H0_channel;  //MUST SET DIRICHLET BATHYMETRY
 				}
 		// set open boundary forcing for HIBMA test where open boundary is at X=0 
 		// Note we are forcing the free surface (actually the depth) but do not specify the velocity

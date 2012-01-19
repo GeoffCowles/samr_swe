@@ -632,8 +632,22 @@ subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,bedlevel)
 			     alpha = min( (abs(xc)-.5*channel_length)/(.5*(channel_domain*.5-.5*channel_length)), 1.0)
 			     h(i,j) = h(i,j) - alpha*(h(i,j)-channel_mean_depth);
 			  endif;
+			  !h = 10.
 		end do
 	end do
+	
+	!---------------------------------------------------------------------
+	case(exner) !exner cosine function
+	!---------------------------------------------------------------------
+   
+	 do i=i1,i2
+	    do j=j1,j2
+		   xc = xlo(1)+dx(1)*dble(i-i1)+dx(1)/2
+		   h(i,j) = exner_zeta - (exner_a0 + exner_a1*cos(2*pi*xc/exner_lambda))
+		   vh(i,j,1) = exner_qf
+		   vh(i,j,2) = 0.0
+		end do
+  end do
 	
  
   end select

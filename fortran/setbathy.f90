@@ -500,9 +500,22 @@ subroutine setbathy(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,b)
 				     b(i,j) = b(i,j) - alpha*(b(i,j)-channel_mean_depth);
 				  endif;
 			   b(i,j) = -b(i,j)
+			   !b = -10.
 			end do
 		end do
-    !stop
+		!write(*,*)'min value of b',minval(b)
+		
+		!---------------------------------------------------------------------
+		case(exner) !exner cosine function
+		!---------------------------------------------------------------------
+
+		 do i=i1,i2
+		    do j=j1,j2
+			   xc = xlo(1)+dx(1)*dble(i-i1)+dx(1)/2
+			   b(i,j) = exner_a0 + exner_a1*cos(2*pi*xc/exner_lambda)
+			end do
+	  end do
+		
   end select
 
   return

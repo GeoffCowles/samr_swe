@@ -80,6 +80,11 @@ extern "C" {
   const int&, const int&, const int&, const int&,
   double*, double*);
 
+  void calc_diffusion_(
+  const double&, const double*, 
+  const int&, const int&, const int&, const int&,
+  double*, double*);
+
   void linfriction_(
   const double*, const double&,
   const int&, const int&, const int&, const int&,

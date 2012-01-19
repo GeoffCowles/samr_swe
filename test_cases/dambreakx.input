@@ -29,6 +29,28 @@ swe {
 // mindepth: set the minimum depth (if depth is < mindepth), velocities are set to zero 
    mindepth             = 1.e-3
 
+// sediment model parameters
+   // sedmodel: sediment model selector
+   // = 0:  no sediment model
+   // = 1:  track bed changes but do not update bathymetry (no morpho)
+   // = 2:  track bed changes and update bathymetry (morpho)
+   //
+   // sedinit: start time for sediment model (allows for a ramp up of hydro before starting sediment)
+   //
+   // taucrit: critical shear stress in N/m^2
+   //
+   // morphfactor: Lesser style "online" morphological acceleration [0, infinity]
+   //   = 0:  no morphology
+   //   = 1:  morphology is real time
+   //   >1 :  morphology is accelerated
+
+   sedmodel = 0
+   sedinit  = 43200
+   // sedinit  = 60  //bug, sedinit=0 crashes, something isn't initialized properly
+   d50      = .00024
+   morphfactor = 50.
+
+
    Refinement_data {
       refine_criteria = "DEPTH_GRADIENT"
  
@@ -45,6 +67,7 @@ swe {
          boundary_condition      = "DIRICHLET"
          depth = 1.0
          bathy = 0.0
+         bedlevel = 0.0
          veldepth = 2.5,0.0 
       }
       boundary_edge_xhi {
@@ -94,7 +117,7 @@ Main {
  
 // visualization dump parameters
    viz_writer            = "VisIt" // use: "Vizamrai", "VisIt" for both
-   viz_dump_interval     = 1          // zero to turn off
+   viz_dump_interval     = 0          // zero to turn off
    viz_dump_dirname      = "viz_dambreakx"
    viz_dump_filename     = "dambreakx"   // not used by VisIt
    visit_file_cluster_size = 1        // not used by Vizamrai
@@ -113,7 +136,7 @@ TimerManager{
 }
 
 CartesianGeometry{
-   domain_boxes	= [(0,0),(299,4)]
+   domain_boxes	= [(0,0),(499,4)]
 
    x_lo = 0.e0 , 0.e0   // lower end of computational domain.
    x_up = 50.e0 , 50.e0 // upper end of computational domain.

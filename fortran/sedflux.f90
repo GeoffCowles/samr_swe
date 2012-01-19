@@ -54,7 +54,7 @@ subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,b,iflux,jflux)
 	real(dp) :: qy(i1-NCGST:i2+NCGST,j1-NCGST:j2+NCGST)
 	real(dp) :: taub,tau_edge
 	real(dp) :: fac1,fac2,shieldfac,gprime,facMPM,facVR,facEH
-	real(dp) :: dstar,loadMPM,loadVR,loadEH,loadfac,loadEH2
+	real(dp) :: dstar,loadMPM,loadVR,loadEH,loadfac,loadEH2,loadlinear
 	real(dp) :: slope_fac,dbdx,dbdy,slmax,oo2dx,oo2dy
 	real(dp) :: dzdx
 	integer i,j
@@ -139,6 +139,20 @@ subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,b,iflux,jflux)
 		loadEH = facEH*taub*(shieldfac**2)*((vh(i,j,1)**2 + vh(i,j,2)**2)**1.5)*(h(i,j)**-3)*(h(i,j)**-(1./6.))
 		qx(i,j) = loadEH*taux(i,j)/(taub+tinynum)
 		qy(i,j) = loadEH*tauy(i,j)/(taub+tinynum)
+
+		end do
+	end do
+	
+	case(load_linear)  ! for Exner analytical test - Kubatko et al., ocean modelling, 2006
+  
+	do j=j1-NCGST,j2+NCGST
+		do i=i1-NCGST,i2+NCGST
+
+    !linear load - qx = u*A
+		!loadlinear = exner_A*sqrt(vh(i,j,1)**2 + vh(i,j,2)**2)/h(i,j) !A*u
+		loadlinear = exner_Aqf/h(i,j) !A*u
+		qx(i,j) = loadlinear*taux(i,j)/(taub+tinynum)
+		qy(i,j) = loadlinear*tauy(i,j)/(taub+tinynum)
 
 		end do
 	end do
