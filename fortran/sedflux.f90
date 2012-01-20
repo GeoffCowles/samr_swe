@@ -57,6 +57,7 @@ subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,b,iflux,jflux)
 	real(dp) :: dstar,loadMPM,loadVR,loadEH,loadfac,loadEH2,loadlinear
 	real(dp) :: slope_fac,dbdx,dbdy,slmax,oo2dx,oo2dy
 	real(dp) :: dzdx
+	real(dp) :: u,v,vmag
 	integer i,j
 
   !zero out fluxes 
@@ -151,13 +152,12 @@ subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,b,iflux,jflux)
     !linear load - qx = u*A
 		!loadlinear = exner_A*sqrt(vh(i,j,1)**2 + vh(i,j,2)**2)/h(i,j) !A*u
 		loadlinear = exner_Aqf/h(i,j) !A*u
-		qx(i,j) = loadlinear*taux(i,j)/(taub+tinynum)
-		qy(i,j) = loadlinear*tauy(i,j)/(taub+tinynum)
+		qx(i,j) = loadlinear !*taux(i,j)/(taub+tinynum)
+		qy(i,j) = loadlinear !*tauy(i,j)/(taub+tinynum)
 
 		end do
 	end do
-	write(*,*)'issue is that we arent computing taux/tauy, they are zero, we need to use velocity to set direction'
-	stop
+	
   
 	end select
 	
@@ -213,7 +213,6 @@ subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,b,iflux,jflux)
 	!-----------------------------------------------------------------------------------------
 	
 	fac1 = ahalf*dt*morphfactor*(1./(1-porosity))
-	write(*,*)'here: ',fac1,qx(5,1)
 	
 	! idir
 	do j=j1,j2
@@ -241,7 +240,7 @@ subroutine flux_sed(cid,dt,dx,xlo,xhi,i1,i2,j1,j2,h,vh,bedlevel,b,iflux,jflux)
 	!if(cid == devriend) jflux = zero
 
 	!extrapolate i flux at inflow boundary !FUDGE
-	if(cid==trench .or. cid==devriend)then
+	if(cid==trench .or. cid==devriend .or. cid==exner)then
   if(abs(xlo(1))<1e-5)then
       iflux(0,:) = iflux(1,:)
     endif
@@ -311,7 +310,6 @@ subroutine consdiff_sed(dx,i1,i2,j1,j2,xlo,xhi,iflux,jflux,bedlevel,b,h)
 
   !loop over internal cells, update state variables using convervative diff on fluxes
   do i=i1,i2
-	   write(*,*)iflux(i,1),iflux(i+1,1)
 	do j=j1,j2
       delta(i,j) =  &
                -oodx*(iflux(i+1,j)-iflux(i,j)) &

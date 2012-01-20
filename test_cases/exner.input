@@ -44,7 +44,7 @@ swe {
    //   = 1:  morphology is real time
    //   >1 :  morphology is accelerated
 
-   sedmodel = 1
+   sedmodel = 2
    sedinit  = 0.0
    d50      = .0001   
    morphfactor = 1.00
@@ -128,7 +128,7 @@ Main {
    log_all_nodes    = TRUE
 
 // matlab pencil file
-   matlab_dump_interval  = 1  
+   matlab_dump_interval  = 1
    matlab_dump_filename  = "pencil"
    matlab_dump_dirname   = "./pencil_exner"
    matlab_pencil_direction = 0
@@ -154,11 +154,11 @@ TimerManager{
 }
 
 CartesianGeometry {
-domain_boxes = [(0,0) , (49,3)]
+domain_boxes = [(0,0) , (499,3)]
 
 
-   x_lo         = -10.e0 , 0.e0   // lower end of computational domain.
-   x_up         =  10.0,  0.3     // upper end of computational domain.
+   x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
+   x_up         = 20.0,  0.3     // upper end of computational domain.
 }
 
 StandardTagAndInitialize{
@@ -174,7 +174,7 @@ PatchHierarchy{
    }
 
    largest_patch_size {
-      level_0 = 224,32  
+      level_0 = 2000,32  
       // all finer levels will use same values as level_0...
    }
 
@@ -198,8 +198,9 @@ HyperbolicLevelIntegrator{
 }
 
 TimeRefinementIntegrator{
-   start_time           = 0.e0     // initial simulation time
-   end_time             = 5.      // final simulation time
+   start_time           = 0.0     // initial simulation time
+   //end_time             = 3.0      // final simulation time
+   end_time             = 4.5      // final simulation time
    grow_dt              = 1.1e0    // growth factor for timesteps
    max_integrator_steps = 300000       // max number of simulation timesteps
 }

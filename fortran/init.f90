@@ -643,15 +643,18 @@ subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,bedlevel)
 	 do i=i1,i2
 	    do j=j1,j2
 		   xc = xlo(1)+dx(1)*dble(i-i1)+dx(1)/2
-		   h(i,j) = exner_zeta - (exner_a0 + exner_a1*cos(2*pi*xc/exner_lambda))
+		   h(i,j) = exner_zeta - (exner_a0 + exner_a1*cos(2*pi*(xc-.5*exner_lambda)/exner_lambda))
 		   vh(i,j,1) = exner_qf
 		   vh(i,j,2) = 0.0
+		   if(xc >= 20.) then
+		     h(i,j) = exner_zeta 
+		   endif
 		end do
   end do
 	
  
   end select
-  write(*,*)'please note, currently using weird porosity, load formulation, and no bedslope effects for exner test'
+  write(*,*)'please note, currently using weird porosity, clamped free surface, weird load formulation, and no bedslope effects for exner test'
   pause
   return
 
