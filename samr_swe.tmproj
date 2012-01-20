@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>fortran/cntrl.f90</string>
+	<string>fortran/sedflux.f90</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -44,7 +44,7 @@
 			<key>filename</key>
 			<string>swe.C</string>
 			<key>lastUsed</key>
-			<date>2012-01-11T19:24:39Z</date>
+			<date>2012-01-19T20:46:24Z</date>
 		</dict>
 		<dict>
 			<key>filename</key>
@@ -98,12 +98,12 @@
 				<key>column</key>
 				<integer>42</integer>
 				<key>line</key>
-				<integer>74</integer>
+				<integer>112</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>63</integer>
+			<integer>93</integer>
 		</dict>
 		<key>fortran/coarsen.f90</key>
 		<dict>
@@ -152,14 +152,14 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>67</integer>
+				<integer>23</integer>
 				<key>line</key>
-				<integer>45</integer>
+				<integer>312</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>7</integer>
+			<integer>282</integer>
 		</dict>
 		<key>fortran/friction.f90</key>
 		<dict>
@@ -175,6 +175,20 @@
 			<key>firstVisibleLine</key>
 			<integer>18</integer>
 		</dict>
+		<key>fortran/init.f90</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>7</integer>
+				<key>line</key>
+				<integer>654</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>609</integer>
+		</dict>
 		<key>fortran/junkprobe.f90</key>
 		<dict>
 			<key>caret</key>
@@ -188,6 +202,20 @@
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
 			<integer>1</integer>
+		</dict>
+		<key>fortran/limit.f90</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>32</integer>
+				<key>line</key>
+				<integer>25</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
 		</dict>
 		<key>fortran/mhke.f90</key>
 		<dict>
@@ -236,28 +264,28 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>15</integer>
+				<integer>112</integer>
 				<key>line</key>
-				<integer>67</integer>
+				<integer>158</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>39</integer>
+			<integer>125</integer>
 		</dict>
 		<key>fortran/setbathy.f90</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>3</integer>
+				<integer>38</integer>
 				<key>line</key>
-				<integer>506</integer>
+				<integer>514</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>473</integer>
+			<integer>475</integer>
 		</dict>
 		<key>fortran/step2_geo.f</key>
 		<dict>
@@ -292,14 +320,30 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>25</integer>
+				<integer>35</integer>
 				<key>line</key>
-				<integer>1221</integer>
+				<integer>317</integer>
 			</dict>
+			<key>columnSelection</key>
+			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>1217</integer>
+			<integer>293</integer>
+			<key>selectFrom</key>
+			<dict>
+				<key>column</key>
+				<integer>31</integer>
+				<key>line</key>
+				<integer>317</integer>
+			</dict>
+			<key>selectTo</key>
+			<dict>
+				<key>column</key>
+				<integer>35</integer>
+				<key>line</key>
+				<integer>317</integer>
+			</dict>
 		</dict>
 		<key>sweFort.h</key>
 		<dict>
@@ -319,10 +363,16 @@
 	<key>openDocuments</key>
 	<array>
 		<string>fortran/cntrl.f90</string>
+		<string>fortran/limit.f90</string>
+		<string>fortran/init.f90</string>
+		<string>fortran/flux.f90</string>
+		<string>fortran/sedflux.f90</string>
+		<string>fortran/setbathy.f90</string>
+		<string>swe.C</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
 	<true/>
 	<key>windowFrame</key>
-	<string>{{621, 101}, {1205, 924}}</string>
+	<string>{{699, 233}, {1205, 924}}</string>
 </dict>
 </plist>
