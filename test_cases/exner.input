@@ -154,7 +154,7 @@ TimerManager{
 }
 
 CartesianGeometry {
-domain_boxes = [(0,0) , (499,3)]
+domain_boxes = [(0,0) , (999,3)]
 
 
    x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
@@ -199,8 +199,8 @@ HyperbolicLevelIntegrator{
 
 TimeRefinementIntegrator{
    start_time           = 0.0     // initial simulation time
-   //end_time             = 3.0      // final simulation time
-   end_time             = 4.5      // final simulation time
+   end_time             = 3.0      // final simulation time
+   //end_time             = 4.5      // final simulation time
    grow_dt              = 1.1e0    // growth factor for timesteps
    max_integrator_steps = 300000       // max number of simulation timesteps
 }

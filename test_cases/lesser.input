@@ -1,9 +1,9 @@
-// migrating devriend case from devriend (1987) 
+// migrating hump case as described in Lesser et al., C.E. 51, 2004, 883-915, page 909 
 // 
 
 swe {
   
-   data_problem         = "DEVRIEND"    
+   data_problem         = "LESSER"      
 
 // frictype:  select the friction type
 //   = 0 => no friction
@@ -14,7 +14,7 @@ swe {
    frictype             = 0
 
 // C_manning:  manning (n) friction coefficient (only used if frictype == 2)
-   C_manning            = 0.025
+   C_manning            = 0.02
 
 // fluxorder: order of the spatial flux
 //    = 1 => 1st order
@@ -64,7 +64,7 @@ swe {
          grad_tol = 1.e-4
       }
       BATHY_GRADIENT {
-         grad_tol = 1.00e-2 
+         grad_tol = 2.5e-3 
       }
 
       
@@ -78,7 +78,7 @@ swe {
          depth = 10.0
          bathy = 0.0
          bedlevel = 0.0
-         veldepth = 5.0,0.0
+         veldepth = 10.,0.0
       }
 //      boundary_edge_xhi {
 //         boundary_condition      = "DIRICHLET"
@@ -145,7 +145,7 @@ Main {
  
 // visualization dump parameters
    viz_writer            = "VisIt" // use: "Vizamrai", "VisIt" for both
-   viz_dump_interval     = 0         // zero to turn off
+   viz_dump_interval     = 500         // zero to turn off
    viz_dump_dirname      = "viz_devriend"
    viz_dump_filename     = "devriend"   // not used by VisIt
    visit_file_cluster_size = 1        // not used by Vizamrai
@@ -173,14 +173,14 @@ domain_boxes = [(0,0) , (99,24)]  //
 
 
 // Lesser domains
-//   x_lo         = 0.e0 , 5000.e0   // lower end of computational domain.
-//  x_up         = 20000.0,  10000.0   // upper end of computational domain.
+   x_lo         = 0.e0 , 5000.e0   // lower end of computational domain.
+  x_up         = 20000.0,  10000.0   // upper end of computational domain.
 //   x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
 //   x_up         = 20000.0,  10000.0   // upper end of computational domain.
 
 // devriend domains (1000km x 500 or 1000km x 250)
-   x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
-   x_up         = 1000.0,  250.0   // upper end of computational domain.
+//   x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
+//   x_up         = 1000.0,  250.0   // upper end of computational domain.
 
 }
 
@@ -189,7 +189,7 @@ StandardTagAndInitialize{
 }
 
 PatchHierarchy{
-   max_levels          = 2        // Maximum number of levels in hierarchy.
+   max_levels          = 1        // Maximum number of levels in hierarchy.
 
    ratio_to_coarser {              // vector ratio to next coarser level
       level_1            = 4,  4
@@ -223,7 +223,7 @@ HyperbolicLevelIntegrator{
 TimeRefinementIntegrator{
    start_time           = 0.e0     // initial simulation time
 //   end_time             = 1728000.   // final simulation time
-   end_time             = 36.      // final simulation time
+   end_time             = 172800.    // final simulation time
    grow_dt              = 1.1e0    // growth factor for timesteps
    max_integrator_steps = 30000000       // max number of simulation timesteps
 }

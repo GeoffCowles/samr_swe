@@ -1,9 +1,9 @@
-// roelvink inlet test from Roelvink, J.A., Coastal Engineering 53, 2006, 277-287.
+// warner inlet case from: Warner etal C&G 2008 
 // 
 
 swe {
   
-   data_problem         = "ROELVINK"  
+   data_problem         = "WARNER"    
 
 // frictype:  select the friction type
 //   = 0 => no friction
@@ -12,7 +12,7 @@ swe {
    frictype             = 2
 
 // C_manning:  manning (n) friction coefficient (only used if frictype == 2)
-   C_manning            = 0.01 
+   C_manning            = 0.015 
 
 // fluxorder: order of the spatial flux
 //    = 1 => 1st order
@@ -47,8 +47,8 @@ swe {
    sedmodel = 2
    sedinit  = 43200
    // sedinit  = 60  //bug, sedinit=0 crashes, something isn't initialized properly
-   d50      = .0002  
-   morphfactor = 11. 
+   d50      = .0002
+   morphfactor = 10. 
 
    Refinement_data {
 //     refine_criteria = "DEPTH_GRADIENT"
@@ -113,20 +113,20 @@ Main {
    base_name = "swe"
 
 // log file parameters 
-   log_file_name    = "roelvink.log"
+   log_file_name    = "warner.log"
    log_all_nodes    = TRUE
 
 // matlab pencil file
    matlab_dump_interval  = 0 
    matlab_dump_filename  = "pencil"
-   matlab_dump_dirname   = "./pencil_roelvink"
+   matlab_dump_dirname   = "./pencil_warner"
    matlab_pencil_direction = 0
  
 // visualization dump parameters
    viz_writer            = "VisIt" // use: "Vizamrai", "VisIt" for both
-   viz_dump_interval     = 800      // zero to turn off
-   viz_dump_dirname      = "viz_roelvink"
-   viz_dump_filename     = "roelvink"   // not used by VisIt
+   viz_dump_interval     = 360      // zero to turn off
+   viz_dump_dirname      = "viz_warner"
+   viz_dump_filename     = "warner"   // not used by VisIt
    visit_file_cluster_size = 1        // not used by Vizamrai
 
 // restart dump parameters
@@ -143,115 +143,22 @@ TimerManager{
 }
 
 CartesianGeometry {
-//   domain_boxes = [ (0,0) , (9,13) ],
-//	          [ (11,0) , (29,13) ],
-//	          [ (0,14) , (29,17) ],
-//	          [ (0,18) , (9,31) ],
-//                  [ (11,18) , (29,31) ]
-//   domain_boxes = [ (0,0) , (19,27) ],
-//                  [ (21,0) , (59,27) ],
-//                  [ (0,28) , (59,35) ],
-//                  [ (0,36) , (19,63) ],
-//                  [ (21,36) , (59,63) ]
-//   domain_boxes = [ (0,0) , (19,27) ],
-//                  [ (0,28), (20,35) ],
-//                  [ (0,36), (19,63) ],
-//                  [ (21,0), (59,63) ]
 
-// two-cell inlet (one-cell inlet crashes AMR)
-//   domain_boxes = [ (0,0) , (19,27) ],
-//                  [ (0,28), (21,35) ],
-//                  [ (0,36), (19,63) ],
-//                  [ (22,0), (59,63) ]
-
-// two-cell inlet (one-cell inlet crashes AMR) at higher res
-//   domain_boxes = [ (0,0) , (39,55) ],
-//                  [ (0,56), (41,71) ],
-//                  [ (0,72), (39,127)],
-//                  [ (42,0), (119,127) ]
-//
-// half an inlet 
-//   domain_boxes = [ (0,0) , (41,7) ],
-//                  [ (0,8), (39,63) ],
-//                  [ (42,0), (119,63) ]
-
-
-// coarse model testing (will crash with AMR)
-//   domain_boxes = [ (0,0) , (10,1) ],
-//                  [ (0,4) , (9,14) ], 
-//                  [ (11,0), (29,14) ]
-//
-
-// 0.5 resolution, 1-cell inlet width, full domain
-//domain_boxes = [ (0,0) , (9,12) ],
-//               [ (0,13) , (10,16) ],
-//               [ (0,17) , (9,29) ],
-//               [ (11,0) , (29,29) ]
-
-// 0.5 resolution, 1-cell inlet width, half domain
-//domain_boxes = [ (0,0) , (10,1) ],
-//               [ (0,2) , (9,14) ],
-//               [ (0,17) , (9,29) ] 
-
-// 0.5x0.25 resolution, 1-cell inlet width, half domain
-//domain_boxes = [ (0,0) , (10,3) ],
-//               [ (0,4) , (9,29) ],
-//               [ (11,0) , (29,29) ] 
-//x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
-//x_up         = 15000, 7500   // upper end of computational domain.
-
-// 0.5x0.25 resolution, 1-cell inlet width, full domain
-//domain_boxes = [ (0,0) , (9,25) ],
-//               [ (0,26) , (10,33) ],
-//               [ (0,34) , (9,59) ],
-//               [ (11,0) , (29,59) ]
-//x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
-//x_up         = 15000, 15000  // upper end of computational domain.
-
-// .25 x .25 resolution, 1-cell inlet width, half domain
-//domain_boxes = [ (0,0) , (20,3) ],
-//               [ (0,4) , (19,29) ],
-//               [ (21,0) , (59,29) ]
-//x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
-//x_up         = 15000, 7500   // upper end of computational domain.
-
-// .125 x .125 resolution, 1-cell inlet width, half domain
-//domain_boxes = [ (0,0) , (40,7) ],
-//               [ (0,8) , (39,59) ],
-//               [ (41,0) , (119,59) ] 
-//x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
-//x_up         = 15000, 7500   // upper end of computational domain.
-
-// .25 x .25 res, 2-cell inlet width, half domain
-//domain_boxes = [ (0,0) , (21,3) ],
-//               [ (0,4) , (19,29) ],
-//               [ (22,0) , (59,29) ] 
-//x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
-//x_up         = 15000, 7500   // upper end of computational domain.
-
-// .05 x .05 km resolution, 1-cell inlet width, half domain
-//domain_boxes = [ (0,0) , (100,19) ],
-//               [ (0,20) , (99,149) ],
-//               [ (101,0) , (299,149) ] 
-//x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
-//x_up         = 15000, 7500   // upper end of computational domain.
-
-
-// .5 x .5 km resolution, 2-cell inlet width, full domain
-//domain_boxes = [ (0,0) , (9,12) ],
-//               [ (0,13) , (11,16) ],
-//               [ (0,17) , (9,29) ],
-//               [ (12,0) , (29,29) ]
-//x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
-//x_up         = 15000, 15000  // upper end of computational domain.
-
-// 100m x 100m  resolution, 2-cell (200m) inlet width, half domain
-// this should be the same resolution and inlet thickness of Roelvink
-domain_boxes = [ (0,0) , (51,9) ],
-               [ (0,10) , (49,74) ],
-               [ (52,0) , (149,74) ] 
+// .25 x .25 km resolution, 2-cell inlet width, full domain
+//domain_boxes = [ (0,0) , (31,3) ],
+//               [ (0,4) , (29,27) ],
+//               [ (32,0) , (59,27) ] 
+// .125 x .125 km resolution, 2-cell inlet width, full domain
+//domain_boxes = [ (0,0) , (61,7) ],
+//               [ (0,8) , (59,55) ],
+//               [ (62,0) , (119,55) ] 
+// .125 x .125 km resolution, 1-cell inlet width, full domain
+domain_boxes = [ (0,0) , (60,7) ],
+               [ (0,8) , (59,55) ],
+               [ (61,0) , (119,55) ] 
 x_lo         = 0.e0 , 0.e0   // lower end of computational domain.
-x_up         = 15000, 7500   // upper end of computational domain.
+x_up         = 15000, 7000  // upper end of computational domain.
+
 
 
 }
@@ -261,7 +168,7 @@ StandardTagAndInitialize{
 }
 
 PatchHierarchy{
-   max_levels          = 3        // Maximum number of levels in hierarchy.
+   max_levels          = 1        // Maximum number of levels in hierarchy.
 
    ratio_to_coarser {              // vector ratio to next coarser level
       level_1            = 2 , 2
@@ -275,7 +182,7 @@ PatchHierarchy{
 
    smallest_patch_size {
       level_0 = 2 , 2
-      level_1 = 8 , 8
+      level_1 = 2 , 2
       // all finer levels will use same values as level_0...
    }
 }
@@ -294,10 +201,7 @@ HyperbolicLevelIntegrator{
 
 TimeRefinementIntegrator{
    start_time           = 0.e0     // initial simulation time
-   end_time             = 259200 // 5 tidal cycles + 1 spinup X morph of 11 gives 55 m-days of evolution
-   end_time             = 25920000.   // final simulation time
-//   end_time             = 432000.     // final simulation time
-//   end_time = 86400.
+   end_time             = 864000.   // final simulation time
    grow_dt              = 1.1e0    // growth factor for timesteps
    max_integrator_steps = 30000000       // max number of simulation timesteps
 //   max_integrator_steps = 20              // max number of simulation timesteps

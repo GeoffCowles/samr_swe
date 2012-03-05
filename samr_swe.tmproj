@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>fortran/cntrl.f90</string>
+	<string>swe.C</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -20,13 +20,13 @@
 			<key>filename</key>
 			<string>main.C</string>
 			<key>lastUsed</key>
-			<date>2012-01-10T19:16:09Z</date>
+			<date>2012-02-23T00:47:30Z</date>
 		</dict>
 		<dict>
 			<key>filename</key>
 			<string>Makefile</string>
 			<key>lastUsed</key>
-			<date>2012-01-11T16:22:42Z</date>
+			<date>2012-02-23T00:47:00Z</date>
 		</dict>
 		<dict>
 			<key>filename</key>
@@ -44,13 +44,15 @@
 			<key>filename</key>
 			<string>swe.C</string>
 			<key>lastUsed</key>
-			<date>2012-01-20T03:29:23Z</date>
+			<date>2012-02-23T00:47:30Z</date>
+			<key>selected</key>
+			<true/>
 		</dict>
 		<dict>
 			<key>filename</key>
 			<string>swe.h</string>
 			<key>lastUsed</key>
-			<date>2012-01-11T16:22:41Z</date>
+			<date>2012-02-19T03:27:29Z</date>
 		</dict>
 		<dict>
 			<key>filename</key>
@@ -63,6 +65,20 @@
 	<integer>200</integer>
 	<key>metaData</key>
 	<dict>
+		<key>Makefile</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>48</integer>
+				<key>line</key>
+				<integer>111</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>72</integer>
+		</dict>
 		<key>Makefile.depend</key>
 		<dict>
 			<key>caret</key>
@@ -91,19 +107,33 @@
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
 		</dict>
+		<key>fortran/calcdt.f90</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>3</integer>
+				<key>line</key>
+				<integer>77</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>37</integer>
+		</dict>
 		<key>fortran/cntrl.f90</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>43</integer>
+				<integer>27</integer>
 				<key>line</key>
-				<integer>112</integer>
+				<integer>89</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>93</integer>
+			<integer>69</integer>
 		</dict>
 		<key>fortran/coarsen.f90</key>
 		<dict>
@@ -152,7 +182,7 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>23</integer>
+				<integer>19</integer>
 				<key>line</key>
 				<integer>312</integer>
 			</dict>
@@ -175,19 +205,33 @@
 			<key>firstVisibleLine</key>
 			<integer>18</integer>
 		</dict>
+		<key>fortran/grad.f90</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>13</integer>
+				<key>line</key>
+				<integer>119</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>64</integer>
+		</dict>
 		<key>fortran/init.f90</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>27</integer>
+				<integer>21</integer>
 				<key>line</key>
-				<integer>649</integer>
+				<integer>554</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>612</integer>
+			<integer>536</integer>
 		</dict>
 		<key>fortran/junkprobe.f90</key>
 		<dict>
@@ -278,14 +322,14 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>33</integer>
+				<integer>1</integer>
 				<key>line</key>
-				<integer>515</integer>
+				<integer>393</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>477</integer>
+			<integer>376</integer>
 		</dict>
 		<key>fortran/step2_geo.f</key>
 		<dict>
@@ -301,6 +345,20 @@
 			<key>firstVisibleLine</key>
 			<integer>198</integer>
 		</dict>
+		<key>fortran/wd.f90</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>68</integer>
+				<key>line</key>
+				<integer>42</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>19</integer>
+		</dict>
 		<key>main.C</key>
 		<dict>
 			<key>caret</key>
@@ -313,7 +371,35 @@
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>774</integer>
+			<integer>666</integer>
+		</dict>
+		<key>swe.C</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>1496</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>1860</integer>
+		</dict>
+		<key>swe.h</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>2</integer>
+				<key>line</key>
+				<integer>461</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>438</integer>
 		</dict>
 		<key>sweFort.h</key>
 		<dict>
@@ -334,12 +420,24 @@
 	<array>
 		<string>fortran/sedflux.f90</string>
 		<string>fortran/cntrl.f90</string>
+		<string>fortran/wd.f90</string>
 		<string>fortran/init.f90</string>
+		<string>fortran/refine.f90</string>
+		<string>fortran/limit.f90</string>
+		<string>fortran/step2_geo.f</string>
+		<string>fortran/grad.f90</string>
+		<string>fortran/calcdt.f90</string>
+		<string>swe.h</string>
 		<string>fortran/setbathy.f90</string>
+		<string>swe.C</string>
+		<string>Makefile</string>
+		<string>main.C</string>
+		<string>fortran/coarsen.f90</string>
+		<string>fortran/flux.f90</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
 	<true/>
 	<key>windowFrame</key>
-	<string>{{257, 0}, {1182, 878}}</string>
+	<string>{{658, 256}, {1182, 878}}</string>
 </dict>
 </plist>

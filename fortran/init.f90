@@ -41,6 +41,7 @@ subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,bedlevel)
   real(dp) :: xhalf,xc,yc,depth_left,depth_right,x0,xberm,fac,fac2,zeta,u_left
   real(dp) :: theta_scrit,t1,t2,t3,t4,f1,f2
   real(dp) :: devriend_x,devriend_y,devriend_amp,devriend_rad,dist
+  real(dp) :: lesser_x,lesser_y,lesser_amp,lesser_rad
   real(dp) :: alpha,beta
   
 
@@ -537,21 +538,44 @@ subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,bedlevel)
 	!---------------------------------------------------------------------
 	case(devriend) !de Vriend hump morphodynamic case
 	!---------------------------------------------------------------------
-	
-	devriend_amp = 5.    !amplitude of hump
-   devriend_x   = 5000. !x location of hump center
-   devriend_y   = 5000. !y location of hump center
-   devriend_rad = 1000. !radius of hump
+	 !note, de Vriend used 0.5 m/s for inflow but we get better comparison
+	 !using 1 m/s.  At 0.5 m/s we need a huge manning coefficient to get the
+	 !right propagation speed
+   devriend_amp = 1.    !amplitude of hump
+   devriend_x   = 500. !x location of hump center
+   devriend_y   = 0. !y location of hump center
+   devriend_rad = 50. !radius of hump
    do i=i1-igst,i2+igst
 	 do j=j1-jgst,j2+jgst
       xc = xlo(1)+dx(1)*dble(i-i1)+dx(1)/2
       yc = xlo(2)+dx(2)*dble(j-j1)+dx(2)/2
       dist = (xc-devriend_x)**2 +(yc-devriend_y)**2
       h(i,j) = 10.-devriend_amp*exp(-dist/(2*devriend_rad*devriend_rad))
-      vh(i,j,1) = 10.
+      !vh(i,j,1) = 5.   !use 5 for 0.5 m/s
+      vh(i,j,1) = 5.0   !use 10 for 1 m/s
       vh(i,j,2) = 0.0
  	 end do 
    end do
+
+	!---------------------------------------------------------------------
+	case(lesser) !lesser hump morphodynamic case
+	!---------------------------------------------------------------------
+	!lesser params
+  lesser_amp = 5.    !amplitude of hump
+	lesser_x   = 5000. !x location of hump center
+	lesser_y   = 5000. !y location of hump center
+	lesser_rad = 1000. !radius of hump
+	
+	do i=i1-igst,i2+igst
+	do j=j1-jgst,j2+jgst
+	   xc = xlo(1)+dx(1)*dble(i-i1)+dx(1)/2
+	   yc = xlo(2)+dx(2)*dble(j-j1)+dx(2)/2
+	   dist = (xc-lesser_x)**2 +(yc-lesser_y)**2
+	   h(i,j) = 10.-lesser_amp*exp(-dist/(2*lesser_rad*lesser_rad))
+	   vh(i,j,1) = 10.0  ! 1 m/s
+	   vh(i,j,2) = 0.0
+	end do 
+	end do
 
 	!---------------------------------------------------------------------
 	case(trenchy) !warner migrating trench case in y-direction
@@ -651,11 +675,23 @@ subroutine initflow(cid,dx,xlo,xhi,i1,i2,j1,j2,igst,jgst,h,vh,b,bedlevel)
 		   endif
 		end do
   end do
+
+	!---------------------------------------------------------------------
+	case(warner) !warner inlet problem
+	!---------------------------------------------------------------------
+ 
+	 do i=i1,i2
+	    do j=j1,j2
+		   h(i,j) = 4.0
+		   vh(i,j,1) = 0.0
+		   vh(i,j,2) = 0.0
+		end do
+	end do
 	
  
   end select
-  write(*,*)'please note, currently using weird porosity, clamped free surface, weird load formulation, and no bedslope effects for exner test'
-  pause
+  !write(*,*)'please note, currently using weird porosity, clamped free surface, weird load formulation, and no bedslope effects for exner test'
+  !pause
   return
 
 end subroutine initflow

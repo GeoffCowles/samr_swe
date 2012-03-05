@@ -113,6 +113,8 @@ using namespace std;
 #define HIBMA           (29)
 #define CHANNEL         (30)
 #define EXNER           (31)
+#define WARNER          (32)
+#define LESSER          (33)
 
 // defines for cell tagging routines
 #define RICHARDSON_NEWLY_TAGGED (-10)
@@ -328,7 +330,11 @@ swe::swe(
 	} else if (d_data_problem == "CHANNEL") {
 		d_data_problem_int = CHANNEL;
   } else if (d_data_problem == "EXNER") {
-		d_data_problem_int = EXNER;
+		d_data_problem_int = WARNER;
+	} else if (d_data_problem == "WARNER") {
+		d_data_problem_int = WARNER;
+	} else if (d_data_problem == "LESSER") {
+		d_data_problem_int = LESSER;
    } else {
       TBOX_ERROR(d_object_name << ": "
          << "Unknown d_data_problem string = "
@@ -1051,6 +1057,11 @@ void swe::boundaryReset(
            (tbox::MathUtilities<double>::Abs(xpatchlo[0] - xdomainlo[0]) < dx[0])) {
           bdry_case = DIRICHLET_BC;
        }
+// // BEGIN SIMPLE-MINDED FIX FOR WARNER PROBLEM
+      if ((d_data_problem == "WARNER") && (bnode == 1) &&
+           (tbox::MathUtilities<double>::Abs(xpatchlo[0] - xdomainlo[0]) < dx[0])) {
+          bdry_case = DIRICHLET_BC;
+       }
 // // BEGIN SIMPLE-MINDED FIX FOR CHANNEL PROBLEM
       if ((d_data_problem == "CHANNEL") && (bnode == 1) &&
             (tbox::MathUtilities<double>::Abs(xpatchlo[0] - xdomainlo[0]) < dx[0])) {
@@ -1215,6 +1226,44 @@ void swe::setPhysicalBoundaryConditions(
 				//								d_bdry_edge_veldepth[i*PDIM+1] = 0.; //u*h;
 			}
 		}
+		
+		// set open boundary forcing for WARNER test where open boundary is at X=0 
+		// Note we are forcing the free surface (actually the depth) but do not specify the velocity
+		// thus we are resetting the scalar_bcond to DIRICHLET (which then uses the values we provide)
+		// and we are resetting the vector_bcond to FLOW (which seems to automatically use zeroth-order 
+		// extrapolation for ud/vd)
+		// note we do not set values for d_bdry_edge_veldepth
+   } else if(d_data_problem == "WARNER"){
+		double H0_obc = 4; //depth at OBC when tide =0
+		double zb_obc = 0; //bathymetry at OBC 
+		double eta0_tide = 1.0;
+		double T_tide = 12*3600;
+		double h; //,u;
+		const tbox::Pointer<geom::CartesianPatchGeometry > patch_geom = patch.getPatchGeometry();
+		const double* dx = patch_geom->getDx();
+		const double* xpatchlow = patch_geom->getXLower();
+		const double* xdomainlow = d_grid_geometry->getXLower();
+		if (tbox::MathUtilities<double>::Abs(xpatchlow[0]-xdomainlow[0]) < dx[0]) {
+			tmp_edge_scalar_bcond[XLO] = DIRICHLET_BC;
+		 	tmp_edge_vector_bcond[XLO] = FLOW_BC;
+		   tmp_edge_veldepth_bcond[XLO] = FLOW_BC;
+		}
+		for (int i = 0; i < NUM_2D_EDGES; i++) {
+										if(tmp_edge_scalar_bcond[i] == DIRICHLET_BC){
+			//if(d_scalar_bdry_edge_conds[i] == DIRICHLET_BC){
+										//equation 33, Brufau et al, IJNMF v39
+				h = H0_obc + eta0_tide*cos(2*3.14159*fill_time/T_tide);
+				//cout << "setting h on edge " << h << "  " << i << '\n';
+										//equation  
+										//u = eta0_hen*sqrt(9.81/H0_hen)*cos(2*3.14159*fill_time/T_hen);
+				d_bdry_edge_depth[i] = h;
+				d_bdry_edge_bathy[i] = zb_obc;  //MUST SET DIRICHLET BATHYMETRY
+				//d_bdry_edge_bedlevel[i] = 99.0;
+				//								d_bdry_edge_veldepth[i*PDIM+0] = 0.; //u*h;
+				//								d_bdry_edge_veldepth[i*PDIM+1] = 0.; //u*h;
+			}
+		}
+		
 		// set open boundary forcing for CHANNEL test where open boundary is at X=0 
 		// Note we are forcing the free surface (actually the depth) but do not specify the velocity
 		// thus we are resetting the scalar_bcond to DIRICHLET (which then uses the values we provide)

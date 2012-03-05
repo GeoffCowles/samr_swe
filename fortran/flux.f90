@@ -300,7 +300,7 @@ subroutine consdiff(dx,i1,i2,j1,j2,ifluxm,jfluxm,ifluxp,jfluxp,h,vh,b)
       h(i,j) = h(i,j) &
                                    -oodx*(ifluxm(i+1,j,1)-ifluxp(i,j,1)) &
                                    -oody*(jfluxm(j+1,i,1)-jfluxp(j,i,1)) 
-      h(i,j) = exner_zeta - b(i,j) !EXNER requires clamped free surface
+!      h(i,j) = exner_zeta - b(i,j) !EXNER requires clamped free surface
       do k=1,NDIMS
        vh(i,j,k) = vh(i,j,k) &
                -oodx*(ifluxm(i+1,j,k+1)-ifluxp(i,j,k+1)) &
